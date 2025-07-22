@@ -9,6 +9,7 @@ import HeroSection from "@/components/HeroSection";
 import ProblemSolutionSection from "@/components/ProblemSolutionSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import SignupPage from "@/components/SignupPage";
+import IntroductionSection from "@/components/IntroductionSection";
 
 export default function HomePage() {
   const [loadingFinished, setLoadingFinished] = useState(false);
@@ -64,6 +65,7 @@ export default function HomePage() {
         {!showSignup && (
           <>
             <HeroSection onGetStarted={handleGetStarted} />
+            <IntroductionSection />
             <ProblemSolutionSection />
             <FeaturesSection />
           </>

@@ -47,7 +47,7 @@ export default function LoadingScreen({ onFinish }: { onFinish: () => void }) {
         {/* Tagline sliding to right */}
         <motion.span
           initial={{ x: 0, opacity: 0, clipPath: 'inset(0 50% 0 50%)' }}
-          animate={{ x: 20, opacity: 1, clipPath: 'inset(0 0% 0 0%)' }}
+          animate={{ x: 15, opacity: 1, clipPath: 'inset(0 0% 0 0%)' }}
           transition={{ duration: 1.2, delay: 0.3, ease: "easeOut" }}
           className="text-white text-lg"
           aria-label="Your personal AI job finder tagline"

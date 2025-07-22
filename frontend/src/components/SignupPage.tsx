@@ -1,33 +1,100 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
+  const router = useRouter();
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [message, setMessage] = useState("");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (form.password !== form.confirmPassword) {
+      setMessage("Passwords do not match");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:8000/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          password: form.password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMessage(data.detail || "Signup failed");
+      } else {
+        setMessage("Signup successful!");
+        router.push("/signin");
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage("Signup failed");
+    }
+  };
+
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-[#FFF5E1] px-4">
       <h1 className="text-4xl font-bold mb-6 text-gray-900">Create your account</h1>
 
-      <form className="flex flex-col gap-4 w-full max-w-sm">
+      <form
+        className="flex flex-col gap-4 w-full max-w-sm"
+        onSubmit={handleSubmit}
+      >
         <input
           type="text"
+          name="name"
           placeholder="Name"
-          className="px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100]"
+          value={form.name}
+          onChange={handleChange}
+          className="px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
+          required
         />
         <input
           type="email"
+          name="email"
           placeholder="Email"
-          className="px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100]"
+          value={form.email}
+          onChange={handleChange}
+          className="px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
+          required
         />
         <input
           type="password"
+          name="password"
           placeholder="Password"
-          className="px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100]"
+          value={form.password}
+          onChange={handleChange}
+          className="px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
+          required
         />
         <input
           type="password"
+          name="confirmPassword"
           placeholder="Confirm Password"
-          className="px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100]"
+          value={form.confirmPassword}
+          onChange={handleChange}
+          className="px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
+          required
         />
+
         <button
           type="submit"
           className="bg-[#8B4513] text-white px-4 py-3 rounded-2xl font-semibold hover:bg-[#A0522D] transition"
@@ -35,6 +102,8 @@ export default function SignupPage() {
           Sign up
         </button>
       </form>
+
+      {message && <p className="mt-4 text-red-600">{message}</p>}
 
       <div className="my-4 text-gray-600">or</div>
 
@@ -45,12 +114,14 @@ export default function SignupPage() {
         Sign up with Google
       </button>
 
-
       <p className="mt-4 text-gray-700">
         Already have an account?{" "}
-        <Link href="/signin" className="text-[#FFB100] font-semibold hover:underline">
+        <button
+          onClick={() => router.push("/signin")}
+          className="text-[#FFB100] font-semibold hover:underline"
+        >
           Sign in
-        </Link>
+        </button>
       </p>
     </main>
   );

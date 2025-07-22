@@ -28,12 +28,17 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
         TackleIt
       </div>
 
-      <button
-        onClick={handleClick}
-        className="bg-[#FFB100] text-white px-6 py-2 rounded-full font-semibold shadow hover:scale-105 hover:bg-[#ff9800] transition transform duration-300 ease-in-out"
-      >
-        Get Started
-      </button>
+      <div className="flex items-center space-x-4">
+        <a href="/dashboard" className="text-white font-semibold hover:text-[#FFB100] transition">
+          Dashboard
+        </a>
+        <button
+          onClick={handleClick}
+          className="bg-[#FFB100] text-white px-6 py-2 rounded-full font-semibold shadow hover:scale-105 hover:bg-[#ff9800] transition transform duration-300 ease-in-out"
+        >
+          Get Started
+        </button>
+      </div>
     </motion.nav>
   );
 }
