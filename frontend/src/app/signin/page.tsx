@@ -3,18 +3,19 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Curtain from "@/components/Curtain"; // adjust path
-import { GoogleLogin } from "@react-oauth/google"; // install if not already
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function SigninPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [redirectPath, setRedirectPath] = useState("/dashboard"); // default redirect
 
   const handleSignIn = async (email: string, password: string) => {
     setIsSuccess(false);
     setIsError(false);
-    setLoading(true); // Start loading immediately
+    setLoading(true);
 
     try {
       const res = await fetch("http://127.0.0.1:8000/auth/login", {
@@ -29,13 +30,19 @@ export default function SigninPage() {
         const data = await res.json();
         console.log("Token received:", data.access_token);
         localStorage.setItem("token", data.access_token);
-        setIsSuccess(true);
 
-        // Do NOT setLoading(false) here; wait for Curtain onFinish
+        // 🔥 Check if user is first time user
+        if (data.is_first_time_user) {
+          setRedirectPath("/preferences");
+        } else {
+          setRedirectPath("/dashboard");
+        }
+
+        setIsSuccess(true);
       } else {
         alert("Login failed: Invalid email or password");
         setIsError(true);
-        setLoading(false); // stop loading here for failure
+        setLoading(false);
       }
     } catch (error) {
       console.error("A network or other error occurred:", error);
@@ -44,7 +51,6 @@ export default function SigninPage() {
       setLoading(false);
     }
   };
-
 
   const handleGoogleSignIn = async (credentialResponse: any) => {
     setLoading(true);
@@ -63,9 +69,14 @@ export default function SigninPage() {
       const data = await res.json();
       if (res.ok) {
         localStorage.setItem("token", data.access_token);
-        setIsSuccess(true);
 
-        // Do NOT call router.push here. Let Curtain handle it.
+        if (data.is_first_time_user) {
+          setRedirectPath("/preferences");
+        } else {
+          setRedirectPath("/dashboard");
+        }
+
+        setIsSuccess(true);
       } else {
         alert("Google sign-in failed: " + data.detail);
         setIsError(true);
@@ -78,7 +89,6 @@ export default function SigninPage() {
       setLoading(false);
     }
   };
-
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-[#FFF5E1] px-4">
@@ -142,14 +152,12 @@ export default function SigninPage() {
           setLoading(false);
 
           if (isSuccess) {
-            router.push("/dashboard");
+            router.push(redirectPath);
           } else if (isError) {
             // Stay on page or show retry UI
           }
         }}
       />
-
-
     </main>
   );
 }

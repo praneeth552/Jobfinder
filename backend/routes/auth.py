@@ -7,12 +7,10 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 import os
 
-
 router = APIRouter()
-
 users_collection = db["users"]
 
-# ✅ Existing signup route
+# ✅ Signup route (standard)
 @router.post("/signup")
 async def signup(user: User):
     existing_user = await users_collection.find_one({"email": user.email})
@@ -22,10 +20,12 @@ async def signup(user: User):
     user_dict = user.dict()
     user_dict["password"] = hash_password(user.password)
     user_dict["auth_type"] = "standard"
+    user_dict["is_first_time_user"] = True
+    user_dict["preferences"] = {}
     await users_collection.insert_one(user_dict)
     return {"message": "User created successfully"}
 
-# ✅ Existing login route
+# ✅ Login route (standard)
 @router.post("/login")
 async def login(user: UserLogin):
     db_user = await users_collection.find_one({"email": user.email})
@@ -33,7 +33,11 @@ async def login(user: UserLogin):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     token = create_access_token({"email": db_user["email"]})
-    return {"access_token": token, "token_type": "bearer"}
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "is_first_time_user": db_user.get("is_first_time_user", True)  # ➡️ Return this
+    }
 
 # ✅ New Pydantic model to receive Google token
 class GoogleToken(BaseModel):
@@ -47,12 +51,12 @@ async def google_login(data: GoogleToken):
         idinfo = id_token.verify_oauth2_token(
             data.token,
             requests.Request(),
-            os.environ.get("GOOGLE_CLIENT_ID")  # Replace with your actual Google Client ID
+            os.environ.get("GOOGLE_CLIENT_ID")
         )
 
         email = idinfo["email"]
         name = idinfo.get("name", "")
-        google_id = idinfo["sub"]
+        google_id_value = idinfo["sub"]
 
         # Check if user exists
         db_user = await users_collection.find_one({"email": email})
@@ -62,11 +66,16 @@ async def google_login(data: GoogleToken):
             new_user = {
                 "name": name,
                 "email": email,
-                "google_id": google_id,
+                "google_id": google_id_value,
                 "auth_type": "google",
                 "password": None,  # No password for Google users
+                "is_first_time_user": True,
+                "preferences": {}
             }
             await users_collection.insert_one(new_user)
+            is_first_time_user = True
+        else:
+            is_first_time_user = db_user.get("is_first_time_user", True)
 
         # Generate your app's JWT token
         token = create_access_token({"email": email})
@@ -74,6 +83,7 @@ async def google_login(data: GoogleToken):
         return {
             "access_token": token,
             "token_type": "bearer",
+            "is_first_time_user": is_first_time_user,
             "message": "Google login successful",
             "email": email,
             "name": name
@@ -81,20 +91,3 @@ async def google_login(data: GoogleToken):
 
     except ValueError:
         raise HTTPException(status_code=401, detail="Invalid Google token")
-    
-
-@router.post("/google-login")
-async def google_login(user: UserGoogle):
-    db_user = await users_collection.find_one({"email": user.email})
-    if db_user:
-        token = create_access_token({"email": db_user["email"]})
-        return {"access_token": token, "token_type": "bearer"}
-    else:
-        # Optionally create user if not exists
-        user_dict = user.dict()
-        user_dict["auth_type"] = "google"
-        user_dict["password"] = None
-        await users_collection.insert_one(user_dict)
-        token = create_access_token({"email": user.email})
-        return {"access_token": token, "token_type": "bearer"}
-

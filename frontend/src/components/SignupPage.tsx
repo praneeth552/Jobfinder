@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
+import ParticleLoader from "@/components/ParticleLoader";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -14,6 +15,9 @@ export default function SignupPage() {
     confirmPassword: "",
   });
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [redirectPath, setRedirectPath] = useState("/dashboard"); // default redirect
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -27,52 +31,69 @@ export default function SignupPage() {
       return;
     }
 
+    setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          password: form.password,
-        }),
+      const res = await axios.post("http://localhost:8000/auth/signup", {
+        name: form.name,
+        email: form.email,
+        password: form.password,
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setMessage(data.detail || "Signup failed");
-      } else {
+      if (res.status === 200 || res.status === 201) {
         setMessage("Signup successful!");
-        router.push("/signin");
+        setIsSuccess(true);
+        setRedirectPath("/preferences"); // New users go to preferences
+      } else {
+        setMessage(res.data.detail || "Signup failed");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setMessage("Signup failed");
+      setMessage(err.response?.data?.detail || "Signup failed");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // ✅ Google signup handler
   const handleGoogleSignup = async (credentialResponse: any) => {
     const token = credentialResponse.credential;
 
+    setLoading(true);
     try {
       const res = await axios.post("http://localhost:8000/auth/google", {
         token: token,
       });
 
       console.log("Backend response:", res.data);
-      // Store your app JWT token here if returned from backend
+
+      localStorage.setItem("token", res.data.access_token);
+
+      if (res.data.is_first_time_user) {
+        setRedirectPath("/preferences");
+      } else {
+        setRedirectPath("/dashboard");
+      }
+
+      setIsSuccess(true);
       setMessage("Google signup successful!");
-      router.push("/dashboard"); // or wherever you route after signup
     } catch (err) {
       console.error("Google signup failed", err);
       setMessage("Google signup failed");
+    } finally {
+      setLoading(false);
     }
   };
 
+  // ✅ Redirect on success
+  useEffect(() => {
+    if (isSuccess) {
+      router.push(redirectPath);
+    }
+  }, [isSuccess, router, redirectPath]);
+
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-[#FFF5E1] px-4">
+    <main className="flex flex-col items-center justify-center min-h-screen bg-[#FFF5E1] px-4 relative">
+      {loading && <ParticleLoader isLoading={loading} />}
+
       <h1 className="text-4xl font-bold mb-6 text-gray-900">Create your account</h1>
 
       <form
@@ -119,6 +140,7 @@ export default function SignupPage() {
         <button
           type="submit"
           className="bg-[#8B4513] text-white px-4 py-3 rounded-2xl font-semibold hover:bg-[#A0522D] transition"
+          disabled={loading}
         >
           Sign up
         </button>
@@ -128,14 +150,15 @@ export default function SignupPage() {
 
       <div className="my-4 text-gray-600">or</div>
 
-      {/* ✅ Replaced placeholder Google signup button with actual GoogleLogin */}
-      <GoogleLogin
-        onSuccess={handleGoogleSignup}
-        onError={() => {
-          console.log("Google signup failed");
-          setMessage("Google signup failed");
-        }}
-      />
+      <div className="rounded-3xl overflow-hidden">
+        <GoogleLogin
+          onSuccess={handleGoogleSignup}
+          onError={() => {
+            console.log("Google signup failed");
+            setMessage("Google signup failed");
+          }}
+        />
+      </div>
 
       <p className="mt-4 text-gray-700">
         Already have an account?{" "}
