@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Curtain from "@/components/Curtain"; // adjust path
+import { GoogleLogin } from "@react-oauth/google"; // install if not already
 
 export default function SigninPage() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function SigninPage() {
   const handleSignIn = async (email: string, password: string) => {
     setIsSuccess(false);
     setIsError(false);
+    setLoading(true); // Start loading immediately
 
     try {
       const res = await fetch("http://127.0.0.1:8000/auth/login", {
@@ -28,17 +30,55 @@ export default function SigninPage() {
         console.log("Token received:", data.access_token);
         localStorage.setItem("token", data.access_token);
         setIsSuccess(true);
-        setLoading(true);
+
+        // Do NOT setLoading(false) here; wait for Curtain onFinish
       } else {
         alert("Login failed: Invalid email or password");
         setIsError(true);
-        setLoading(true);
+        setLoading(false); // stop loading here for failure
       }
     } catch (error) {
       console.error("A network or other error occurred:", error);
       alert("An error occurred during sign-in. Please try again.");
+      setIsError(true);
+      setLoading(false);
     }
   };
+
+
+  const handleGoogleSignIn = async (credentialResponse: any) => {
+    setLoading(true);
+    setIsSuccess(false);
+    setIsError(false);
+
+    try {
+      const res = await fetch("http://127.0.0.1:8000/auth/google", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token: credentialResponse.credential }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem("token", data.access_token);
+        setIsSuccess(true);
+
+        // Do NOT call router.push here. Let Curtain handle it.
+      } else {
+        alert("Google sign-in failed: " + data.detail);
+        setIsError(true);
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+      alert("An error occurred during Google sign-in");
+      setIsError(true);
+      setLoading(false);
+    }
+  };
+
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-[#FFF5E1] px-4">
@@ -70,19 +110,21 @@ export default function SigninPage() {
         <button
           type="submit"
           className="bg-[#8B4513] text-white px-4 py-3 rounded-2xl font-semibold hover:bg-[#A0522D] transition"
+          disabled={loading}
         >
-          Sign in
+          {loading ? "Signing in..." : "Sign in"}
         </button>
       </form>
 
       <div className="my-4 text-gray-600">or</div>
 
-      <button
-        onClick={() => console.log("Google sign in")}
-        className="bg-blue-500 text-white px-4 py-3 rounded-2xl font-semibold hover:bg-blue-600 transition"
-      >
-        Sign in with Google
-      </button>
+      <GoogleLogin
+        onSuccess={handleGoogleSignIn}
+        onError={() => {
+          console.log("Google Login Failed");
+          alert("Google Login Failed");
+        }}
+      />
 
       <p className="mt-4 text-gray-700">
         Don&apos;t have an account?{" "}
@@ -97,13 +139,17 @@ export default function SigninPage() {
       <Curtain
         isLoading={loading}
         onFinish={() => {
+          setLoading(false);
+
           if (isSuccess) {
             router.push("/dashboard");
           } else if (isError) {
-            router.push("/?signup=true");
+            // Stay on page or show retry UI
           }
         }}
       />
+
+
     </main>
   );
 }

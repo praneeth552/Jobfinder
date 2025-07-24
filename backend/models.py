@@ -13,3 +13,8 @@ class Job(BaseModel):
     title: str
     company: str
     location: str
+
+class UserGoogle(BaseModel):
+    name: str
+    email: EmailStr
+    google_id: str

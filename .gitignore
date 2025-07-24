@@ -1,12 +1,36 @@
-.env
-backend/venv/
-node_modules
+# Python virtual environments
 venv/
+backend/venv/
+
+# Python cache files
 __pycache__/
 *.pyc
+
+# Environment variables
 .env
+
+# macOS system files
 .DS_Store
+
+# Node.js dependencies
 node_modules/
-# Ignore Python virtual environments
-venv/
-backend/venv/
+
+# Log files
+*.log
+
+# VSCode settings
+.vscode/
+
+# Pytest cache
+.pytest_cache/
+
+# MyPy cache
+.mypy_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+
+# Swap files
+*.swp
+*.swo

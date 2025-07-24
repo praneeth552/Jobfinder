@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { GoogleLogin } from "@react-oauth/google";
+import axios from "axios";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -47,6 +49,25 @@ export default function SignupPage() {
     } catch (err) {
       console.error(err);
       setMessage("Signup failed");
+    }
+  };
+
+  // ✅ Google signup handler
+  const handleGoogleSignup = async (credentialResponse: any) => {
+    const token = credentialResponse.credential;
+
+    try {
+      const res = await axios.post("http://localhost:8000/auth/google", {
+        token: token,
+      });
+
+      console.log("Backend response:", res.data);
+      // Store your app JWT token here if returned from backend
+      setMessage("Google signup successful!");
+      router.push("/dashboard"); // or wherever you route after signup
+    } catch (err) {
+      console.error("Google signup failed", err);
+      setMessage("Google signup failed");
     }
   };
 
@@ -107,12 +128,14 @@ export default function SignupPage() {
 
       <div className="my-4 text-gray-600">or</div>
 
-      <button
-        onClick={() => console.log("Google sign up")}
-        className="bg-blue-500 text-white px-4 py-3 rounded-2xl font-semibold hover:bg-blue-600 transition"
-      >
-        Sign up with Google
-      </button>
+      {/* ✅ Replaced placeholder Google signup button with actual GoogleLogin */}
+      <GoogleLogin
+        onSuccess={handleGoogleSignup}
+        onError={() => {
+          console.log("Google signup failed");
+          setMessage("Google signup failed");
+        }}
+      />
 
       <p className="mt-4 text-gray-700">
         Already have an account?{" "}
