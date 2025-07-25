@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
+import Cookies from "js-cookie"; // <-- FIX: Import the 'js-cookie' library
 import ParticleLoader from "@/components/ParticleLoader";
 
 export default function SignupPage() {
@@ -63,32 +64,32 @@ export default function SignupPage() {
         token: token,
       });
 
-      console.log("Backend response:", res.data);
+      const { access_token, user_id, is_first_time_user } = res.data;
 
-      localStorage.setItem("token", res.data.access_token);
+      // Set tokens for middleware and client-side use
+      localStorage.setItem("token", access_token);
+      localStorage.setItem("user_id", user_id);
+      Cookies.set("token", access_token, { expires: 1 }); // Expires in 1 day
 
-      if (res.data.is_first_time_user) {
-        setRedirectPath("/preferences");
-      } else {
-        setRedirectPath("/dashboard");
-      }
+      setMessage("Google signup successful! Redirecting...");
+      
+      // Hard redirect to ensure middleware catches the new cookie
+      const destination = is_first_time_user ? "/preferences" : "/dashboard";
+      window.location.href = destination;
 
-      setIsSuccess(true);
-      setMessage("Google signup successful!");
     } catch (err) {
       console.error("Google signup failed", err);
       setMessage("Google signup failed");
-    } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Redirect on success
+  // This useEffect is now only for the standard signup flow
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess && !loading) { // Ensure it doesn't run for Google sign-in
       router.push(redirectPath);
     }
-  }, [isSuccess, router, redirectPath]);
+  }, [isSuccess, loading, router, redirectPath]);
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-[#FFF5E1] px-4 relative">

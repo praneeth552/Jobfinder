@@ -1,67 +1,76 @@
-import asyncio
 import requests
-from playwright.async_api import async_playwright
 import logging
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Setup logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-async def scrape_infosys():
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)  # set to True for server
-        page = await browser.new_page()
-        
+def scrape_infosys():
+    logging.info("Fetching Infosys job listings from API.")
+
+    # Infosys jobs API URL
+    INFOSYS_API_URL = "https://intapgateway.infosysapps.com/careersci/search/intapjbsrch/getCareerSearchJobs?sourceId=1,21&searchText=ALL"
+
+    # Your backend endpoint
+    BACKEND_ENDPOINT = "http://127.0.0.1:8000/jobs/"  # Matches TCS backend endpoint style
+
+    # Headers to mimic browser request
+    HEADERS = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/plain, */*",
+    }
+
+    try:
+        response = requests.get(INFOSYS_API_URL, headers=HEADERS)
+        response.raise_for_status()
+    except Exception as e:
+        logging.error(f"Failed to fetch data from Infosys API: {e}")
+        return
+
+    data = response.json()
+
+    # If API returns a list directly
+    jobs = data[:20] if isinstance(data, list) else data.get("careerSearchJobs", [])[:20]
+
+    logging.info(f"Fetched {len(jobs)} jobs. Processing each now...")
+
+    for index, job in enumerate(jobs, start=1):
+        # Extracting necessary fields
+        title = job.get("postingTitle", "N/A")
+        location = job.get("location", "N/A")
+        reference_code = job.get("referenceCode")
+        posting_id = job.get("postingId")
+        min_exp = job.get("minExperienceLevel")
+        max_exp = job.get("maxExperienceLevel")
+        skills = job.get("technicalRequirement") or job.get("preferredSkills") or "N/A"
+
+        # Construct job URL if postingId exists
+        if reference_code:
+            job_url = f"https://career.infosys.com/jobdesc?jobReferenceCode={reference_code}&rc=0&jobType=normal"
+        else:
+            job_url = "Not available"
+
+        # Create description combining experience and skills
+        description = f"Experience: {min_exp}-{max_exp} years. Skills: {skills}."
+
+        payload = {
+            "title": title,
+            "company": "Infosys",
+            "location": location,
+            "job_url": job_url,
+            "description": description
+        }
+
+        logging.info(f"[{index}] {title} | {location} | {job_url}")
+
+        # Push to backend
         try:
-            logging.info("Navigating to Infosys careers page.")
-            await page.goto("https://career.infosys.com/joblist", timeout=60000)
-            await page.wait_for_load_state("networkidle")
-            logging.info("Page loaded. Waiting for job listings to appear.")
-            
-            # Handle the pop-up
-            try:
-                logging.info("Looking for the announcement pop-up.")
-                ok_button_selector = "button:has-text('OK')"
-                await page.wait_for_selector(ok_button_selector, timeout=10000)
-                await page.click(ok_button_selector)
-                logging.info("Clicked 'OK' on the pop-up.")
-            except Exception as e:
-                logging.info("Pop-up not found or could not be clicked. Continuing without interaction.")
+            backend_response = requests.post(BACKEND_ENDPOINT, json=payload)
+            backend_response.raise_for_status()
+            logging.info(f"Successfully sent job '{title}' to backend.")
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Error sending job '{title}' to backend: {e}")
 
-            # Wait for the job listings to appear
-            await page.wait_for_selector('mat-card.appCard', timeout=30000)
-            
-            job_listings = await page.query_selector_all('mat-card.appCard')
-            logging.info(f"Found {len(job_listings)} job listings.")
-
-            for job in job_listings:
-                title_element = await job.query_selector('div.job-titleTxt2')
-                location_element = await job.query_selector('div.job-locationTxt2')
-                
-                if title_element and location_element:
-                    title = await title_element.inner_text()
-                    location = await location_element.inner_text()
-                    company = "Infosys"
-                    
-                    logging.info(f"Found job: {title} at {company} in {location}")
-
-                    # Send to backend
-                    try:
-                        response = requests.post("http://127.0.0.1:8000/jobs/", json={
-                            "title": title,
-                            "company": company,
-                            "location": location
-                        })
-                        response.raise_for_status()
-                        logging.info(f"Successfully sent job '{title}' to backend.")
-                    except requests.exceptions.RequestException as e:
-                        logging.error(f"Error sending job to backend: {e}")
-
-        except Exception as e:
-            logging.error(f"Scraping error: {e}", exc_info=True)
-            await page.screenshot(path="infosys_error.png")
-            logging.info("Screenshot saved: infosys_error.png")
-        finally:
-            await browser.close()
-            logging.info("Browser closed. Scraping complete.")
+    logging.info("Infosys scraping completed successfully.")
 
 if __name__ == "__main__":
-    asyncio.run(scrape_infosys())
+    scrape_infosys()

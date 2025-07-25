@@ -36,7 +36,8 @@ async def login(user: UserLogin):
     return {
         "access_token": token,
         "token_type": "bearer",
-        "is_first_time_user": db_user.get("is_first_time_user", True)  # ➡️ Return this
+        "is_first_time_user": db_user.get("is_first_time_user", True),
+        "user_id": str(db_user["_id"])
     }
 
 # ✅ New Pydantic model to receive Google token
@@ -63,7 +64,7 @@ async def google_login(data: GoogleToken):
 
         if not db_user:
             # Create new user
-            new_user = {
+            new_user_data = {
                 "name": name,
                 "email": email,
                 "google_id": google_id_value,
@@ -72,9 +73,11 @@ async def google_login(data: GoogleToken):
                 "is_first_time_user": True,
                 "preferences": {}
             }
-            await users_collection.insert_one(new_user)
+            result = await users_collection.insert_one(new_user_data)
+            user_id = str(result.inserted_id)
             is_first_time_user = True
         else:
+            user_id = str(db_user["_id"])
             is_first_time_user = db_user.get("is_first_time_user", True)
 
         # Generate your app's JWT token
@@ -84,6 +87,7 @@ async def google_login(data: GoogleToken):
             "access_token": token,
             "token_type": "bearer",
             "is_first_time_user": is_first_time_user,
+            "user_id": user_id,
             "message": "Google login successful",
             "email": email,
             "name": name

@@ -2,96 +2,88 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Curtain from "@/components/Curtain"; // adjust path
+import Curtain from "@/components/Curtain";
 import { GoogleLogin } from "@react-oauth/google";
+import Cookies from "js-cookie";
 
 export default function SigninPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [redirectPath, setRedirectPath] = useState("/dashboard"); // default redirect
+  const [redirectPath, setRedirectPath] = useState("/dashboard");
 
   const handleSignIn = async (email: string, password: string) => {
-    setIsSuccess(false);
-    setIsError(false);
-    setLoading(true);
-
     try {
       const res = await fetch("http://127.0.0.1:8000/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       if (res.ok) {
+        setLoading(true); // Show curtain on success
         const data = await res.json();
-        console.log("Token received:", data.access_token);
         localStorage.setItem("token", data.access_token);
+        localStorage.setItem("user_id", data.user_id);
+        Cookies.set("token", data.access_token, { expires: 1 / 24 });
 
-        // 🔥 Check if user is first time user
         if (data.is_first_time_user) {
           setRedirectPath("/preferences");
         } else {
           setRedirectPath("/dashboard");
         }
-
         setIsSuccess(true);
       } else {
         alert("Login failed: Invalid email or password");
-        setIsError(true);
-        setLoading(false);
       }
     } catch (error) {
       console.error("A network or other error occurred:", error);
       alert("An error occurred during sign-in. Please try again.");
-      setIsError(true);
-      setLoading(false);
     }
   };
 
   const handleGoogleSignIn = async (credentialResponse: any) => {
-    setLoading(true);
-    setIsSuccess(false);
-    setIsError(false);
-
+    setLoading(true); // Show curtain on Google sign-in
     try {
       const res = await fetch("http://127.0.0.1:8000/auth/google", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: credentialResponse.credential }),
       });
 
       const data = await res.json();
       if (res.ok) {
         localStorage.setItem("token", data.access_token);
+        localStorage.setItem("user_id", data.user_id); // <-- FIX HERE
+        Cookies.set("token", data.access_token, { expires: 1 / 24 });
 
         if (data.is_first_time_user) {
           setRedirectPath("/preferences");
         } else {
           setRedirectPath("/dashboard");
         }
-
         setIsSuccess(true);
       } else {
         alert("Google sign-in failed: " + data.detail);
-        setIsError(true);
-        setLoading(false);
+        setLoading(false); // Hide curtain on failure
       }
     } catch (error) {
       console.error("Google sign-in error:", error);
       alert("An error occurred during Google sign-in");
-      setIsError(true);
-      setLoading(false);
+      setLoading(false); // Hide curtain on failure
+    }
+  };
+
+  const handleAnimationFinish = () => {
+    if (isSuccess) {
+      router.replace(redirectPath);
     }
   };
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-[#FFF5E1] px-4">
+      <Curtain isLoading={loading} onFinish={handleAnimationFinish} />
+
       <h1 className="text-4xl font-bold mb-6 text-gray-900">Sign in to your account</h1>
 
       <form
@@ -145,19 +137,6 @@ export default function SigninPage() {
           Sign up
         </button>
       </p>
-
-      <Curtain
-        isLoading={loading}
-        onFinish={() => {
-          setLoading(false);
-
-          if (isSuccess) {
-            router.push(redirectPath);
-          } else if (isError) {
-            // Stay on page or show retry UI
-          }
-        }}
-      />
     </main>
   );
 }

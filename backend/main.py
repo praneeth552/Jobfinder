@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes import auth, jobs, preferences
 from dotenv import load_dotenv
+from routes import recommendations
 
 load_dotenv()
 
@@ -16,6 +17,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+app.include_router(recommendations.router)
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(jobs.router, prefix="/jobs", tags=["Jobs"])
 app.include_router(preferences.router, prefix="/preferences", tags=["Preferences"])

@@ -1,0 +1,41 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+import HandwritingEffect from "./HandwritingEffect";
+
+export default function WelcomeCurtain({ show }: { show: boolean }) {
+  const [curtainUp, setCurtainUp] = useState(false);
+  const router = useRouter();
+
+  const handleHandwritingComplete = useCallback(() => {
+    setTimeout(() => {
+      setCurtainUp(true);
+    }, 700); // A brief pause after text is written
+  }, []);
+
+  const handleExitComplete = () => {
+    router.push("/dashboard");
+  };
+
+  return (
+    <AnimatePresence onExitComplete={handleExitComplete}>
+      {show && !curtainUp && (
+        <motion.div
+          initial={{ y: "100%" }}
+          animate={{ y: "0%" }}
+          exit={{ y: "-100%" }}
+          transition={{ duration: 1.2, ease: [0.83, 0, 0.17, 1] }}
+          className="fixed inset-0 bg-black flex items-center justify-center z-50"
+        >
+          <HandwritingEffect
+            text="Hello there... Welcome!"
+            speed={100}
+            onComplete={handleHandwritingComplete}
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}

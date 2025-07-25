@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import WelcomeCurtain from "@/components/WelcomeCurtain";
 
-export default function PreferencesPage() {
+function PreferencesPage() {
   const router = useRouter();
 
   const [role, setRole] = useState<string[]>([]);
@@ -13,6 +14,7 @@ export default function PreferencesPage() {
   const [experience, setExperience] = useState<string>("");
 
   const [message, setMessage] = useState("");
+  const [showWelcome, setShowWelcome] = useState(false);
 
   const handleMultiSelect = (
     value: string,
@@ -39,10 +41,10 @@ export default function PreferencesPage() {
       return;
     }
 
-    try {
-      const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-      const res = await axios.post(
+    try {
+      await axios.post(
         "http://localhost:8000/preferences",
         {
           role,
@@ -56,8 +58,8 @@ export default function PreferencesPage() {
       );
 
       setMessage("Preferences saved successfully!");
-      router.push("/dashboard");
-    } catch (err) {
+      setShowWelcome(true);
+    } catch (err: any) {
       console.error(err);
       setMessage("Failed to save preferences.");
     }
@@ -193,6 +195,10 @@ export default function PreferencesPage() {
 
         {message && <p className="mt-4 text-red-600">{message}</p>}
       </form>
+
+      <WelcomeCurtain show={showWelcome} />
     </main>
   );
 }
+
+export default PreferencesPage;
