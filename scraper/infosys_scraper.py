@@ -11,7 +11,7 @@ def scrape_infosys():
     INFOSYS_API_URL = "https://intapgateway.infosysapps.com/careersci/search/intapjbsrch/getCareerSearchJobs?sourceId=1,21&searchText=ALL"
 
     # Your backend endpoint
-    BACKEND_ENDPOINT = "http://127.0.0.1:8000/jobs/"  # Matches TCS backend endpoint style
+    BACKEND_ENDPOINT = "https://259ac95922b6.ngrok-free.app/jobs/"  # Matches TCS backend endpoint style
 
     # Headers to mimic browser request
     HEADERS = {

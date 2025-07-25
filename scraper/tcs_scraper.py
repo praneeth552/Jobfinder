@@ -70,7 +70,7 @@ async def scrape_tcs():
 
                 # Send to backend
                 try:
-                    response = requests.post("http://127.0.0.1:8000/jobs/", json={
+                    response = requests.post("https://259ac95922b6.ngrok-free.app/jobs/", json={
                         "title": title,
                         "company": "TCS",
                         "location": location,
