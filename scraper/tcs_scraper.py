@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 async def scrape_tcs():
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)  # set to True in deployment
+        browser = await p.chromium.launch(headless=True)  # set to True in deployment
         page = await browser.new_page()
         
         try:
