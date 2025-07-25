@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 async def scrape_tcs():
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)  # set to True in deployment
+        browser = await p.chromium.launch(headless=False)  # set to True in deployment
         page = await browser.new_page()
         
         try:
@@ -70,7 +70,7 @@ async def scrape_tcs():
 
                 # Send to backend
                 try:
-                    response = requests.post("https://259ac95922b6.ngrok-free.app/jobs/", json={
+                    response = requests.post("http://127.0.0.1:8000/jobs/", json={
                         "title": title,
                         "company": "TCS",
                         "location": location,
