@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Cookies from "js-cookie";
 import axios from "axios";
+import GoogleSheetsToggle from "@/components/GoogleSheetsToggle";
 
 interface Recommendation {
   title: string;
@@ -15,33 +16,93 @@ interface Recommendation {
   job_url?: string;
 }
 
-const DashboardPage = () => {
+export default function DashboardPage() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [isClient, setIsClient] = useState(false);
+  const [isSheetsEnabled, setIsSheetsEnabled] = useState(false);
+  const [isToggleLoading, setIsToggleLoading] = useState(false);
   const router = useRouter();
-  const userId = typeof window !== 'undefined' ? localStorage.getItem("user_id") : null;
+  const searchParams = useSearchParams();
+  const token = typeof window !== "undefined" ? Cookies.get("token") : null;
+  const userId = typeof window !== "undefined" ? Cookies.get("user_id") : null;
 
-  const fetchExistingRecommendations = async () => {
+  useEffect(() => {
+    setIsClient(true);
+
+    if (!token || !userId) {
+      router.replace("/signin");
+      return;
+    }
+
+    const fetchSheetStatus = async () => {
+      try {
+        const response = await axios.get(`http://127.0.0.1:8000/sheets/status`, {
+          params: { user_id: userId },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setIsSheetsEnabled(response.data.enabled);
+      } catch (error) {
+        console.error("Failed to fetch sheet status:", error);
+        setIsSheetsEnabled(false);
+      }
+    };
+
+    if (searchParams.get("sheets_success")) {
+      alert("Google Sheets access granted successfully!");
+      setIsSheetsEnabled(true); // Immediately update UI
+      window.history.replaceState(null, "", "/dashboard");
+    } else {
+      fetchSheetStatus();
+    }
+
+    fetchExistingRecommendations();
+  }, [token, userId, searchParams]);
+
+  const handleSheetToggle = async () => {
     if (!userId) return;
+
+    setIsToggleLoading(true);
+    if (isSheetsEnabled) {
+      try {
+        await axios.post(
+          `http://127.0.0.1:8000/sheets/disable`,
+          {},
+          {
+            params: { user_id: userId },
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setIsSheetsEnabled(false);
+      } catch (error) {
+        console.error("Failed to disable sheet sync:", error);
+      }
+    } else {
+      window.location.href = `http://127.0.0.1:8000/sheets/auth?user_id=${encodeURIComponent(
+        userId
+      )}`;
+    }
+    setIsToggleLoading(false);
+  };
+  
+  const fetchExistingRecommendations = async () => {
+    if (!userId || !token) return;
     try {
       setIsLoading(true);
       setError(null);
+
       const res = await axios.get(
         `http://127.0.0.1:8000/recommendations/${userId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      if (res.data && res.data.recommended_jobs) {
+
+      if (res.data?.recommended_jobs) {
         setRecommendations(res.data.recommended_jobs);
       }
-    } catch (error: any) {
-      // It's okay if there are no recommendations yet
-      if (error.response?.status !== 404) {
+    } catch (err: any) {
+      if (err.response?.status !== 404) {
         setError("Could not fetch existing recommendations.");
       }
     } finally {
@@ -50,33 +111,25 @@ const DashboardPage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchExistingRecommendations();
-  }, [userId]);
-
   const handleGenerateRecommendations = async () => {
-    if (!userId) {
-      setError("User ID not found. Please log in again.");
+    if (!userId || !token) {
+      setError("User not authenticated. Please sign in again.");
       return;
     }
     try {
       setIsLoading(true);
       setError(null);
+
       const res = await axios.post(
         `http://127.0.0.1:8000/generate_recommendations/${userId}`,
         null,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
+
       setRecommendations(res.data.recommended_jobs);
-    } catch (error: any) {
-      console.error("Full error object:", error);
-      const errorMessage = error.response?.data?.detail || error.message || "An unexpected error occurred while generating recommendations.";
-      console.error("Error generating recommendations:", errorMessage);
-      setError(errorMessage);
+    } catch (err: any) {
+      console.error("Error generating recs", err);
+      setError(err.response?.data?.detail || err.message || "Unexpected error.");
     } finally {
       setIsLoading(false);
     }
@@ -86,6 +139,7 @@ const DashboardPage = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user_id");
     Cookies.remove("token");
+    Cookies.remove("user_id");
     router.replace("/signin");
   };
 
@@ -97,26 +151,36 @@ const DashboardPage = () => {
       className="min-h-screen bg-[#fdf6e3]"
     >
       <div className="container mx-auto py-12 px-4">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
           <motion.h1
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            transition={{ duration: 0.8 }}
             className="text-4xl md:text-5xl font-bold text-[#8B4513]"
           >
             Job Recommendations
           </motion.h1>
+
           <div className="flex items-center gap-4">
             <button
               onClick={handleGenerateRecommendations}
               disabled={isLoading}
-              className="bg-green-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-green-700 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="bg-green-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-green-700 transition duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               {isLoading ? "Analyzing..." : "Get Personalized Jobs"}
             </button>
+
+            {isClient && (
+              <GoogleSheetsToggle
+                isEnabled={isSheetsEnabled}
+                isLoading={isToggleLoading}
+                onToggle={handleSheetToggle}
+              />
+            )}
+
             <button
               onClick={handleLogout}
-              className="bg-red-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-600 transition-all duration-300"
+              className="bg-red-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-600 transition duration-300"
             >
               Logout
             </button>
@@ -124,47 +188,38 @@ const DashboardPage = () => {
         </div>
 
         {isLoading && (
-          <p className="text-center text-gray-600 text-lg">Loading recommendations, this may take a moment...</p>
+          <p className="text-center text-gray-600 text-lg">
+            Loading recommendations, this may take a moment...
+          </p>
         )}
-        
+
         {error && (
-          <p className="text-center text-red-500 bg-red-100 p-4 rounded-lg">{error}</p>
+          <p className="text-center text-red-500 bg-red-100 p-4 rounded-lg">
+            {error}
+          </p>
         )}
 
         {!isLoading && !error && recommendations.length === 0 && !isFirstLoad && (
-           <p className="text-center text-gray-600 text-lg">No recommendations found. Try generating a new list!</p>
+          <p className="text-center text-gray-600 text-lg">
+            No recommendations found. Try generating a new list!
+          </p>
         )}
 
-        {!isLoading && recommendations.length > 0 && (
+        {recommendations.length > 0 && (
           <motion.div
             initial="hidden"
             animate="visible"
-            variants={{
-              hidden: {},
-              visible: {
-                transition: {
-                  staggerChildren: 0.1,
-                },
-              },
-            }}
+            variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1 } } }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
             {recommendations.map((job, index) => (
               <motion.div
                 key={index}
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: { opacity: 1, y: 0 },
-                }}
+                variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                whileHover={{
-                  scale: 1.03,
-                  boxShadow: "0 10px 20px rgba(139,69,19,0.2)",
-                }}
-                className="bg-white rounded-xl shadow-md p-6 cursor-pointer transform transition-transform duration-300 flex flex-col h-full"
-                onClick={() => {
-                  if (job.job_url) window.open(job.job_url, "_blank");
-                }}
+                whileHover={{ scale: 1.03, boxShadow: "0 10px 20px rgba(139,69,19,0.2)" }}
+                className="bg-white rounded-xl shadow-md p-6 cursor-pointer transform transition transform duration-300 flex flex-col h-full"
+                onClick={() => job.job_url && window.open(job.job_url, "_blank")}
               >
                 <div className="flex-grow">
                   <h2 className="text-xl font-bold mb-2 text-[#B8860B]">
@@ -178,7 +233,10 @@ const DashboardPage = () => {
                   </p>
                   {job.match_score && (
                     <div className="w-full bg-gray-200 rounded-full h-2.5 mb-3">
-                      <div className="bg-blue-600 h-2.5 rounded-full" style={{width: `${job.match_score}%`}}></div>
+                      <div
+                        className="bg-blue-600 h-2.5 rounded-full"
+                        style={{ width: `${job.match_score}%` }}
+                      />
                       <p className="text-sm text-gray-600 mt-1">
                         Match Score: {job.match_score}/100
                       </p>
@@ -186,7 +244,9 @@ const DashboardPage = () => {
                   )}
                 </div>
                 {job.reason && (
-                  <p className="text-gray-600 italic text-sm mt-auto pt-4">"{job.reason}"</p>
+                  <p className="text-gray-600 italic text-sm mt-auto pt-4">
+                    "{job.reason}"
+                  </p>
                 )}
               </motion.div>
             ))}
@@ -195,6 +255,4 @@ const DashboardPage = () => {
       </div>
     </motion.div>
   );
-};
-
-export default DashboardPage;
+}

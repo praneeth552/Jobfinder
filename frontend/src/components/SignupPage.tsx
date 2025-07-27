@@ -4,21 +4,23 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
-import Cookies from "js-cookie"; // <-- FIX: Import the 'js-cookie' library
-import ParticleLoader from "@/components/ParticleLoader";
+import Cookies from "js-cookie";
+import Curtain from "@/components/Curtain"; // <-- Use Curtain instead of ParticleLoader
 
 export default function SignupPage() {
   const router = useRouter();
+
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [redirectPath, setRedirectPath] = useState("/dashboard"); // default redirect
+  const [redirectPath, setRedirectPath] = useState("/dashboard");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -42,8 +44,8 @@ export default function SignupPage() {
 
       if (res.status === 200 || res.status === 201) {
         setMessage("Signup successful!");
-        setIsSuccess(true);
-        setRedirectPath("/preferences"); // New users go to preferences
+        setRedirectPath("/preferences");
+        setIsSuccess(true); // triggers Curtain
       } else {
         setMessage(res.data.detail || "Signup failed");
       }
@@ -57,7 +59,6 @@ export default function SignupPage() {
 
   const handleGoogleSignup = async (credentialResponse: any) => {
     const token = credentialResponse.credential;
-
     setLoading(true);
     try {
       const res = await axios.post("http://localhost:8000/auth/google", {
@@ -66,41 +67,34 @@ export default function SignupPage() {
 
       const { access_token, user_id, is_first_time_user } = res.data;
 
-      // Set tokens for middleware and client-side use
       localStorage.setItem("token", access_token);
       localStorage.setItem("user_id", user_id);
-      Cookies.set("token", access_token, { expires: 1 }); // Expires in 1 day
+      Cookies.set("token", access_token, { expires: 1 });
+      Cookies.set("user_id", user_id, { expires: 1 });
 
-      setMessage("Google signup successful! Redirecting...");
-      
-      // Hard redirect to ensure middleware catches the new cookie
-      const destination = is_first_time_user ? "/preferences" : "/dashboard";
-      window.location.href = destination;
-
+      setMessage("Google signup successful!");
+      setRedirectPath(is_first_time_user ? "/preferences" : "/dashboard");
+      setIsSuccess(true); // triggers Curtain
     } catch (err) {
       console.error("Google signup failed", err);
       setMessage("Google signup failed");
-      setLoading(false);
+      setLoading(false); // stop Curtain
     }
   };
 
-  // This useEffect is now only for the standard signup flow
-  useEffect(() => {
-    if (isSuccess && !loading) { // Ensure it doesn't run for Google sign-in
-      router.push(redirectPath);
+  const handleAnimationFinish = () => {
+    if (isSuccess) {
+      router.replace(redirectPath);
     }
-  }, [isSuccess, loading, router, redirectPath]);
+  };
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-[#FFF5E1] px-4 relative">
-      {loading && <ParticleLoader isLoading={loading} />}
+      <Curtain isLoading={loading} onFinish={handleAnimationFinish} />
 
       <h1 className="text-4xl font-bold mb-6 text-gray-900">Create your account</h1>
 
-      <form
-        className="flex flex-col gap-4 w-full max-w-sm"
-        onSubmit={handleSubmit}
-      >
+      <form className="flex flex-col gap-4 w-full max-w-sm" onSubmit={handleSubmit}>
         <input
           type="text"
           name="name"

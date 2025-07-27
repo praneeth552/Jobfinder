@@ -7,6 +7,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 import json
+from services.google_sheets import write_to_sheet
 
 load_dotenv()
 
@@ -18,9 +19,12 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 @router.post("/generate_recommendations/{user_id}")
 async def generate_recommendations(user_id: str):
     try:
-        user = await db.users.find_one({"_id": ObjectId(user_id)})
+        # Convert string user_id to ObjectId for database query
+        user_object_id = ObjectId(user_id)
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid user ID format")
+
+    user = await db.users.find_one({"_id": user_object_id})
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -66,12 +70,10 @@ Do not include any text, explanations, or markdown formatting before or after th
         model = genai.GenerativeModel("gemini-1.5-flash-latest")
         response = model.generate_content(prompt)
         
-        # Clean the response to ensure it's valid JSON
         cleaned_response_text = response.text.strip().replace("```json", "").replace("```", "").strip()
         
         recommended_jobs_data = json.loads(cleaned_response_text)
         
-        # Validate with Pydantic models
         recommended_jobs = [RecommendedJob(**job) for job in recommended_jobs_data]
 
     except (json.JSONDecodeError, ValueError) as e:
@@ -93,6 +95,11 @@ Do not include any text, explanations, or markdown formatting before or after th
         {"$set": recommendation_data},
         upsert=True
     )
+
+    # If user has enabled sheets integration, write to their sheet
+    if user.get("sheets_enabled"):
+        # Pass the original string user_id, not the ObjectId
+        await write_to_sheet(user_id, [job.dict() for job in recommended_jobs])
 
     return recommendation_data
 

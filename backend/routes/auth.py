@@ -6,7 +6,9 @@ from utils import hash_password, verify_password, create_access_token
 from google.oauth2 import id_token
 from google.auth.transport import requests
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 router = APIRouter()
 users_collection = db["users"]
 

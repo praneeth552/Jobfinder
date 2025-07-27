@@ -26,6 +26,7 @@ export default function SigninPage() {
         localStorage.setItem("token", data.access_token);
         localStorage.setItem("user_id", data.user_id);
         Cookies.set("token", data.access_token, { expires: 1 / 24 });
+        Cookies.set("user_id", data.user_id, { expires: 1 / 24 });
 
         if (data.is_first_time_user) {
           setRedirectPath("/preferences");
@@ -43,7 +44,7 @@ export default function SigninPage() {
   };
 
   const handleGoogleSignIn = async (credentialResponse: any) => {
-    setLoading(true); // Show curtain on Google sign-in
+    setLoading(true);
     try {
       const res = await fetch("http://127.0.0.1:8000/auth/google", {
         method: "POST",
@@ -51,26 +52,27 @@ export default function SigninPage() {
         body: JSON.stringify({ token: credentialResponse.credential }),
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        localStorage.setItem("token", data.access_token);
-        localStorage.setItem("user_id", data.user_id); // <-- FIX HERE
-        Cookies.set("token", data.access_token, { expires: 1 / 24 });
-
-        if (data.is_first_time_user) {
-          setRedirectPath("/preferences");
-        } else {
-          setRedirectPath("/dashboard");
-        }
-        setIsSuccess(true);
-      } else {
-        alert("Google sign-in failed: " + data.detail);
-        setLoading(false); // Hide curtain on failure
+      if (!res.ok) {
+        // Try to get more specific error from backend
+        const errorData = await res.json().catch(() => null); // Gracefully handle non-JSON responses
+        const detail = errorData?.detail || `Request failed with status ${res.status}`;
+        throw new Error(detail);
       }
-    } catch (error) {
+
+      const data = await res.json();
+      
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("user_id", data.user_id);
+      Cookies.set("token", data.access_token, { expires: 1 / 24 });
+      Cookies.set("user_id", data.user_id, { expires: 1 / 24 });
+
+      setRedirectPath(data.is_first_time_user ? "/preferences" : "/dashboard");
+      setIsSuccess(true);
+
+    } catch (error: any) {
       console.error("Google sign-in error:", error);
-      alert("An error occurred during Google sign-in");
-      setLoading(false); // Hide curtain on failure
+      alert(`An error occurred during Google sign-in: ${error.message}`);
+      setLoading(false);
     }
   };
 
