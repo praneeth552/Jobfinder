@@ -1,6 +1,12 @@
 from pydantic import BaseModel, EmailStr, field_validator, model_validator
 from typing import List, Optional, Union
 from datetime import datetime
+from enum import Enum
+
+class PlanType(str, Enum):
+    free = "free"
+    pro = "pro"
+
 
 class UserPreferences(BaseModel):
     role: List[str]
@@ -22,9 +28,10 @@ class UserPreferences(BaseModel):
 class User(BaseModel):
     name: str
     email: EmailStr
-    password: Optional[str] = None  # hashed password or None for Google
+    password: Optional[str] = None
     is_first_time_user: bool = True
     preferences: Optional[UserPreferences] = None
+    plan_type: PlanType = PlanType.free  # 🔥 default to 'free'
     created_at: datetime = datetime.utcnow()
     updated_at: datetime = datetime.utcnow()
 

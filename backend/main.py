@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import auth, jobs, preferences, recommendations, google_sheets
+from routes import auth, jobs, preferences, recommendations, google_sheets, user
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,6 +21,7 @@ app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(jobs.router, prefix="/jobs", tags=["Jobs"])
 app.include_router(preferences.router, prefix="/preferences", tags=["Preferences"])
 app.include_router(google_sheets.router, prefix="/sheets", tags=["Google Sheets"])
+app.include_router(user.router, prefix="/user", tags=["User"])
 
 @app.get("/")
 async def root():

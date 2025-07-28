@@ -30,6 +30,10 @@ async def authorize_sheet_access(user_id: str):
     """
     Starts the OAuth 2.0 flow for the user to grant access to their Google Sheets.
     """
+    user = await db.users.find_one({"_id": ObjectId(user_id)})
+    if not user or user.get("plan_type") != "pro":
+        raise HTTPException(status_code=403, detail="Google Sheets integration is a Pro feature.")
+
     print(f"--- USING REDIRECT URI: '{REDIRECT_URI}' ---")
     flow = Flow.from_client_secrets_file(
         CLIENT_SECRET_FILE,

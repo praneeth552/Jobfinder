@@ -1,3 +1,4 @@
+// dashboard/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -24,13 +25,18 @@ export default function DashboardPage() {
   const [isClient, setIsClient] = useState(false);
   const [isSheetsEnabled, setIsSheetsEnabled] = useState(false);
   const [isToggleLoading, setIsToggleLoading] = useState(false);
+  const [userPlan, setUserPlan] = useState<"free" | "pro">("free");
+
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const token = typeof window !== "undefined" ? Cookies.get("token") : null;
   const userId = typeof window !== "undefined" ? Cookies.get("user_id") : null;
+  const plan = typeof window !== "undefined" ? Cookies.get("plan_type") : "free";
 
   useEffect(() => {
     setIsClient(true);
+    setUserPlan(plan === "pro" ? "pro" : "free");
 
     if (!token || !userId) {
       router.replace("/signin");
@@ -52,7 +58,7 @@ export default function DashboardPage() {
 
     if (searchParams.get("sheets_success")) {
       alert("Google Sheets access granted successfully!");
-      setIsSheetsEnabled(true); // Immediately update UI
+      setIsSheetsEnabled(true);
       window.history.replaceState(null, "", "/dashboard");
     } else {
       fetchSheetStatus();
@@ -86,7 +92,7 @@ export default function DashboardPage() {
     }
     setIsToggleLoading(false);
   };
-  
+
   const fetchExistingRecommendations = async () => {
     if (!userId || !token) return;
     try {
@@ -112,26 +118,31 @@ export default function DashboardPage() {
   };
 
   const handleGenerateRecommendations = async () => {
-    if (!userId || !token) {
-      setError("User not authenticated. Please sign in again.");
-      return;
-    }
-    try {
-      setIsLoading(true);
-      setError(null);
+    if (userPlan === "pro") {
+      if (!userId || !token) {
+        setError("User not authenticated. Please sign in again.");
+        return;
+      }
 
-      const res = await axios.post(
-        `http://127.0.0.1:8000/generate_recommendations/${userId}`,
-        null,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      try {
+        setIsLoading(true);
+        setError(null);
 
-      setRecommendations(res.data.recommended_jobs);
-    } catch (err: any) {
-      console.error("Error generating recs", err);
-      setError(err.response?.data?.detail || err.message || "Unexpected error.");
-    } finally {
-      setIsLoading(false);
+        const res = await axios.post(
+          `http://127.0.0.1:8000/generate_recommendations/${userId}`,
+          null,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        setRecommendations(res.data.recommended_jobs);
+      } catch (err: any) {
+        console.error("Error generating recs", err);
+        setError(err.response?.data?.detail || err.message || "Unexpected error.");
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      router.push('/upgrade');
     }
   };
 
@@ -140,6 +151,7 @@ export default function DashboardPage() {
     localStorage.removeItem("user_id");
     Cookies.remove("token");
     Cookies.remove("user_id");
+    Cookies.remove("plan_type");
     router.replace("/signin");
   };
 
@@ -165,16 +177,27 @@ export default function DashboardPage() {
             <button
               onClick={handleGenerateRecommendations}
               disabled={isLoading}
-              className="bg-green-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-green-700 transition duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className={`px-6 py-2 rounded-full font-semibold transition duration-300 ${
+                isLoading
+                  ? "bg-gray-400 cursor-not-allowed text-white"
+                  : userPlan === 'free'
+                  ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                  : "bg-green-600 hover:bg-green-700 text-white"
+              }`}
             >
-              {isLoading ? "Analyzing..." : "Get Personalized Jobs"}
+              {userPlan === "free"
+                ? "Upgrade to Pro"
+                : isLoading
+                ? "Analyzing..."
+                : "Get Personalized Jobs"}
             </button>
 
             {isClient && (
               <GoogleSheetsToggle
-                isEnabled={isSheetsEnabled}
+                isEnabled={isSheetsEnabled && userPlan === 'pro'}
                 isLoading={isToggleLoading}
                 onToggle={handleSheetToggle}
+                disabled={userPlan === 'free'}
               />
             )}
 
@@ -186,6 +209,12 @@ export default function DashboardPage() {
             </button>
           </div>
         </div>
+
+        {userPlan === "free" && (
+          <p className="text-yellow-800 bg-yellow-100 border border-yellow-300 p-4 rounded mb-6 text-center font-semibold">
+            You are currently on the <strong>Free Plan</strong>. Upgrade to Pro to get personalized job recommendations.
+          </p>
+        )}
 
         {isLoading && (
           <p className="text-center text-gray-600 text-lg">

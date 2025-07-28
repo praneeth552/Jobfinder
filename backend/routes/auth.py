@@ -24,6 +24,8 @@ async def signup(user: User):
     user_dict["auth_type"] = "standard"
     user_dict["is_first_time_user"] = True
     user_dict["preferences"] = {}
+    user_dict["plan_type"] = "free"  # ⬅️ NEW: default plan is 'free'
+    
     await users_collection.insert_one(user_dict)
     return {"message": "User created successfully"}
 
@@ -39,7 +41,8 @@ async def login(user: UserLogin):
         "access_token": token,
         "token_type": "bearer",
         "is_first_time_user": db_user.get("is_first_time_user", True),
-        "user_id": str(db_user["_id"])
+        "user_id": str(db_user["_id"]),
+        "plan_type": db_user.get("plan_type", "free")  # ⬅️ NEW: include plan in response
     }
 
 # ✅ New Pydantic model to receive Google token
@@ -71,16 +74,19 @@ async def google_login(data: GoogleToken):
                 "email": email,
                 "google_id": google_id_value,
                 "auth_type": "google",
-                "password": None,  # No password for Google users
+                "password": None,
                 "is_first_time_user": True,
-                "preferences": {}
+                "preferences": {},
+                "plan_type": "free"  # ⬅️ NEW: default plan for new Google user
             }
             result = await users_collection.insert_one(new_user_data)
             user_id = str(result.inserted_id)
             is_first_time_user = True
+            user_plan = "free"
         else:
             user_id = str(db_user["_id"])
             is_first_time_user = db_user.get("is_first_time_user", True)
+            user_plan = db_user.get("plan_type", "free")
 
         # Generate your app's JWT token
         token = create_access_token({"email": email})
@@ -92,7 +98,8 @@ async def google_login(data: GoogleToken):
             "user_id": user_id,
             "message": "Google login successful",
             "email": email,
-            "name": name
+            "name": name,
+            "plan_type": user_plan  # ⬅️ NEW: send plan in response
         }
 
     except ValueError:

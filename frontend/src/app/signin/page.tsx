@@ -1,3 +1,4 @@
+// signin/page.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -21,12 +22,14 @@ export default function SigninPage() {
       });
 
       if (res.ok) {
-        setLoading(true); // Show curtain on success
+        setLoading(true);
         const data = await res.json();
+
         localStorage.setItem("token", data.access_token);
         localStorage.setItem("user_id", data.user_id);
         Cookies.set("token", data.access_token, { expires: 1 / 24 });
         Cookies.set("user_id", data.user_id, { expires: 1 / 24 });
+        Cookies.set("plan_type", data.plan_type || "free", { expires: 1 / 24 }); // ✅ Add this line
 
         if (data.is_first_time_user) {
           setRedirectPath("/preferences");
@@ -38,7 +41,7 @@ export default function SigninPage() {
         alert("Login failed: Invalid email or password");
       }
     } catch (error) {
-      console.error("A network or other error occurred:", error);
+      console.error("Login error:", error);
       alert("An error occurred during sign-in. Please try again.");
     }
   };
@@ -53,22 +56,21 @@ export default function SigninPage() {
       });
 
       if (!res.ok) {
-        // Try to get more specific error from backend
-        const errorData = await res.json().catch(() => null); // Gracefully handle non-JSON responses
+        const errorData = await res.json().catch(() => null);
         const detail = errorData?.detail || `Request failed with status ${res.status}`;
         throw new Error(detail);
       }
 
       const data = await res.json();
-      
+
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("user_id", data.user_id);
       Cookies.set("token", data.access_token, { expires: 1 / 24 });
       Cookies.set("user_id", data.user_id, { expires: 1 / 24 });
+      Cookies.set("plan_type", data.plan_type || "free", { expires: 1 / 24 }); // ✅ Add this line
 
       setRedirectPath(data.is_first_time_user ? "/preferences" : "/dashboard");
       setIsSuccess(true);
-
     } catch (error: any) {
       console.error("Google sign-in error:", error);
       alert(`An error occurred during Google sign-in: ${error.message}`);

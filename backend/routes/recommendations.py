@@ -19,7 +19,6 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 @router.post("/generate_recommendations/{user_id}")
 async def generate_recommendations(user_id: str):
     try:
-        # Convert string user_id to ObjectId for database query
         user_object_id = ObjectId(user_id)
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid user ID format")
@@ -28,7 +27,25 @@ async def generate_recommendations(user_id: str):
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
+    # Rate limiting logic
+    last_recommendation = await db.recommendations.find_one(
+        {"user_id": user_id},
+        sort=[("generated_at", -1)]
+    )
+
+    if last_recommendation:
+        last_generated_at = last_recommendation["generated_at"]
+        now = datetime.utcnow()
+        time_since_last_generation = now - last_generated_at
+
+        if user.get("plan_type") == "free":
+            if time_since_last_generation.days < 30:
+                raise HTTPException(status_code=429, detail="Free users can generate recommendations once every 30 days.")
+        elif user.get("plan_type") == "pro":
+            if time_since_last_generation.days < 7:
+                raise HTTPException(status_code=429, detail="Pro users can generate recommendations once every 7 days.")
+
     preferences = user.get("preferences", {})
     if not preferences:
         raise HTTPException(status_code=400, detail="User preferences not set")
@@ -97,8 +114,7 @@ Do not include any text, explanations, or markdown formatting before or after th
     )
 
     # If user has enabled sheets integration, write to their sheet
-    if user.get("sheets_enabled"):
-        # Pass the original string user_id, not the ObjectId
+    if user.get("sheets_enabled") and user.get("plan_type") == "pro":
         await write_to_sheet(user_id, [job.dict() for job in recommended_jobs])
 
     return recommendation_data
