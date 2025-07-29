@@ -7,6 +7,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 import os
 from dotenv import load_dotenv
+from datetime import datetime
 
 load_dotenv()
 router = APIRouter()
@@ -77,13 +78,20 @@ async def google_login(data: GoogleToken):
                 "password": None,
                 "is_first_time_user": True,
                 "preferences": {},
-                "plan_type": "free"  # ⬅️ NEW: default plan for new Google user
+                "plan_type": "free",  # ⬅️ NEW: default plan for new Google user
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
             }
             result = await users_collection.insert_one(new_user_data)
             user_id = str(result.inserted_id)
             is_first_time_user = True
             user_plan = "free"
         else:
+            # For existing users, update the updated_at field
+            await users_collection.update_one(
+                {"email": email},
+                {"$set": {"updated_at": datetime.utcnow()}}
+            )
             user_id = str(db_user["_id"])
             is_first_time_user = db_user.get("is_first_time_user", True)
             user_plan = db_user.get("plan_type", "free")

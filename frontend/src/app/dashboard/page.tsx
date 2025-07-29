@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Cookies from "js-cookie";
 import axios from "axios";
 import GoogleSheetsToggle from "@/components/GoogleSheetsToggle";
+import UserProfile from "@/components/UserProfile";
 
 interface Recommendation {
   title: string;
@@ -26,6 +27,8 @@ export default function DashboardPage() {
   const [isSheetsEnabled, setIsSheetsEnabled] = useState(false);
   const [isToggleLoading, setIsToggleLoading] = useState(false);
   const [userPlan, setUserPlan] = useState<"free" | "pro">("free");
+  const [lastGenerationDate, setLastGenerationDate] = useState<Date | null>(null);
+  const [isGenerationAllowed, setIsGenerationAllowed] = useState(false);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -67,6 +70,22 @@ export default function DashboardPage() {
     fetchExistingRecommendations();
   }, [token, userId, searchParams]);
 
+  useEffect(() => {
+    if (!lastGenerationDate) {
+      setIsGenerationAllowed(true);
+      return;
+    }
+
+    const now = new Date();
+    const diffInDays = (now.getTime() - lastGenerationDate.getTime()) / (1000 * 3600 * 24);
+
+    if (userPlan === 'pro') {
+      setIsGenerationAllowed(diffInDays >= 7);
+    } else {
+      setIsGenerationAllowed(diffInDays >= 30);
+    }
+  }, [lastGenerationDate, userPlan]);
+
   const handleSheetToggle = async () => {
     if (!userId) return;
 
@@ -106,6 +125,9 @@ export default function DashboardPage() {
 
       if (res.data?.recommended_jobs) {
         setRecommendations(res.data.recommended_jobs);
+        if (res.data.generated_at) {
+          setLastGenerationDate(new Date(res.data.generated_at));
+        }
       }
     } catch (err: any) {
       if (err.response?.status !== 404) {
@@ -118,31 +140,34 @@ export default function DashboardPage() {
   };
 
   const handleGenerateRecommendations = async () => {
-    if (userPlan === "pro") {
-      if (!userId || !token) {
-        setError("User not authenticated. Please sign in again.");
-        return;
+    if (!isGenerationAllowed) {
+      return;
+    }
+    
+    if (!userId || !token) {
+      setError("User not authenticated. Please sign in again.");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const res = await axios.post(
+        `http://127.0.0.1:8000/generate_recommendations/${userId}`,
+        null,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setRecommendations(res.data.recommended_jobs);
+      if (res.data.generated_at) {
+        setLastGenerationDate(new Date(res.data.generated_at));
       }
-
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const res = await axios.post(
-          `http://127.0.0.1:8000/generate_recommendations/${userId}`,
-          null,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        setRecommendations(res.data.recommended_jobs);
-      } catch (err: any) {
-        console.error("Error generating recs", err);
-        setError(err.response?.data?.detail || err.message || "Unexpected error.");
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      router.push('/upgrade');
+    } catch (err: any) {
+      console.error("Error generating recs", err);
+      setError(err.response?.data?.detail || err.message || "Unexpected error.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -176,43 +201,45 @@ export default function DashboardPage() {
           <div className="flex items-center gap-4">
             <button
               onClick={handleGenerateRecommendations}
-              disabled={isLoading}
+              disabled={isLoading || !isGenerationAllowed}
               className={`px-6 py-2 rounded-full font-semibold transition duration-300 ${
-                isLoading
+                isLoading || !isGenerationAllowed
                   ? "bg-gray-400 cursor-not-allowed text-white"
-                  : userPlan === 'free'
-                  ? "bg-yellow-500 hover:bg-yellow-600 text-white"
                   : "bg-green-600 hover:bg-green-700 text-white"
               }`}
             >
-              {userPlan === "free"
-                ? "Upgrade to Pro"
-                : isLoading
+              {isLoading
                 ? "Analyzing..."
                 : "Get Personalized Jobs"}
             </button>
 
-            {isClient && (
+            {userPlan === 'free' && (
+              <button
+                onClick={() => router.push('/upgrade')}
+                className="px-6 py-2 rounded-full font-semibold transition duration-300 bg-yellow-500 hover:bg-yellow-600 text-white"
+              >
+                Upgrade to Pro
+              </button>
+            )}
+
+            {isClient && userPlan === 'pro' && (
               <GoogleSheetsToggle
-                isEnabled={isSheetsEnabled && userPlan === 'pro'}
+                isEnabled={isSheetsEnabled}
                 isLoading={isToggleLoading}
                 onToggle={handleSheetToggle}
-                disabled={userPlan === 'free'}
               />
             )}
 
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-600 transition duration-300"
-            >
-              Logout
-            </button>
+            <UserProfile userPlan={userPlan} onLogout={handleLogout} />
           </div>
         </div>
 
-        {userPlan === "free" && (
+        {!isGenerationAllowed && (
           <p className="text-yellow-800 bg-yellow-100 border border-yellow-300 p-4 rounded mb-6 text-center font-semibold">
-            You are currently on the <strong>Free Plan</strong>. Upgrade to Pro to get personalized job recommendations.
+            You have reached your generation limit. 
+            {userPlan === 'free' 
+              ? ` Please wait 30 days or upgrade to Pro for more frequent recommendations.`
+              : ` Please wait 7 days for your next recommendations.`}
           </p>
         )}
 

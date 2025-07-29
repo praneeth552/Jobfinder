@@ -10,6 +10,10 @@ import ProblemSolutionSection from "@/components/ProblemSolutionSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import SignupPage from "@/components/SignupPage";
 import IntroductionSection from "@/components/IntroductionSection";
+import ContactForm from "@/components/ContactForm";
+import Footer from "@/components/Footer";
+import TechStack from "@/components/TechStack";
+import "@/components/TechStack.css";
 
 export default function HomePage() {
   const [loadingFinished, setLoadingFinished] = useState(false);
@@ -66,8 +70,11 @@ export default function HomePage() {
           <>
             <HeroSection onGetStarted={handleGetStarted} />
             <IntroductionSection />
+            <TechStack />
             <ProblemSolutionSection />
             <FeaturesSection />
+            <ContactForm />
+            <Footer />
           </>
         )}
         {showSignup && <SignupPage />}
@@ -111,3 +118,4 @@ export default function HomePage() {
     </main>
   );
 }
+

@@ -39,12 +39,42 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
 
       <motion.button
         onClick={handleButtonClick}
-        whileHover={{ scale: 1.05 }}
+        whileHover="hover"
         whileTap={{ scale: 0.95 }}
-        className="bg-[#FFB100] text-white px-8 py-3 rounded-full text-xl font-semibold shadow hover:bg-[#ff9800] transition relative z-10 overflow-hidden"
+        variants={{
+          initial: {
+            scale: 1,
+            borderRadius: "1rem",
+            background: "linear-gradient(135deg, #FFB100, #ffa726)",
+          },
+          hover: {
+            scale: 1.05,
+            borderRadius: "999px",
+            background: [
+              "linear-gradient(135deg, #FFB100, #ffa726)",
+              "linear-gradient(135deg, #ffc400, #ff9800)",
+              "linear-gradient(135deg, #FFB100, #ffa726)"
+            ],
+            transition: {
+              duration: 1.5,
+              ease: "easeInOut",
+              repeat: Infinity,
+              repeatType: "reverse"
+            }
+          }
+        }}
+        initial="initial"
+        className="text-white px-8 py-3 text-xl font-semibold shadow relative z-10 overflow-hidden glow-hover"
+        style={{
+          borderRadius: "1rem",
+          background: "linear-gradient(135deg, #FFB100, #ffa726)",
+          transition: "all 0.6s ease-in-out"
+        }}
       >
-        Get Started
+        <span className="relative z-10">Get Started <span className="shine absolute top-0 left-[-75%] w-full h-full bg-white opacity-20 transform rotate-45 pointer-events-none" />
+        </span>
       </motion.button>
+
     </section>
   );
 }

@@ -9,7 +9,7 @@ export function middleware(request: NextRequest) {
   const token = tokenCookie?.value;
 
   // Define protected routes
-  const protectedRoutes = ['/dashboard', '/preferences'];
+  const protectedRoutes = ['/dashboard', '/preferences', '/upgrade'];
   const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route));
 
   let isTokenValid = false;
@@ -44,5 +44,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/preferences/:path*', '/signin'],
+  matcher: ['/dashboard/:path*', '/preferences/:path*', '/signin', '/upgrade'],
 };

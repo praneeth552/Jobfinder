@@ -34,7 +34,6 @@ export default function SignupPage() {
       return;
     }
 
-    setLoading(true);
     try {
       const res = await axios.post("http://localhost:8000/auth/signup", {
         name: form.name,
@@ -43,17 +42,17 @@ export default function SignupPage() {
       });
 
       if (res.status === 200 || res.status === 201) {
-        setMessage("Signup successful!");
-        setRedirectPath("/preferences");
-        setIsSuccess(true); // triggers Curtain
+        setMessage("Signup successful! Please sign in.");
+        // Redirect to signin page after a short delay
+        setTimeout(() => {
+          router.push("/signin");
+        }, 2000);
       } else {
         setMessage(res.data.detail || "Signup failed");
       }
     } catch (err: any) {
       console.error(err);
       setMessage(err.response?.data?.detail || "Signup failed");
-    } finally {
-      setLoading(false);
     }
   };
 

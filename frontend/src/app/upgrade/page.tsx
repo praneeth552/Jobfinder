@@ -1,7 +1,6 @@
-// frontend/app/upgrade/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -14,23 +13,59 @@ const UpgradePage = () => {
   const router = useRouter();
   const token = Cookies.get("token");
 
+  // ✅ Load Razorpay checkout script once when component mounts
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
   const handleUpgrade = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      await axios.post(
-        "http://127.0.0.1:8000/user/upgrade",
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      // Update local state/cookie to reflect the change
-      Cookies.set("plan_type", "pro"); 
-      alert("Upgrade successful! You are now a Pro member.");
-      router.push("/dashboard");
+      const orderRes = await axios.post("http://localhost:8000/payment/create-order", {
+        amount: 99,
+      });
+
+      const { id: order_id, amount, currency } = orderRes.data;
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+        amount: amount,
+        currency: currency,
+        name: "JobFinder Pro",
+        description: "Upgrade to Pro Plan",
+        order_id: order_id,
+        handler: async function (response: any) {
+          try {
+            await axios.post(
+              "http://localhost:8000/user/upgrade",
+              {},
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            Cookies.set("plan_type", "pro");
+            alert("Payment Successful! You're now a Pro user.");
+            router.push("/dashboard");
+          } catch (err: any) {
+            setError("Payment succeeded, but upgrade failed.");
+          }
+        },
+        prefill: {
+          name: "Praneeth",
+          email: "your@email.com",
+          contact: "9999999999",
+        },
+        theme: {
+          color: "#8B4513",
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
     } catch (err: any) {
-      setError(err.response?.data?.detail || "An unexpected error occurred.");
+      setError("Failed to initiate payment. Try again.");
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +108,12 @@ const UpgradePage = () => {
             className="bg-white rounded-xl shadow-lg p-8"
           >
             <h2 className="text-3xl font-bold text-center text-[#B8860B]">Free</h2>
-            <p className="text-center text-gray-500 mt-2 mb-6">For casual job seekers</p>
+            <p className="text-center text-4xl font-semibold text-gray-700 tracking-wide mt-2 mb-2">
+              <span className="text-3xl align-top">₹</span>0
+              <span className="text-base font-light text-gray-500">/month</span>
+            </p>
+
+            <p className="text-center text-gray-500 mb-6">For casual job seekers</p>
             <ul className="space-y-4 text-gray-700">
               <Feature text="Generate recommendations once a month" included={true} />
               <Feature text="Google Sheets Integration" included={false} />
@@ -96,7 +136,11 @@ const UpgradePage = () => {
               </div>
             </div>
             <h2 className="text-3xl font-bold text-center text-[#8B4513]">Pro</h2>
-            <p className="text-center text-gray-500 mt-2 mb-6">For serious professionals</p>
+            <p className="text-center text-4xl font-semibold text-gray-700 tracking-wide mt-2 mb-2">
+              <span className="text-3xl align-top">₹</span>99
+              <span className="text-base font-light text-gray-500">/month</span>
+            </p>
+            <p className="text-center text-gray-500 mb-6">For serious professionals</p>
             <ul className="space-y-4 text-gray-700">
               <Feature text="Generate recommendations once a week" included={true} />
               <Feature text="Google Sheets Integration" included={true} />
@@ -107,11 +151,10 @@ const UpgradePage = () => {
               <button
                 onClick={handleUpgrade}
                 disabled={isLoading}
-                className={`w-full px-6 py-3 rounded-full font-semibold text-white transition duration-300 ${
-                  isLoading
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-green-600 hover:bg-green-700"
-                }`}
+                className={`w-full px-6 py-3 rounded-full font-semibold text-white transition duration-300 ${isLoading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-green-600 hover:bg-green-700"
+                  }`}
               >
                 {isLoading ? "Upgrading..." : "Upgrade to Pro"}
               </button>

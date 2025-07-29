@@ -120,11 +120,14 @@ Do not include any text, explanations, or markdown formatting before or after th
     return recommendation_data
 
 
-@router.get("/recommendations/{user_id}", response_model=Recommendation)
+@router.get("/recommendations/{user_id}")
 async def get_recommendations(user_id: str):
     rec = await db.recommendations.find_one({"user_id": user_id})
     
     if not rec:
         raise HTTPException(status_code=404, detail="No recommendations found. Please generate them first.")
 
-    return rec
+    return {
+        "recommended_jobs": rec.get("recommended_jobs", []),
+        "generated_at": rec.get("generated_at"),
+    }
