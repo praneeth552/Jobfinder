@@ -6,19 +6,26 @@ import { useState } from "react";
 import Curtain from "@/components/Curtain";
 import { GoogleLogin } from "@react-oauth/google";
 import Cookies from "js-cookie";
+import TurnstileWidget from "@/components/TurnstileWidget"; // Import the widget
 
 export default function SigninPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [redirectPath, setRedirectPath] = useState("/dashboard");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null); // State for the token
 
   const handleSignIn = async (email: string, password: string) => {
+    if (!turnstileToken) {
+      alert("Please complete the CAPTCHA challenge.");
+      return;
+    }
+
     try {
       const res = await fetch("http://127.0.0.1:8000/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, turnstile_token: turnstileToken }), // Send token to backend
       });
 
       if (res.ok) {
@@ -29,7 +36,7 @@ export default function SigninPage() {
         localStorage.setItem("user_id", data.user_id);
         Cookies.set("token", data.access_token, { expires: 1 / 24 });
         Cookies.set("user_id", data.user_id, { expires: 1 / 24 });
-        Cookies.set("plan_type", data.plan_type || "free", { expires: 1 / 24 }); // ✅ Add this line
+        Cookies.set("plan_type", data.plan_type || "free", { expires: 1 / 24 });
 
         if (data.is_first_time_user) {
           setRedirectPath("/preferences");
@@ -67,7 +74,7 @@ export default function SigninPage() {
       localStorage.setItem("user_id", data.user_id);
       Cookies.set("token", data.access_token, { expires: 1 / 24 });
       Cookies.set("user_id", data.user_id, { expires: 1 / 24 });
-      Cookies.set("plan_type", data.plan_type || "free", { expires: 1 / 24 }); // ✅ Add this line
+      Cookies.set("plan_type", data.plan_type || "free", { expires: 1 / 24 });
 
       setRedirectPath(data.is_first_time_user ? "/preferences" : "/dashboard");
       setIsSuccess(true);
@@ -113,10 +120,16 @@ export default function SigninPage() {
           className="px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
           required
         />
+        
+        {/* Add the Turnstile widget */}
+        <div className="rounded-2xl overflow-hidden">
+          <TurnstileWidget onVerify={setTurnstileToken} />
+        </div>
+
         <button
           type="submit"
           className="bg-[#8B4513] text-white px-4 py-3 rounded-2xl font-semibold hover:bg-[#A0522D] transition"
-          disabled={loading}
+          disabled={loading || !turnstileToken} // Disable button if loading or token not received
         >
           {loading ? "Signing in..." : "Sign in"}
         </button>

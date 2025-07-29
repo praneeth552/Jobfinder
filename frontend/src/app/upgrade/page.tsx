@@ -6,6 +6,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { motion } from "framer-motion";
 import { CheckCircle2, XCircle, Star } from "lucide-react";
+import LoadingButton from "@/components/LoadingButton";
 
 const UpgradePage = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,7 +14,6 @@ const UpgradePage = () => {
   const router = useRouter();
   const token = Cookies.get("token");
 
-  // ✅ Load Razorpay checkout script once when component mounts
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
@@ -24,20 +24,28 @@ const UpgradePage = () => {
   const handleUpgrade = async () => {
     setIsLoading(true);
     setError(null);
-    try {
-      const orderRes = await axios.post("http://localhost:8000/payment/create-order", {
-        amount: 99,
-      });
 
-      const { id: order_id, amount, currency } = orderRes.data;
+    if (!token) {
+      setError("You must be logged in to upgrade.");
+      setIsLoading(false);
+      router.push("/signin");
+      return;
+    }
+
+    try {
+      const subRes = await axios.post(
+        "http://localhost:8000/payment/create-pro-subscription",
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const { subscription_id } = subRes.data;
 
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-        amount: amount,
-        currency: currency,
+        subscription_id: subscription_id,
         name: "JobFinder Pro",
-        description: "Upgrade to Pro Plan",
-        order_id: order_id,
+        description: "Monthly Pro Membership",
         handler: async function (response: any) {
           try {
             await axios.post(
@@ -49,13 +57,12 @@ const UpgradePage = () => {
             alert("Payment Successful! You're now a Pro user.");
             router.push("/dashboard");
           } catch (err: any) {
-            setError("Payment succeeded, but upgrade failed.");
+            setError(
+              "Payment was successful, but we couldn't upgrade your account. Please contact support."
+            );
           }
         },
         prefill: {
-          name: "Praneeth",
-          email: "your@email.com",
-          contact: "9999999999",
         },
         theme: {
           color: "#8B4513",
@@ -64,8 +71,9 @@ const UpgradePage = () => {
 
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
-    } catch (err: any) {
-      setError("Failed to initiate payment. Try again.");
+    } catch (err: any)
+    {
+      setError("Failed to initiate subscription. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -108,8 +116,8 @@ const UpgradePage = () => {
             className="bg-white rounded-xl shadow-lg p-8"
           >
             <h2 className="text-3xl font-bold text-center text-[#B8860B]">Free</h2>
-            <p className="text-center text-4xl font-semibold text-gray-700 tracking-wide mt-2 mb-2">
-              <span className="text-3xl align-top">₹</span>0
+            <p className="text-center text-4xl font-normal text-gray-700 tracking-wide mt-2 mb-2">
+              <span className="text-3xl">₹</span>0
               <span className="text-base font-light text-gray-500">/month</span>
             </p>
 
@@ -148,16 +156,13 @@ const UpgradePage = () => {
               <Feature text="Early access to beta features" included={true} />
             </ul>
             <div className="text-center mt-8">
-              <button
+              <LoadingButton
                 onClick={handleUpgrade}
-                disabled={isLoading}
-                className={`w-full px-6 py-3 rounded-full font-semibold text-white transition duration-300 ${isLoading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-700"
-                  }`}
+                isLoading={isLoading}
+                className="w-full px-6 py-3 rounded-full font-semibold text-white transition duration-300 bg-green-600 hover:bg-green-700"
               >
-                {isLoading ? "Upgrading..." : "Upgrade to Pro"}
-              </button>
+                Upgrade to Pro
+              </LoadingButton>
               {error && <p className="text-red-500 mt-4">{error}</p>}
             </div>
           </motion.div>

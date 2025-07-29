@@ -1,0 +1,26 @@
+import React from 'react';
+import './LoadingButton.css';
+
+interface LoadingButtonProps {
+  isLoading: boolean;
+  children: React.ReactNode;
+}
+
+const LoadingButton: React.FC<LoadingButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>> = ({
+  isLoading,
+  children,
+  ...props
+}) => {
+  return (
+    <button
+      {...props}
+      disabled={isLoading || props.disabled}
+      className={`button-loading-container ${props.className || ""} ${isLoading ? "button-loading" : ""}`}
+    >
+      <span className="button-text">{children}</span>
+      {isLoading && <div className="button-loading-spinner"></div>}
+    </button>
+  );
+};
+
+export default LoadingButton;

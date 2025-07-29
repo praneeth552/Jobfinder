@@ -56,4 +56,7 @@
     transform: translateX(-100%);
   }
 }
-  
+
+.tech-stack-marquee:hover .tech-stack-track {
+  animation-play-state: paused;
+}

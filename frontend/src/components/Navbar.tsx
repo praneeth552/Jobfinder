@@ -93,9 +93,8 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
 
         <motion.button
           onClick={handleGetStartedClick}
-          initial={{ borderRadius: "0.375rem" }} // rounded-md
+          initial={{ borderRadius: "9999px" }} // pill shape by default
           whileHover={{
-            borderRadius: "9999px", // pill shape
             backgroundColor: "#d3d3d3", // ash color
             scale: 1.05,
             color: "#333",
@@ -104,10 +103,11 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
               ease: "easeInOut"
             }
           }}
-          className="px-6 py-2 bg-[#FFB100] text-white font-semibold shadow"
+          className="px-6 py-2 bg-[#FFB100] text-white font-semibold shadow rounded-full"
         >
           Get Started
         </motion.button>
+
       </div>
 
       {/* Mobile Menu Button */}

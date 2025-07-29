@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException, status
+from database import db
+from utils import get_current_user
 import razorpay
 import os
 from dotenv import load_dotenv
@@ -8,26 +9,62 @@ load_dotenv()
 
 router = APIRouter()
 
-# Define a request model for the payment payload
-class OrderPayload(BaseModel):
-    amount: int
-
 razorpay_client = razorpay.Client(
     auth=(os.getenv("RAZORPAY_KEY_ID"), os.getenv("RAZORPAY_KEY_SECRET"))
 )
 
-@router.post("/create-order")
-def create_order(payload: OrderPayload):
+users_collection = db["users"]
+
+@router.post("/create-pro-subscription", status_code=status.HTTP_200_OK)
+async def create_pro_subscription(current_user: dict = Depends(get_current_user)):
+    user_email = current_user.get("email")
+    if not user_email:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User not authenticated",
+        )
+
+    user = await users_collection.find_one({"email": user_email})
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    razorpay_customer_id = user.get("razorpay_customer_id")
+    if not razorpay_customer_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Razorpay customer ID not found for this user.",
+        )
+
+    plan_id = os.getenv("RAZORPAY_PRO_PLAN_ID")
+    
+    # --- DEBUG LOGGING ---
+    print(f"Attempting to create subscription for: {user_email}")
+    print(f"Using Razorpay Customer ID: {razorpay_customer_id}")
+    print(f"Using Razorpay Plan ID: {plan_id}")
+    # --- END DEBUG LOGGING ---
+
+    if not plan_id:
+        print("ERROR: RAZORPAY_PRO_PLAN_ID is not set in the environment.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Razorpay plan ID is not configured.",
+        )
+
     try:
-        order = razorpay_client.order.create({
-            "amount": payload.amount * 100,  # Amount in paise
-            "currency": "INR",
-            "payment_capture": "1"
+        subscription = razorpay_client.subscription.create({
+            "plan_id": plan_id,
+            "customer_id": razorpay_customer_id,
+            "customer_notify": 1,
+            "total_count": 12,  # Example: 12 monthly payments
         })
+
         return {
-            "id": order["id"],
-            "amount": order["amount"],
-            "currency": order["currency"]
+            "subscription_id": subscription["id"],
+            "plan_id": plan_id,
         }
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
