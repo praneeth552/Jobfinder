@@ -36,14 +36,16 @@ function PreferencesPage() {
           });
           const prefs = res.data;
           if (prefs && Object.keys(prefs).length > 0) {
-            setRole(prefs.role || []);
-            setLocation(prefs.location || []);
-            setTechStack(prefs.tech_stack || []);
+            const ensureArray = (value: any): string[] => Array.isArray(value) ? value : (value ? [String(value)] : []);
+
+            setRole(ensureArray(prefs.role));
+            setLocation(ensureArray(prefs.location));
+            setTechStack(ensureArray(prefs.tech_stack));
             setExperience(prefs.experience_level || "");
             setDesiredSalary(prefs.desired_salary || "");
-            setCompanySize(prefs.company_size || []);
-            setJobType(prefs.job_type || []);
-            setWorkArrangement(prefs.work_arrangement || []);
+            setCompanySize(ensureArray(prefs.company_size));
+            setJobType(ensureArray(prefs.job_type));
+            setWorkArrangement(ensureArray(prefs.work_arrangement));
           }
         } catch (error) {
           console.error("Failed to fetch preferences", error);
@@ -99,7 +101,21 @@ function PreferencesPage() {
       }
     } catch (err: any) {
       console.error(err);
-      toast.error(err.response?.data?.detail || "Failed to save preferences.");
+      if (err.response?.data?.detail) {
+        const errorDetail = err.response.data.detail;
+        if (Array.isArray(errorDetail)) {
+          // Pydantic validation error
+          const firstError = errorDetail[0];
+          const field = firstError.loc[1];
+          const message = firstError.msg;
+          toast.error(`Error in ${field}: ${message}`);
+        } else {
+          // Other server error
+          toast.error(errorDetail);
+        }
+      } else {
+        toast.error("Failed to save preferences.");
+      }
     } finally {
       setIsSubmitting(false);
     }
