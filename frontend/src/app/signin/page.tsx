@@ -1,86 +1,69 @@
-// signin/page.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Curtain from "@/components/Curtain";
+import axios from "axios";
+import toast from "react-hot-toast";
 import { GoogleLogin } from "@react-oauth/google";
 import Cookies from "js-cookie";
-import TurnstileWidget from "@/components/TurnstileWidget"; // Import the widget
+import Curtain from "@/components/Curtain";
+import LoadingButton from "@/components/LoadingButton";
+import TurnstileWidget from "@/components/TurnstileWidget";
 
 export default function SigninPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [redirectPath, setRedirectPath] = useState("/dashboard");
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null); // State for the token
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleSignIn = async (email: string, password: string) => {
     if (!turnstileToken) {
-      alert("Please complete the CAPTCHA challenge.");
+      toast.error("Please complete the CAPTCHA challenge.");
       return;
     }
 
+    setLoading(true);
     try {
-      const res = await fetch("http://127.0.0.1:8000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, turnstile_token: turnstileToken }), // Send token to backend
+      const res = await axios.post("http://localhost:8000/auth/login", {
+        email,
+        password,
+        turnstile_token: turnstileToken,
       });
 
-      if (res.ok) {
-        setLoading(true);
-        const data = await res.json();
+      const data = res.data;
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("user_id", data.user_id);
+      Cookies.set("token", data.access_token, { expires: 1 });
+      Cookies.set("user_id", data.user_id, { expires: 1 });
+      Cookies.set("plan_type", data.plan_type || "free", { expires: 1 });
 
-        localStorage.setItem("token", data.access_token);
-        localStorage.setItem("user_id", data.user_id);
-        Cookies.set("token", data.access_token, { expires: 1 / 24 });
-        Cookies.set("user_id", data.user_id, { expires: 1 / 24 });
-        Cookies.set("plan_type", data.plan_type || "free", { expires: 1 / 24 });
-
-        if (data.is_first_time_user) {
-          setRedirectPath("/preferences");
-        } else {
-          setRedirectPath("/dashboard");
-        }
-        setIsSuccess(true);
-      } else {
-        alert("Login failed: Invalid email or password");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      alert("An error occurred during sign-in. Please try again.");
+      setRedirectPath(data.is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
+      setIsSuccess(true); // Trigger the curtain animation
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || "Sign-in failed. Please check your credentials.");
+      setLoading(false);
     }
   };
 
   const handleGoogleSignIn = async (credentialResponse: any) => {
     setLoading(true);
     try {
-      const res = await fetch("http://127.0.0.1:8000/auth/google", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: credentialResponse.credential }),
+      const res = await axios.post("http://localhost:8000/auth/google", {
+        token: credentialResponse.credential,
       });
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => null);
-        const detail = errorData?.detail || `Request failed with status ${res.status}`;
-        throw new Error(detail);
-      }
-
-      const data = await res.json();
-
+      const data = res.data;
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("user_id", data.user_id);
-      Cookies.set("token", data.access_token, { expires: 1 / 24 });
-      Cookies.set("user_id", data.user_id, { expires: 1 / 24 });
-      Cookies.set("plan_type", data.plan_type || "free", { expires: 1 / 24 });
+      Cookies.set("token", data.access_token, { expires: 1 });
+      Cookies.set("user_id", data.user_id, { expires: 1 });
+      Cookies.set("plan_type", data.plan_type || "free", { expires: 1 });
 
-      setRedirectPath(data.is_first_time_user ? "/preferences" : "/dashboard");
-      setIsSuccess(true);
+      setRedirectPath(data.is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
+      setIsSuccess(true); // Trigger the curtain animation
     } catch (error: any) {
-      console.error("Google sign-in error:", error);
-      alert(`An error occurred during Google sign-in: ${error.message}`);
+      toast.error(error.response?.data?.detail || "An error occurred during Google sign-in.");
       setLoading(false);
     }
   };
@@ -93,7 +76,7 @@ export default function SigninPage() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-[#FFF5E1] px-4">
-      <Curtain isLoading={loading} onFinish={handleAnimationFinish} />
+      <Curtain isLoading={isSuccess} onFinish={handleAnimationFinish} />
 
       <h1 className="text-4xl font-bold mb-6 text-gray-900">Sign in to your account</h1>
 
@@ -121,29 +104,30 @@ export default function SigninPage() {
           required
         />
         
-        {/* Add the Turnstile widget */}
         <div className="rounded-2xl overflow-hidden">
           <TurnstileWidget onVerify={setTurnstileToken} />
         </div>
 
-        <button
+        <LoadingButton
           type="submit"
+          isLoading={loading}
           className="bg-[#8B4513] text-white px-4 py-3 rounded-2xl font-semibold hover:bg-[#A0522D] transition"
-          disabled={loading || !turnstileToken} // Disable button if loading or token not received
+          disabled={loading || !turnstileToken}
         >
-          {loading ? "Signing in..." : "Sign in"}
-        </button>
+          Sign in
+        </LoadingButton>
       </form>
 
       <div className="my-4 text-gray-600">or</div>
 
-      <GoogleLogin
-        onSuccess={handleGoogleSignIn}
-        onError={() => {
-          console.log("Google Login Failed");
-          alert("Google Login Failed");
-        }}
-      />
+      <div className="rounded-3xl overflow-hidden">
+        <GoogleLogin
+          onSuccess={handleGoogleSignIn}
+          onError={() => {
+            toast.error("Google Login Failed");
+          }}
+        />
+      </div>
 
       <p className="mt-4 text-gray-700">
         Don&apos;t have an account?{" "}

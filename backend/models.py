@@ -12,7 +12,11 @@ class UserPreferences(BaseModel):
     role: List[str]
     location: List[str]
     tech_stack: List[str]
-    experience_level: Optional[str]  # "fresher", "1-3 years", "3+ years"
+    experience_level: Optional[str] = None
+    desired_salary: Optional[str] = None
+    company_size: Optional[List[str]] = None
+    job_type: Optional[List[str]] = None
+    work_arrangement: Optional[List[str]] = None
 
     @model_validator(mode="after")
     def validate_max_lengths(cls, values):
@@ -20,8 +24,14 @@ class UserPreferences(BaseModel):
             raise ValueError("You can select up to 3 roles only.")
         if len(values.location) > 3:
             raise ValueError("You can select up to 3 locations only.")
-        if len(values.tech_stack) > 10:
-            raise ValueError("You can select up to 10 tech stack items only.")
+        if len(values.tech_stack) > 25:
+            raise ValueError("You can select up to 25 tech stack items only.")
+        if values.company_size and len(values.company_size) > 2:
+            raise ValueError("You can select up to 2 company sizes only.")
+        if values.job_type and len(values.job_type) > 2:
+            raise ValueError("You can select up to 2 job types only.")
+        if values.work_arrangement and len(values.work_arrangement) > 2:
+            raise ValueError("You can select up to 2 work arrangements only.")
         return values
 
 

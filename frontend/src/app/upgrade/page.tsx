@@ -144,8 +144,8 @@ const UpgradePage = () => {
               </div>
             </div>
             <h2 className="text-3xl font-bold text-center text-[#8B4513]">Pro</h2>
-            <p className="text-center text-4xl font-semibold text-gray-700 tracking-wide mt-2 mb-2">
-              <span className="text-3xl align-top">₹</span>99
+            <p className="text-center text-4xl font-normal text-gray-700 tracking-wide mt-2 mb-2">
+              <span className="text-3xl">₹</span>99
               <span className="text-base font-light text-gray-500">/month</span>
             </p>
             <p className="text-center text-gray-500 mb-6">For serious professionals</p>

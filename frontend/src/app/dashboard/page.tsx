@@ -8,6 +8,7 @@ import Cookies from "js-cookie";
 import axios from "axios";
 import GoogleSheetsToggle from "@/components/GoogleSheetsToggle";
 import UserProfile from "@/components/UserProfile";
+import LoadingButton from "@/components/LoadingButton";
 
 interface Recommendation {
   title: string;
@@ -27,8 +28,11 @@ export default function DashboardPage() {
   const [isSheetsEnabled, setIsSheetsEnabled] = useState(false);
   const [isToggleLoading, setIsToggleLoading] = useState(false);
   const [userPlan, setUserPlan] = useState<"free" | "pro">("free");
-  const [lastGenerationDate, setLastGenerationDate] = useState<Date | null>(null);
+  const [lastGenerationDate, setLastGenerationDate] = useState<Date | null>(
+    null
+  );
   const [isGenerationAllowed, setIsGenerationAllowed] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState<string>("");
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -48,10 +52,13 @@ export default function DashboardPage() {
 
     const fetchSheetStatus = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/sheets/status`, {
-          params: { user_id: userId },
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          `http://127.0.0.1:8000/sheets/status`,
+          {
+            params: { user_id: userId },
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setIsSheetsEnabled(response.data.enabled);
       } catch (error) {
         console.error("Failed to fetch sheet status:", error);
@@ -76,14 +83,32 @@ export default function DashboardPage() {
       return;
     }
 
-    const now = new Date();
-    const diffInDays = (now.getTime() - lastGenerationDate.getTime()) / (1000 * 3600 * 24);
+    const intervalId = setInterval(() => {
+      const now = new Date();
+      const requiredDays = userPlan === "pro" ? 7 : 30;
+      const nextGenerationDate = new Date(lastGenerationDate.getTime());
+      nextGenerationDate.setDate(lastGenerationDate.getDate() + requiredDays);
 
-    if (userPlan === 'pro') {
-      setIsGenerationAllowed(diffInDays >= 7);
-    } else {
-      setIsGenerationAllowed(diffInDays >= 30);
-    }
+      const diff = nextGenerationDate.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        setIsGenerationAllowed(true);
+        setTimeRemaining("");
+        clearInterval(intervalId);
+      } else {
+        setIsGenerationAllowed(false);
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor(
+          (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        setTimeRemaining(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+      }
+    }, 1000);
+
+    return () => clearInterval(intervalId);
   }, [lastGenerationDate, userPlan]);
 
   const handleSheetToggle = async () => {
@@ -143,7 +168,7 @@ export default function DashboardPage() {
     if (!isGenerationAllowed) {
       return;
     }
-    
+
     if (!userId || !token) {
       setError("User not authenticated. Please sign in again.");
       return;
@@ -165,7 +190,9 @@ export default function DashboardPage() {
       }
     } catch (err: any) {
       console.error("Error generating recs", err);
-      setError(err.response?.data?.detail || err.message || "Unexpected error.");
+      setError(
+        err.response?.data?.detail || err.message || "Unexpected error."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -188,41 +215,40 @@ export default function DashboardPage() {
       className="min-h-screen bg-[#fdf6e3]"
     >
       <div className="container mx-auto py-12 px-4">
-        <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
+        <div className="flex justify-between items-center mb-8 gap-4">
           <motion.h1
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8 }}
-            className="text-4xl md:text-5xl font-bold text-[#8B4513]"
+            className="text-4xl md:text-5xl font-bold text-[#8B4513] flex-shrink-0"
           >
             Job Recommendations
           </motion.h1>
 
-          <div className="flex items-center gap-4">
-            <button
+          <div className="flex items-center justify-end gap-4">
+            <LoadingButton
               onClick={handleGenerateRecommendations}
-              disabled={isLoading || !isGenerationAllowed}
+              isLoading={isLoading}
               className={`px-6 py-2 rounded-full font-semibold transition duration-300 ${
-                isLoading || !isGenerationAllowed
+                !isGenerationAllowed
                   ? "bg-gray-400 cursor-not-allowed text-white"
                   : "bg-green-600 hover:bg-green-700 text-white"
               }`}
+              disabled={isLoading || !isGenerationAllowed}
             >
-              {isLoading
-                ? "Analyzing..."
-                : "Get Personalized Jobs"}
-            </button>
+              Get Personalized Jobs
+            </LoadingButton>
 
-            {userPlan === 'free' && (
+            {userPlan === "free" && (
               <button
-                onClick={() => router.push('/upgrade')}
+                onClick={() => router.push("/upgrade")}
                 className="px-6 py-2 rounded-full font-semibold transition duration-300 bg-yellow-500 hover:bg-yellow-600 text-white"
               >
                 Upgrade to Pro
               </button>
             )}
 
-            {isClient && userPlan === 'pro' && (
+            {isClient && userPlan === "pro" && (
               <GoogleSheetsToggle
                 isEnabled={isSheetsEnabled}
                 isLoading={isToggleLoading}
@@ -230,16 +256,19 @@ export default function DashboardPage() {
               />
             )}
 
-            <UserProfile userPlan={userPlan} onLogout={handleLogout} />
+            <UserProfile
+              userPlan={userPlan}
+              onLogout={handleLogout}
+              onEditPreferences={() => router.push("/preferences")}
+            />
           </div>
         </div>
 
-        {!isGenerationAllowed && (
+        {!isGenerationAllowed && timeRemaining && (
           <p className="text-yellow-800 bg-yellow-100 border border-yellow-300 p-4 rounded mb-6 text-center font-semibold">
-            You have reached your generation limit. 
-            {userPlan === 'free' 
-              ? ` Please wait 30 days or upgrade to Pro for more frequent recommendations.`
-              : ` Please wait 7 days for your next recommendations.`}
+            You can generate new recommendations in {timeRemaining}.
+            {userPlan === "free" &&
+              ` Upgrade to Pro for more frequent recommendations.`}
           </p>
         )}
 
@@ -255,37 +284,53 @@ export default function DashboardPage() {
           </p>
         )}
 
-        {!isLoading && !error && recommendations.length === 0 && !isFirstLoad && (
-          <p className="text-center text-gray-600 text-lg">
-            No recommendations found. Try generating a new list!
-          </p>
-        )}
+        {!isLoading &&
+          !error &&
+          recommendations.length === 0 &&
+          !isFirstLoad && (
+            <p className="text-center text-gray-600 text-lg">
+              No recommendations found. Try generating a new list!
+            </p>
+          )}
 
         {recommendations.length > 0 && (
           <motion.div
             initial="hidden"
             animate="visible"
-            variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1 } } }}
+            variants={{
+              hidden: {},
+              visible: { transition: { staggerChildren: 0.1 } },
+            }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
             {recommendations.map((job, index) => (
               <motion.div
                 key={index}
-                variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0 },
+                }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                whileHover={{ scale: 1.03, boxShadow: "0 10px 20px rgba(139,69,19,0.2)" }}
+                whileHover={{
+                  scale: 1.03,
+                  boxShadow: "0 10px 20px rgba(139,69,19,0.2)",
+                }}
                 className="bg-white rounded-xl shadow-md p-6 cursor-pointer transform transition transform duration-300 flex flex-col h-full"
-                onClick={() => job.job_url && window.open(job.job_url, "_blank")}
+                onClick={() =>
+                  job.job_url && window.open(job.job_url, "_blank")
+                }
               >
                 <div className="flex-grow">
                   <h2 className="text-xl font-bold mb-2 text-[#B8860B]">
                     {job.title}
                   </h2>
                   <p className="text-gray-800 mb-1">
-                    <span className="font-semibold">Company:</span> {job.company}
+                    <span className="font-semibold">Company:</span>{" "}
+                    {job.company}
                   </p>
                   <p className="text-gray-800 mb-3">
-                    <span className="font-semibold">Location:</span> {job.location}
+                    <span className="font-semibold">Location:</span>{" "}
+                    {job.location}
                   </p>
                   {job.match_score && (
                     <div className="w-full bg-gray-200 rounded-full h-2.5 mb-3">

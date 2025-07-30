@@ -8,6 +8,7 @@ import Cookies from "js-cookie";
 import Curtain from "@/components/Curtain";
 import LoadingButton from "./LoadingButton";
 import TurnstileWidget from "./TurnstileWidget";
+import toast from "react-hot-toast";
 
 const PasswordCriteria = ({ criteria }: { criteria: { [key: string]: boolean } }) => {
   const criteriaText: { [key: string]: string } = {
@@ -68,7 +69,6 @@ export default function SignupPage() {
     confirmPassword: "",
   });
 
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [redirectPath, setRedirectPath] = useState("/dashboard");
@@ -104,45 +104,42 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
 
     if (!turnstileToken) {
-      setMessage("Please complete the CAPTCHA challenge.");
+      toast.error("Please complete the CAPTCHA challenge.");
       setLoading(false);
       return;
     }
 
     if (form.password !== form.confirmPassword) {
-      setMessage("Passwords do not match");
+      toast.error("Passwords do not match");
       setLoading(false);
       return;
     }
 
     if (!allCriteriaMet) {
-      setMessage("Password does not meet all criteria.");
+      toast.error("Password does not meet all criteria.");
       setLoading(false);
       return;
     }
 
     try {
-      const res = await axios.post("http://localhost:8000/auth/signup", {
+      const res = await axios.post("http://localhost:8000/auth/signup-otp", {
         name: form.name,
         email: form.email,
         password: form.password,
         turnstile_token: turnstileToken,
       });
 
-      if (res.status === 200 || res.status === 201) {
-        setMessage("Signup successful! Please sign in.");
-        setTimeout(() => {
-          router.push("/signin");
-        }, 2000);
+      if (res.status === 200) {
+        toast.success("OTP sent to your email!");
+        router.push(`/otp?email=${form.email}`);
       } else {
-        setMessage(res.data.detail || "Signup failed");
+        toast.error(res.data.detail || "Signup failed");
       }
     } catch (err: any) {
       console.error(err);
-      setMessage(err.response?.data?.detail || "Signup failed");
+      toast.error(err.response?.data?.detail || "Signup failed");
     } finally {
       setLoading(false);
     }
@@ -163,12 +160,12 @@ export default function SignupPage() {
       Cookies.set("token", access_token, { expires: 1 });
       Cookies.set("user_id", user_id, { expires: 1 });
 
-      setMessage("Google signup successful!");
-      setRedirectPath(is_first_time_user ? "/preferences" : "/dashboard");
+      toast.success("Google signup successful!");
+      setRedirectPath(is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
       setIsSuccess(true);
     } catch (err) {
       console.error("Google signup failed", err);
-      setMessage("Google signup failed");
+      toast.error("Google signup failed");
       setLoading(false);
     }
   };
@@ -238,8 +235,6 @@ export default function SignupPage() {
         </LoadingButton>
       </form>
 
-      {message && <p className="mt-4 text-red-600">{message}</p>}
-
       <div className="my-4 text-gray-600">or</div>
 
       <div className="rounded-3xl overflow-hidden">
@@ -247,7 +242,7 @@ export default function SignupPage() {
           onSuccess={handleGoogleSignup}
           onError={() => {
             console.log("Google signup failed");
-            setMessage("Google signup failed");
+            toast.error("Google signup failed");
           }}
         />
       </div>

@@ -50,11 +50,20 @@ async def generate_recommendations(user_id: str):
     if not preferences:
         raise HTTPException(status_code=400, detail="User preferences not set")
 
+    print("--- Generating Recommendations ---")
+    print(f"User ID: {user_id}")
+    print(f"User Preferences: {json.dumps(preferences, indent=2)}")
+
     jobs_cursor = db.jobs.find({})
     jobs = await jobs_cursor.to_list(length=200) 
 
     if not jobs:
         raise HTTPException(status_code=404, detail="No jobs found in the database")
+
+    # Truncate job descriptions to keep the prompt size reasonable
+    for job in jobs:
+        if 'description' in job and job['description']:
+            job['description'] = job['description'][:500] + '...'
 
     prompt = f"""
 You are an expert AI Job Recommendation Assistant. Your task is to analyze user preferences and a list of available jobs, then return a ranked list of the most suitable job recommendations.
@@ -64,11 +73,14 @@ User Preferences:
 - Location: {', '.join(preferences.get('location', []))}
 - Tech Stack: {', '.join(preferences.get('tech_stack', []))}
 - Experience Level: {preferences.get('experience_level', 'Not specified')}
+- Company Size: {', '.join(preferences.get('company_size', []))}
+- Job Type: {', '.join(preferences.get('job_type', []))}
+- Work Arrangement: {', '.join(preferences.get('work_arrangement', []))}
 
 Available Job Postings:
 {json.dumps([{'title': job.get('title'), 'company': job.get('company'), 'location': job.get('location'), 'description': job.get('description', 'No description available'), 'job_url': job.get('job_url')} for job in jobs], indent=2)}
 
-Based on the user's preferences, please provide a list of the top 5-10 job recommendations. For each recommendation, calculate a 'match_score' from 0 to 100, where 100 is a perfect match. Also, provide a brief 'reason' for why the job is a good match.
+Based on the user's preferences, please provide a ranked list of the top 5-10 job recommendations from the list provided. It is crucial that you return the best possible matches, even if none of them are a perfect fit. For each recommendation, calculate a 'match_score' from 0 to 100, where 100 is a perfect match. Also, provide a brief 'reason' for why the job is a good match.
 
 IMPORTANT: Your final output MUST be a single, valid JSON array of objects. Each object in the array should strictly follow this format:
 {{
@@ -84,21 +96,27 @@ Do not include any text, explanations, or markdown formatting before or after th
 """
 
     try:
+        print("Sending prompt to Gemini API...")
         model = genai.GenerativeModel("gemini-1.5-flash-latest")
         response = model.generate_content(prompt)
         
+        print("Received response from Gemini API.")
         cleaned_response_text = response.text.strip().replace("```json", "").replace("```", "").strip()
         
+        print("Attempting to parse JSON...")
         recommended_jobs_data = json.loads(cleaned_response_text)
+        print("Successfully parsed JSON.")
         
         recommended_jobs = [RecommendedJob(**job) for job in recommended_jobs_data]
 
     except (json.JSONDecodeError, ValueError) as e:
-        print(f"Error processing Gemini response: {e}")
-        print(f"Raw response was: {response.text}")
-        raise HTTPException(status_code=500, detail="Failed to parse recommendations from AI. Please try again.")
+        print(f"--- ERROR: Failed to parse JSON from Gemini response ---")
+        print(f"Error: {e}")
+        print(f"Raw response text was:\n---\n{response.text}\n---")
+        raise HTTPException(status_code=500, detail="Failed to parse recommendations from AI. The format was invalid.")
     except Exception as e:
-        print(f"An unexpected error occurred with Gemini API: {e}")
+        print(f"--- ERROR: An unexpected error occurred with the Gemini API ---")
+        print(f"Error: {e}")
         raise HTTPException(status_code=500, detail=f"An error occurred while generating recommendations: {e}")
 
     recommendation_data = {

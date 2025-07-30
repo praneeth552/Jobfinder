@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from models import User, UserLogin, UserGoogle
 from database import db
@@ -7,13 +7,21 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 import os
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
 import razorpay
 import httpx
+import random
+import string
+from email_utils import send_email
+import pymongo
 
 load_dotenv()
 router = APIRouter()
 users_collection = db["users"]
+temp_users_collection = db["temp_users"]
+
+# Add a TTL index to the temp_users_collection
+temp_users_collection.create_index("createdAt", expireAfterSeconds=600) # OTP expires in 10 minutes
 
 razorpay_client = razorpay.Client(
     auth=(os.getenv("RAZORPAY_KEY_ID"), os.getenv("RAZORPAY_KEY_SECRET"))
@@ -53,8 +61,12 @@ def is_password_strong(password: str) -> bool:
         return False
     return True
 
-@router.post("/signup")
-async def signup(user: UserSignup):
+def generate_otp(length=6):
+    characters = string.digits
+    return "".join(random.choice(characters) for _ in range(length))
+
+@router.post("/signup-otp")
+async def signup_otp(user: UserSignup):
     await verify_turnstile(user.turnstile_token)
     existing_user = await users_collection.find_one({"email": user.email})
     if existing_user:
@@ -63,24 +75,78 @@ async def signup(user: UserSignup):
     if not is_password_strong(user.password):
         raise HTTPException(status_code=400, detail="Password does not meet the required criteria.")
     
-    user_dict = user.dict(exclude={"turnstile_token"})
-    user_dict["password"] = hash_password(user.password)
-    user_dict["auth_type"] = "standard"
-    user_dict["is_first_time_user"] = True
-    user_dict["preferences"] = {}
-    user_dict["plan_type"] = "free"
+    otp = generate_otp()
+    
+    temp_user_data = user.dict(exclude={"turnstile_token"})
+    temp_user_data["otp"] = otp
+    temp_user_data["createdAt"] = datetime.utcnow()
+    
+    await temp_users_collection.insert_one(temp_user_data)
+    
+    email_body = f"""
+    <html>
+        <body>
+            <h2>Welcome to Tackleit!</h2>
+            <p>Your One-Time Password (OTP) for account verification is:</p>
+            <h3>{otp}</h3>
+            <p>This OTP is valid for 10 minutes. Please do not share it with anyone.</p>
+            <p>If you did not request this, please ignore this email.</p>
+            <br>
+            <p>Best regards,</p>
+            <p>The Tackleit Team</p>
+        </body>
+    </html>
+    """
+
+    try:
+        await send_email(
+            subject="Your OTP for Job Finder Account Verification",
+            recipients=[user.email],
+            body=email_body
+        )
+        return {"message": "OTP sent to your email successfully."}
+    except Exception as e:
+        print(f"Error sending email: {e}")
+        raise HTTPException(status_code=500, detail="Failed to send OTP email.")
+
+
+class VerifyOTP(BaseModel):
+    email: str
+    otp: str
+
+@router.post("/verify-otp")
+async def verify_otp(data: VerifyOTP):
+    temp_user = await temp_users_collection.find_one({"email": data.email, "otp": data.otp})
+
+    if not temp_user:
+        raise HTTPException(status_code=400, detail="Invalid OTP or email.")
+
+    user_dict = {
+        "name": temp_user["name"],
+        "email": temp_user["email"],
+        "password": hash_password(temp_user["password"]),
+        "auth_type": "standard",
+        "is_first_time_user": True,
+        "preferences": {},
+        "plan_type": "free",
+        "created_at": datetime.utcnow(),
+        "updated_at": datetime.utcnow()
+    }
     
     try:
         customer = razorpay_client.customer.create({
-            "name": user.name,
-            "email": user.email,
+            "name": temp_user["name"],
+            "email": temp_user["email"],
         })
         user_dict["razorpay_customer_id"] = customer["id"]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create Razorpay customer: {str(e)}")
 
     await users_collection.insert_one(user_dict)
-    return {"message": "User created successfully"}
+    await temp_users_collection.delete_one({"email": data.email})
+    
+    return {"message": "User created successfully. Please log in."}
+
 
 class UserLoginWithTurnstile(UserLogin):
     turnstile_token: str
