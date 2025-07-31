@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
-export default function LoadingScreen({ onFinish }: { onFinish: () => void }) {
+export default function LoadingScreen({ onFinish }: { onFinish?: () => void }) {
   const [progress, setProgress] = useState(0);
   const [shouldSlideUp, setShouldSlideUp] = useState(false);
 
@@ -13,7 +13,9 @@ export default function LoadingScreen({ onFinish }: { onFinish: () => void }) {
         if (old >= 100) {
           clearInterval(interval);
           setTimeout(() => setShouldSlideUp(true), 1000); // wait 1s before sliding up
-          setTimeout(() => onFinish(), 2500); // slide up duration + buffer before finishing
+          if (onFinish) {
+            setTimeout(() => onFinish(), 2500); // slide up duration + buffer before finishing
+          }
           return 100;
         }
         return old + 1; // smoother increment
