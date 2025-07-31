@@ -9,6 +9,8 @@ import Cookies from "js-cookie";
 import Curtain from "@/components/Curtain";
 import LoadingButton from "@/components/LoadingButton";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import { Eye, EyeOff } from 'lucide-react';
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function SigninPage() {
   const router = useRouter();
@@ -16,6 +18,7 @@ export default function SigninPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [redirectPath, setRedirectPath] = useState("/dashboard");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSignIn = async (email: string, password: string) => {
     if (!turnstileToken) {
@@ -86,8 +89,19 @@ export default function SigninPage() {
   };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-[#FFF5E1] px-4">
+    <main className="flex flex-col items-center justify-center min-h-screen bg-[#FFF5E1] px-4 animated-gradient-bg">
       <Curtain isLoading={isSuccess} onFinish={handleAnimationFinish} />
+
+      <div className="mt-12 mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="inline-block bg-black text-white px-6 py-2 rounded-full shadow-lg pill-glow"
+        >
+          <h1 className="text-2xl font-bold">TackleIt</h1>
+        </motion.div>
+      </div>
 
       <h1 className="text-4xl font-bold mb-6 text-gray-900">Sign in to your account</h1>
 
@@ -107,13 +121,22 @@ export default function SigninPage() {
           className="px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
           required
         />
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          className="px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
-          required
-        />
+        <div className="relative">
+          <input
+            name="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            className="w-full px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600"
+          >
+            {showPassword ? <EyeOff /> : <Eye />}
+          </button>
+        </div>
         
         <div className="rounded-2xl overflow-hidden">
           <TurnstileWidget onVerify={setTurnstileToken} />
@@ -122,7 +145,7 @@ export default function SigninPage() {
         <LoadingButton
           type="submit"
           isLoading={loading}
-          className="bg-[#8B4513] text-white px-4 py-3 rounded-2xl font-semibold hover:bg-[#A0522D] transition"
+          className="bg-[#8B4513] text-white px-4 py-3 rounded-2xl font-semibold hover:bg-[#A0522D] transition button-glow"
           disabled={loading || !turnstileToken}
         >
           Sign in

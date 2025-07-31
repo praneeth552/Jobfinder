@@ -184,20 +184,20 @@ export default function DashboardClient() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8, ease: "easeInOut" }}
-      className="min-h-screen bg-[#fdf6e3]"
+      className="min-h-screen bg-[#fdf6e3] animated-gradient-bg"
     >
       <div className="container mx-auto py-12 px-4">
-        <div className="flex justify-between items-center mb-8 gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
           <motion.h1
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8 }}
-            className="text-4xl md:text-5xl font-bold text-[#8B4513] flex-shrink-0"
+            className="text-4xl md:text-5xl font-bold text-[#8B4513] text-center md:text-left"
           >
             Job Recommendations
           </motion.h1>
 
-          <div className="flex items-center justify-end gap-4">
+          <div className="flex flex-wrap items-center justify-center md:justify-end gap-2 md:gap-4">
             <LoadingButton
               onClick={handleGenerateRecommendations}
               isLoading={isLoading}
@@ -293,14 +293,14 @@ export default function DashboardClient() {
                 }
               >
                 <div className="flex-grow">
-                  <h2 className="text-xl font-bold mb-2 text-[#B8860B]">
+                  <h2 className="text-xl font-bold mb-2 text-[#B8860B] break-words">
                     {job.title}
                   </h2>
-                  <p className="text-gray-800 mb-1">
+                  <p className="text-gray-800 mb-1 break-words">
                     <span className="font-semibold">Company:</span>{" "}
                     {job.company}
                   </p>
-                  <p className="text-gray-800 mb-3">
+                  <p className="text-gray-800 mb-3 break-words">
                     <span className="font-semibold">Location:</span>{" "}
                     {job.location}
                   </p>

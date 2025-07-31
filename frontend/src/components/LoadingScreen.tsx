@@ -33,12 +33,12 @@ export default function LoadingScreen({ onFinish }: { onFinish?: () => void }) {
       style={{ pointerEvents: shouldSlideUp ? "none" : "auto" }}
       aria-label="Loading screen"
     >
-      {/* Container for both texts in a row */}
-      <div className="flex items-center space-x-4 mb-8">
-        {/* TackleIt sliding to left */}
+      {/* Responsive container for brand and tagline */}
+      <div className="flex flex-col md:flex-row items-center text-center md:text-left space-y-2 md:space-y-0 md:space-x-4 mb-8">
+        {/* TackleIt sliding animation */}
         <motion.h1
           initial={{ x: 0, opacity: 0, clipPath: 'inset(0 50% 0 50%)' }}
-          animate={{ x: -20, opacity: 1, clipPath: 'inset(0 0% 0 0%)' }}
+          animate={{ x: 0, opacity: 1, clipPath: 'inset(0 0% 0 0%)' }}
           transition={{ duration: 1.2, delay: 0.3, ease: "easeOut" }}
           className="text-white text-4xl font-bold"
           aria-label="TackleIt brand name"
@@ -46,10 +46,10 @@ export default function LoadingScreen({ onFinish }: { onFinish?: () => void }) {
           TackleIt
         </motion.h1>
 
-        {/* Tagline sliding to right */}
+        {/* Tagline sliding animation */}
         <motion.span
           initial={{ x: 0, opacity: 0, clipPath: 'inset(0 50% 0 50%)' }}
-          animate={{ x: 15, opacity: 1, clipPath: 'inset(0 0% 0 0%)' }}
+          animate={{ x: 0, opacity: 1, clipPath: 'inset(0 0% 0 0%)' }}
           transition={{ duration: 1.2, delay: 0.3, ease: "easeOut" }}
           className="text-white text-lg"
           aria-label="Your personal AI job finder tagline"

@@ -8,7 +8,9 @@ import Cookies from "js-cookie";
 import Curtain from "@/components/Curtain";
 import LoadingButton from "./LoadingButton";
 import TurnstileWidget from "./TurnstileWidget";
-import toast from "react-hot-toast";
+import { Eye, EyeOff } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from "framer-motion";
 
 const PasswordCriteria = ({ criteria }: { criteria: { [key: string]: boolean } }) => {
   const criteriaText: { [key: string]: string } = {
@@ -73,6 +75,8 @@ export default function SignupPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [redirectPath, setRedirectPath] = useState("/dashboard");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordCriteria, setPasswordCriteria] = useState({
     minLength: false,
     uppercase: false,
@@ -181,8 +185,19 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-[#FFF5E1] px-4 relative">
+    <main className="flex flex-col items-center justify-center min-h-screen bg-[#FFF5E1] px-4 relative animated-gradient-bg">
       <Curtain isLoading={loading && isSuccess} onFinish={handleAnimationFinish} />
+
+      <div className="mt-12 mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="inline-block bg-black text-white px-6 py-2 rounded-full shadow-lg pill-glow"
+        >
+          <h1 className="text-2xl font-bold mx-4">TackleIt</h1>
+        </motion.div>
+      </div>
 
       <h1 className="text-4xl font-bold mb-6 text-gray-900">Create your account</h1>
 
@@ -205,24 +220,42 @@ export default function SignupPage() {
           className="px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
           required
         />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          className="px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
-          required
-        />
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm Password"
-          value={form.confirmPassword}
-          onChange={handleChange}
-          className="px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
-          required
-        />
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={handleChange}
+            className="w-full px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600"
+          >
+            {showPassword ? <EyeOff /> : <Eye />}
+          </button>
+        </div>
+        <div className="relative">
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            name="confirmPassword"
+            placeholder="Confirm Password"
+            value={form.confirmPassword}
+            onChange={handleChange}
+            className="w-full px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600"
+          >
+            {showConfirmPassword ? <EyeOff /> : <Eye />}
+          </button>
+        </div>
 
         <PasswordCriteria criteria={passwordCriteria} />
 
@@ -233,7 +266,7 @@ export default function SignupPage() {
         <LoadingButton
           type="submit"
           isLoading={loading && !isSuccess}
-          className="bg-[#8B4513] text-white px-4 py-3 rounded-2xl font-semibold hover:bg-[#A0522D] transition"
+          className="bg-[#8B4513] text-white px-4 py-3 rounded-2xl font-semibold hover:bg-[#A0522D] transition button-glow"
           disabled={loading || !turnstileToken || !allCriteriaMet || form.password !== form.confirmPassword}>
           Sign up
         </LoadingButton>
