@@ -16,7 +16,7 @@ load_dotenv()
 
 app = FastAPI()
 
-origins = ["http://localhost", "http://localhost:3000"]  # Add your prod domain here later
+origins = ["http://localhost", "http://localhost:3000", "https://jobfinder-frontend-pied.vercel.app"]  # Add your prod domain here later
 
 app.add_middleware(
     CORSMiddleware,
