@@ -110,8 +110,12 @@ const ContactForm = () => {
         interest: "Suggest a feature",
         message: "",
       });
-    } catch {
-      toast.error("Something went wrong. Please try again later.");
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.detail || "Something went wrong. Please try again later.");
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
     } finally {
       setIsSubmitting(false);
     }

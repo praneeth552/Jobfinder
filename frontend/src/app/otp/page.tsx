@@ -22,7 +22,11 @@ const OTPPage = () => {
             toast.success("Verification successful! Please sign in.");
             setIsSuccess(true);
         } catch (error: unknown) {
-            toast.error(error.response?.data?.detail || "An error occurred.");
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data?.detail || "An error occurred.");
+            } else {
+                toast.error("An unexpected error occurred.");
+            }
             setLoading(false);
         }
     };

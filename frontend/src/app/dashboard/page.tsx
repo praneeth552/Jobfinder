@@ -158,9 +158,13 @@ export default function DashboardPage() {
       }
     } catch (err: unknown) {
       console.error("Error generating recs", err);
-      setError(
-        err.response?.data?.detail || err.message || "Unexpected error."
-      );
+      if (axios.isAxiosError(err)) {
+        setError(
+          err.response?.data?.detail || err.message || "An unexpected error occurred."
+        );
+      } else {
+        setError("An unexpected error occurred.");
+      }
     } finally {
       setIsLoading(false);
     }

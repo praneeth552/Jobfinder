@@ -71,9 +71,12 @@ const UpgradePage = () => {
 
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
-    } catch (err: unknown)
-    {
-      setError("Failed to initiate subscription. Please try again.");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.detail || "Failed to initiate subscription. Please try again.");
+      } else {
+        setError("An unexpected error occurred.");
+      }
     } finally {
       setIsLoading(false);
     }

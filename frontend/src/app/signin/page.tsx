@@ -63,7 +63,11 @@ export default function SigninPage() {
       setRedirectPath(data.is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
       setIsSuccess(true); // Trigger the curtain animation
     } catch (error: unknown) {
-      toast.error(error.response?.data?.detail || "An error occurred during Google sign-in.");
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.detail || "An error occurred during Google sign-in.");
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
       setLoading(false);
     }
   };
