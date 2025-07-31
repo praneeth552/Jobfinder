@@ -41,7 +41,11 @@ export default function SigninPage() {
       setRedirectPath(data.is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
       setIsSuccess(true); // Trigger the curtain animation
     } catch (error: unknown) {
-      toast.error(error.response?.data?.detail || "Sign-in failed. Please check your credentials.");
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.detail || "Sign-in failed. Please check your credentials.");
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
       setLoading(false);
     }
   };
@@ -63,11 +67,14 @@ export default function SigninPage() {
       setRedirectPath(data.is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
       setIsSuccess(true); // Trigger the curtain animation
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.detail || "An error occurred during Google sign-in.");
-      } else {
-        toast.error("An unexpected error occurred.");
+      let errorMessage = "An unexpected error occurred.";
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response?: { data?: { detail?: string } } };
+        errorMessage = axiosError.response?.data?.detail || "An error occurred during Google sign-in.";
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
       }
+      toast.error(errorMessage);
       setLoading(false);
     }
   };

@@ -111,11 +111,14 @@ const ContactForm = () => {
         message: "",
       });
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.detail || "Something went wrong. Please try again later.");
-      } else {
-        toast.error("An unexpected error occurred.");
+      let errorMessage = "An unexpected error occurred.";
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response?: { data?: { detail?: string } } };
+        errorMessage = axiosError.response?.data?.detail || "Something went wrong. Please try again later.";
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
       }
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

@@ -57,9 +57,14 @@ const UpgradePage = () => {
             alert("Payment Successful! You're now a Pro user.");
             router.push("/dashboard");
           } catch (err: unknown) {
-            setError(
-              "Payment was successful, but we couldn't upgrade your account. Please contact support."
-            );
+            let errorMessage = "An unexpected error occurred.";
+            if (err && typeof err === "object" && "response" in err) {
+              const axiosError = err as { response?: { data?: { detail?: string } } };
+              errorMessage = axiosError.response?.data?.detail || "Payment was successful, but we couldn't upgrade your account. Please contact support.";
+            } else if (err instanceof Error) {
+              errorMessage = err.message;
+            }
+            setError(errorMessage);
           }
         },
         prefill: {
@@ -72,11 +77,14 @@ const UpgradePage = () => {
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
     } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.detail || "Failed to initiate subscription. Please try again.");
-      } else {
-        setError("An unexpected error occurred.");
+      let errorMessage = "An unexpected error occurred.";
+      if (err && typeof err === "object" && "response" in err) {
+        const axiosError = err as { response?: { data?: { detail?: string } } };
+        errorMessage = axiosError.response?.data?.detail || "Failed to initiate subscription. Please try again.";
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
       }
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

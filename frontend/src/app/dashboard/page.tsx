@@ -158,13 +158,14 @@ export default function DashboardPage() {
       }
     } catch (err: unknown) {
       console.error("Error generating recs", err);
-      if (axios.isAxiosError(err)) {
-        setError(
-          err.response?.data?.detail || err.message || "An unexpected error occurred."
-        );
-      } else {
-        setError("An unexpected error occurred.");
+      let errorMessage = "An unexpected error occurred.";
+      if (err && typeof err === "object" && "response" in err) {
+        const axiosError = err as { response?: { data?: { detail?: string }, status?: number }, message?: string };
+        errorMessage = axiosError.response?.data?.detail || axiosError.message || "An unexpected error occurred.";
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
       }
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
