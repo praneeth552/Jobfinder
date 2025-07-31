@@ -16,3 +16,4 @@ dnspython
 Jinja2
 python-multipart
 gunicorn
+setuptools
