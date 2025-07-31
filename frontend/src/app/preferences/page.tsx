@@ -126,11 +126,10 @@ function PreferencesPage() {
     "Node.js", "ExpressJS", "Python", "Django", "Flask", "FastAPI", "Java", "Spring Boot", "C#", ".NET", "Ruby on Rails", "PHP", "Laravel", "Go", "Rust",
     "MongoDB", "MySQL", "PostgreSQL", "SQLite", "Redis", "Firebase", "Supabase", "Prisma",
     "React Native", "Flutter", "Swift", "Kotlin", "SwiftUI",
-    "Python", "PyTorch", "TensorFlow", "Scikit-learn", "Pandas", "NumPy", "LangChain", "LLMs", "NLP",
+    "PyTorch", "TensorFlow", "Scikit-learn", "Pandas", "NumPy", "LangChain", "LLMs", "NLP",
     "Docker", "Kubernetes", "AWS", "Azure", "GCP", "Terraform", "Ansible", "Jenkins", "GitHub Actions", "CI/CD",
     "Git", "REST API", "Three.js", "WebSockets", "Cybersecurity"
   ];
-  const uniqueTechSkills = Array.from(new Set(techSkills));
 
   if (loading) {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
