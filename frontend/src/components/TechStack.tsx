@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import Image from 'next/image';
 import './TechStack.css';
 
 const TechStack = () => {
@@ -18,7 +19,7 @@ const TechStack = () => {
     <div className="tech-stack-track" key={trackKey}>
       {tech.map((t, index) => (
         <div className="tech-item" key={`${trackKey}-${index}`}>
-          <img src={t.logo} alt={t.name} className="tech-logo" />
+          <Image src={t.logo} alt={t.name} className="tech-logo" width={24} height={24} />
           <span>{t.name}</span>
         </div>
       ))}

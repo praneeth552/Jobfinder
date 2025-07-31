@@ -18,10 +18,10 @@ const OTPPage = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await axios.post("http://localhost:8000/auth/verify-otp", { email, otp });
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-otp`, { email, otp });
             toast.success("Verification successful! Please sign in.");
             setIsSuccess(true);
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error(error.response?.data?.detail || "An error occurred.");
             setLoading(false);
         }

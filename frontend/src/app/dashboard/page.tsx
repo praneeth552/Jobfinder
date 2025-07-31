@@ -1,7 +1,7 @@
 // dashboard/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import Cookies from "js-cookie";
@@ -41,41 +41,36 @@ export default function DashboardPage() {
   const userId = typeof window !== "undefined" ? Cookies.get("user_id") : null;
   const plan = typeof window !== "undefined" ? Cookies.get("plan_type") : "free";
 
-  useEffect(() => {
-    setIsClient(true);
-    setUserPlan(plan === "pro" ? "pro" : "free");
+  const fetchExistingRecommendations = useCallback(async () => {
+    if (!userId || !token) return;
+    try {
+      setIsLoading(true);
+      setError(null);
 
-    if (!token || !userId) {
-      router.replace("/signin");
-      return;
-    }
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/recommendations/${userId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    const fetchSheetStatus = async () => {
-      try {
-        const response = await axios.get(
-          `http://127.0.0.1:8000/sheets/status`,
-          {
-            params: { user_id: userId },
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setIsSheetsEnabled(response.data.enabled);
-      } catch (error) {
-        console.error("Failed to fetch sheet status:", error);
-        setIsSheetsEnabled(false);
+      if (res.data?.recommended_jobs) {
+        setRecommendations(res.data.recommended_jobs);
+        if (res.data.generated_at) {
+          setLastGenerationDate(new Date(res.data.generated_at));
+        }
       }
-    };
-
-    if (searchParams.get("sheets_success")) {
-      alert("Google Sheets access granted successfully!");
-      setIsSheetsEnabled(true);
-      window.history.replaceState(null, "", "/dashboard");
-    } else {
-      fetchSheetStatus();
+    } catch (err: unknown) {
+        if (axios.isAxiosError(err) && err.response?.status !== 404) {
+            setError("Could not fetch existing recommendations.");
+        }
+    } finally {
+      setIsLoading(false);
+      setIsFirstLoad(false);
     }
+  }, [token, userId]);
 
+  useEffect(() => {
     fetchExistingRecommendations();
-  }, [token, userId, searchParams]);
+  }, [fetchExistingRecommendations]);
 
   useEffect(() => {
     if (!lastGenerationDate) {
@@ -118,7 +113,7 @@ export default function DashboardPage() {
     if (isSheetsEnabled) {
       try {
         await axios.post(
-          `http://127.0.0.1:8000/sheets/disable`,
+          `${process.env.NEXT_PUBLIC_API_URL}/sheets/disable`,
           {},
           {
             params: { user_id: userId },
@@ -130,38 +125,11 @@ export default function DashboardPage() {
         console.error("Failed to disable sheet sync:", error);
       }
     } else {
-      window.location.href = `http://127.0.0.1:8000/sheets/auth?user_id=${encodeURIComponent(
+      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/sheets/auth?user_id=${encodeURIComponent(
         userId
       )}`;
     }
     setIsToggleLoading(false);
-  };
-
-  const fetchExistingRecommendations = async () => {
-    if (!userId || !token) return;
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const res = await axios.get(
-        `http://127.0.0.1:8000/recommendations/${userId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (res.data?.recommended_jobs) {
-        setRecommendations(res.data.recommended_jobs);
-        if (res.data.generated_at) {
-          setLastGenerationDate(new Date(res.data.generated_at));
-        }
-      }
-    } catch (err: any) {
-      if (err.response?.status !== 404) {
-        setError("Could not fetch existing recommendations.");
-      }
-    } finally {
-      setIsLoading(false);
-      setIsFirstLoad(false);
-    }
   };
 
   const handleGenerateRecommendations = async () => {
@@ -179,7 +147,7 @@ export default function DashboardPage() {
       setError(null);
 
       const res = await axios.post(
-        `http://127.0.0.1:8000/generate_recommendations/${userId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/generate_recommendations/${userId}`,
         null,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -188,7 +156,7 @@ export default function DashboardPage() {
       if (res.data.generated_at) {
         setLastGenerationDate(new Date(res.data.generated_at));
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error generating recs", err);
       setError(
         err.response?.data?.detail || err.message || "Unexpected error."
@@ -346,7 +314,7 @@ export default function DashboardPage() {
                 </div>
                 {job.reason && (
                   <p className="text-gray-600 italic text-sm mt-auto pt-4">
-                    "{job.reason}"
+                    &quot;{job.reason}&quot;
                   </p>
                 )}
               </motion.div>

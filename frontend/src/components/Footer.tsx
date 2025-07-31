@@ -6,7 +6,6 @@ const Footer = () => {
   const myName = "Kotyada Sai Praneeth";
   const myEmail = "saipraneeth2525@gmail.com";
   const currentYear = new Date().getFullYear();
-  const githubRepoUrl = "https://github.com/saipraneethkotyada/Job-Finder";
 
   const socialLinks = [
     {

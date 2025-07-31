@@ -6,11 +6,23 @@ import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import { Mic } from 'lucide-react';
 
-// Define the type for the SpeechRecognition API
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: (event: Event) => void;
+  start: () => void;
+  stop: () => void;
+}
+
 declare global {
   interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
+    SpeechRecognition: { new(): SpeechRecognition };
+    webkitSpeechRecognition: { new(): SpeechRecognition };
   }
 }
 
@@ -23,17 +35,17 @@ const ContactForm = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        const recognition = new SpeechRecognition();
+      const SpeechRecognitionImpl = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognitionImpl) {
+        const recognition = new SpeechRecognitionImpl();
         recognition.continuous = true;
         recognition.interimResults = true;
 
-        recognition.onresult = (event: any) => {
+        recognition.onresult = (event: SpeechRecognitionEvent) => {
           let interimTranscript = '';
           let finalTranscript = '';
           for (let i = 0; i < event.results.length; i++) {
@@ -47,8 +59,8 @@ const ContactForm = () => {
           setFormData(prev => ({ ...prev, message: finalTranscript + interimTranscript }));
         };
 
-        recognition.onerror = (event: any) => {
-          toast.error(`Speech recognition error: ${event.error}`);
+        recognition.onerror = (event: Event) => {
+          toast.error(`Speech recognition error: ${(event as any).error}`);
           setIsRecording(false);
         };
         
@@ -90,7 +102,7 @@ const ContactForm = () => {
     }
 
     try {
-      await axios.post("http://localhost:8000/api/contact", formData);
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/contact`, formData);
       toast.success("Thanks! I’ll get back to you soon.");
       setFormData({
         name: "",
@@ -98,7 +110,7 @@ const ContactForm = () => {
         interest: "Suggest a feature",
         message: "",
       });
-    } catch (error) {
+    } catch {
       toast.error("Something went wrong. Please try again later.");
     } finally {
       setIsSubmitting(false);

@@ -34,7 +34,7 @@ const UpgradePage = () => {
 
     try {
       const subRes = await axios.post(
-        "http://localhost:8000/payment/create-pro-subscription",
+        `${process.env.NEXT_PUBLIC_API_URL}/payment/create-pro-subscription`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -46,17 +46,17 @@ const UpgradePage = () => {
         subscription_id: subscription_id,
         name: "JobFinder Pro",
         description: "Monthly Pro Membership",
-        handler: async function (response: any) {
+        handler: async function (response: { razorpay_payment_id: string; razorpay_subscription_id: string; razorpay_signature: string; }) {
           try {
             await axios.post(
-              "http://localhost:8000/user/upgrade",
+              `${process.env.NEXT_PUBLIC_API_URL}/user/upgrade`,
               {},
               { headers: { Authorization: `Bearer ${token}` } }
             );
             Cookies.set("plan_type", "pro");
             alert("Payment Successful! You're now a Pro user.");
             router.push("/dashboard");
-          } catch (err: any) {
+          } catch (err: unknown) {
             setError(
               "Payment was successful, but we couldn't upgrade your account. Please contact support."
             );
@@ -71,7 +71,7 @@ const UpgradePage = () => {
 
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
-    } catch (err: any)
+    } catch (err: unknown)
     {
       setError("Failed to initiate subscription. Please try again.");
     } finally {

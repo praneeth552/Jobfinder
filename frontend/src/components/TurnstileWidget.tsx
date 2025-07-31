@@ -3,7 +3,13 @@ import { useEffect, useRef } from 'react';
 
 declare global {
   interface Window {
-    turnstile: any;
+    turnstile: {
+      render: (container: HTMLElement, params: {
+        sitekey: string;
+        callback: (token: string) => void;
+      }) => string;
+      remove: (widgetId: string) => void;
+    };
   }
 }
 

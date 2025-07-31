@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { GoogleLogin } from "@react-oauth/google";
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Curtain from "@/components/Curtain";
@@ -124,7 +124,7 @@ export default function SignupPage() {
     }
 
     try {
-      const res = await axios.post("http://localhost:8000/auth/signup-otp", {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup-otp`, {
         name: form.name,
         email: form.email,
         password: form.password,
@@ -137,19 +137,23 @@ export default function SignupPage() {
       } else {
         toast.error(res.data.detail || "Signup failed");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err.response?.data?.detail || "Signup failed");
+      if (axios.isAxiosError(err) && err.response?.data?.detail) {
+        toast.error(err.response.data.detail);
+      } else {
+        toast.error("An unexpected error occurred during signup.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleSignup = async (credentialResponse: any) => {
+  const handleGoogleSignup = async (credentialResponse: CredentialResponse) => {
     const token = credentialResponse.credential;
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:8000/auth/google", {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/google`, {
         token: token,
       });
 

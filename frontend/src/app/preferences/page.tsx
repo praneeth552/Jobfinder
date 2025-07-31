@@ -31,12 +31,12 @@ function PreferencesPage() {
       const token = localStorage.getItem("token");
       if (token) {
         try {
-          const res = await axios.get("http://localhost:8000/preferences", {
+          const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/preferences`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           const prefs = res.data;
           if (prefs && Object.keys(prefs).length > 0) {
-            const ensureArray = (value: any): string[] => Array.isArray(value) ? value : (value ? [String(value)] : []);
+            const ensureArray = (value: unknown): string[] => Array.isArray(value) ? value : (value ? [String(value)] : []);
 
             setRole(ensureArray(prefs.role));
             setLocation(ensureArray(prefs.location));
@@ -84,7 +84,7 @@ function PreferencesPage() {
     const token = localStorage.getItem("token");
     try {
       await axios.post(
-        "http://localhost:8000/preferences",
+        `${process.env.NEXT_PUBLIC_API_URL}/preferences`,
         {
           role, location, tech_stack: techStack, experience_level: experience,
           desired_salary: desiredSalary, company_size: companySize,
@@ -99,9 +99,9 @@ function PreferencesPage() {
         toast.success("Preferences updated successfully!");
         router.push("/dashboard");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      if (err.response?.data?.detail) {
+      if (axios.isAxiosError(err) && err.response?.data?.detail) {
         const errorDetail = err.response.data.detail;
         if (Array.isArray(errorDetail)) {
           // Pydantic validation error
@@ -121,11 +121,7 @@ function PreferencesPage() {
     }
   };
 
-  const handleAnimationFinish = () => {
-    router.push("/dashboard");
-  };
-
-  const techSkills = [
+  const uniqueTechSkills = [
     "JavaScript", "TypeScript", "ReactJS", "Next.js", "Angular", "Vue.js", "HTML5", "CSS3", "SASS", "TailwindCSS", "Bootstrap", "Redux", "Zustand", "GraphQL", "Apollo Client",
     "Node.js", "ExpressJS", "Python", "Django", "Flask", "FastAPI", "Java", "Spring Boot", "C#", ".NET", "Ruby on Rails", "PHP", "Laravel", "Go", "Rust",
     "MongoDB", "MySQL", "PostgreSQL", "SQLite", "Redis", "Firebase", "Supabase", "Prisma",

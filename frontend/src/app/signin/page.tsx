@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { GoogleLogin } from "@react-oauth/google";
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import Cookies from "js-cookie";
 import Curtain from "@/components/Curtain";
 import LoadingButton from "@/components/LoadingButton";
@@ -25,7 +25,7 @@ export default function SigninPage() {
 
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:8000/auth/login", {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
         email,
         password,
         turnstile_token: turnstileToken,
@@ -40,16 +40,16 @@ export default function SigninPage() {
 
       setRedirectPath(data.is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
       setIsSuccess(true); // Trigger the curtain animation
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.response?.data?.detail || "Sign-in failed. Please check your credentials.");
       setLoading(false);
     }
   };
 
-  const handleGoogleSignIn = async (credentialResponse: any) => {
+  const handleGoogleSignIn = async (credentialResponse: CredentialResponse) => {
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:8000/auth/google", {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/google`, {
         token: credentialResponse.credential,
       });
 
@@ -62,7 +62,7 @@ export default function SigninPage() {
 
       setRedirectPath(data.is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
       setIsSuccess(true); // Trigger the curtain animation
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.response?.data?.detail || "An error occurred during Google sign-in.");
       setLoading(false);
     }

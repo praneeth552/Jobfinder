@@ -2,8 +2,6 @@
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
-import { useRef } from "react";
-import * as THREE from "three";
 
 function CameraController() {
   useFrame(({ camera }) => {

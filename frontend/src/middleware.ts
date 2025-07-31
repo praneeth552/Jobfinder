@@ -19,7 +19,7 @@ export function middleware(request: NextRequest) {
       if (decodedToken.exp * 1000 > Date.now()) {
         isTokenValid = true;
       }
-    } catch (error) {
+    } catch {
       // Invalid token format
       isTokenValid = false;
     }
