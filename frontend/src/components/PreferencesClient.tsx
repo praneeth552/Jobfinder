@@ -171,7 +171,7 @@ export default function PreferencesClient() {
         `}
       </style>
       <AnimatePresence>
-        {showWelcome && <WelcomeCurtain onFinish={handleWelcomeFinish} />}
+        {showWelcome && <WelcomeCurtain show={showWelcome} />}
       </AnimatePresence>
       <main className="flex flex-col items-center justify-center min-h-screen px-4 py-12 pref-page-bg">
         <div className="relative z-10 w-full flex flex-col items-center">
