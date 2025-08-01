@@ -194,7 +194,6 @@ export default function SignupPage() {
             background-size: cover;
             background-position: center;
             position: relative;
-            overflow: hidden;
           }
           .signup-page-bg::before {
             content: '';
@@ -210,11 +209,11 @@ export default function SignupPage() {
           }
         `}
       </style>
-      <main className="flex flex-col items-center justify-center min-h-screen px-4 relative signup-page-bg py-6 sm:py-12">
+      <main className="flex flex-col items-center justify-start sm:justify-center min-h-screen px-4 relative signup-page-bg py-8 sm:py-12">
         <div className="relative z-10 w-full max-w-sm">
           <Curtain isLoading={loading && isSuccess} onFinish={handleAnimationFinish} />
 
-          <div className="mt-12 mb-8 text-center">
+          <div className="mb-8 text-center">
             <motion.div
               initial={{ opacity: 0, y: -50 }}
               animate={{ opacity: 1, y: 0 }}
@@ -315,7 +314,7 @@ export default function SignupPage() {
 
           <div className="my-4 text-gray-600 text-center">or</div>
 
-          <div className="rounded-3xl overflow-hidden">
+          <div className="flex justify-center rounded-3xl overflow-hidden">
             <GoogleLogin
               onSuccess={handleGoogleSignup}
               onError={() => {
