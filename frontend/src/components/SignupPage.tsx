@@ -210,7 +210,7 @@ export default function SignupPage() {
           }
         `}
       </style>
-      <main className="flex flex-col items-center justify-center min-h-screen px-4 relative signup-page-bg">
+      <main className="flex flex-col items-center justify-center min-h-screen px-4 relative signup-page-bg py-6 sm:py-12">
         <div className="relative z-10 w-full max-w-sm">
           <Curtain isLoading={loading && isSuccess} onFinish={handleAnimationFinish} />
 
@@ -315,7 +315,7 @@ export default function SignupPage() {
 
           <div className="my-4 text-gray-600 text-center">or</div>
 
-          <div className="rounded-3xl overflow-hidden mx-auto">
+          <div className="rounded-3xl overflow-hidden">
             <GoogleLogin
               onSuccess={handleGoogleSignup}
               onError={() => {
