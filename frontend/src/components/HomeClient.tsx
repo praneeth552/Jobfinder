@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import LoadingScreen from "@/components/LoadingScreen";
 import HeroSection from "@/components/HeroSection";
@@ -17,10 +17,9 @@ import "@/components/TechStack.css";
 
 export default function HomeClient() {
   const [loadingFinished, setLoadingFinished] = useState(false);
-  const [showCurtain, setShowCurtain] = useState(true);
   const [showSignup, setShowSignup] = useState(false);
-  const [showReveal, setShowReveal] = useState(false);
-  const [circlePos, setCirclePos] = useState({ x: 0, y: 0 });
+  const [revealPos, setRevealPos] = useState({ x: 0, y: 0 });
+  const [isRevealing, setIsRevealing] = useState(false);
 
   const searchParams = useSearchParams();
 
@@ -28,46 +27,49 @@ export default function HomeClient() {
     const hasLoaded = sessionStorage.getItem("loadingFinished");
     if (hasLoaded === "true") {
       setLoadingFinished(true);
-      setShowCurtain(false);
-    } else {
-      setShowCurtain(true);
     }
   }, []);
 
-  // ✅ Trigger signup reveal if ?signup=true
   useEffect(() => {
-    if (searchParams.get("signup") === "true") {
-      // Set circlePos to center for default reveal
+    if (searchParams.get("signup") === "true" && !isRevealing) {
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
-      setCirclePos({ x: centerX, y: centerY });
-      setShowReveal(true);
+      setRevealPos({ x: centerX, y: centerY });
+      setIsRevealing(true);
+      setShowSignup(true);
     }
-  }, [searchParams]);
+  }, [searchParams, isRevealing]);
 
   const handleFinishLoading = () => {
-    setShowCurtain(false);
     setLoadingFinished(true);
     sessionStorage.setItem("loadingFinished", "true");
   };
 
   const handleGetStarted = (x: number, y: number) => {
-    setCirclePos({ x, y });
-    setShowReveal(true);
+    setRevealPos({ x, y });
+    setIsRevealing(true);
+    setShowSignup(true); // Show signup immediately for the transition
+  };
+
+  const handleRevealComplete = () => {
+    // We keep isRevealing true so the signup page stays visible inside the reveal wrapper
   };
 
   return (
-    <main className="relative overflow-hidden bg-[#FFF5E1]">
-      {!showSignup && loadingFinished && <Navbar onGetStarted={handleGetStarted} />}
+    <main className="relative overflow-hidden animated-gradient-bg">
+      <AnimatePresence>
+        {!loadingFinished && <LoadingScreen onFinish={handleFinishLoading} />}
+      </AnimatePresence>
 
-      {/* LoadingScreen overlays IntroductionSection until finished */}
-      {!loadingFinished && (
-        <LoadingScreen onFinish={() => setLoadingFinished(true)} />
-      )}
-
-      <div className="relative z-10">
-        {!showSignup && (
-          <>
+      <AnimatePresence>
+        {loadingFinished && !showSignup && !isRevealing && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Navbar onGetStarted={handleGetStarted} />
             <HeroSection onGetStarted={handleGetStarted} />
             <IntroductionSection />
             <TechStack />
@@ -75,46 +77,23 @@ export default function HomeClient() {
             <FeaturesSection />
             <ContactForm />
             <Footer />
-          </>
+          </motion.div>
         )}
-        {showSignup && <SignupPage />}
-      </div>
+      </AnimatePresence>
 
-      {!loadingFinished && (
-        <motion.div
-          animate={showCurtain ? { y: 0 } : { y: "-100%" }}
-          transition={{ duration: 1, ease: "easeInOut" }}
-          onAnimationComplete={() => {
-            if (!showCurtain) {
-              setLoadingFinished(true);
-              sessionStorage.setItem("loadingFinished", "true");
-            }
-          }}
-          className="fixed top-0 left-0 w-screen h-screen bg-[#5C4033] z-60"
-        >
-          <LoadingScreen onFinish={handleFinishLoading} />
-        </motion.div>
-      )}
-
-      {showReveal && (
-        <motion.div
-          initial={{
-            clipPath: `circle(0px at ${circlePos.x}px ${circlePos.y}px)`
-          }}
-          animate={{
-            clipPath: `circle(1500px at ${circlePos.x}px ${circlePos.y}px)`
-          }}
-          transition={{ duration: 1, ease: "easeInOut" }}
-          onAnimationComplete={() => {
-            setShowReveal(false);
-            setShowSignup(true);
-          }}
-          className="fixed top-0 left-0 w-screen h-screen z-50"
-          style={{ backgroundColor: "#FFF5E1" }}
-        >
-          <SignupPage />
-        </motion.div>
-      )}
+      <AnimatePresence>
+        {isRevealing && (
+          <motion.div
+            initial={{ clipPath: `circle(0% at ${revealPos.x}px ${revealPos.y}px)` }}
+            animate={{ clipPath: `circle(150% at ${revealPos.x}px ${revealPos.y}px)` }}
+            transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1] }}
+            onAnimationComplete={handleRevealComplete}
+            className="fixed top-0 left-0 w-full h-full z-50"
+          >
+            <SignupPage />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

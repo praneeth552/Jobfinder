@@ -77,6 +77,7 @@ export default function SignupPage() {
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [passwordCriteria, setPasswordCriteria] = useState({
     minLength: false,
     uppercase: false,
@@ -185,114 +186,156 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-[#FFF5E1] px-4 relative animated-gradient-bg">
-      <Curtain isLoading={loading && isSuccess} onFinish={handleAnimationFinish} />
+    <>
+      <style>
+        {`
+          .signup-page-bg {
+            background-image: url('/background.jpeg');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+          }
+          .signup-page-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(270deg, rgba(255, 245, 225, 0.6), rgba(253, 235, 208, 0.6), rgba(255, 218, 185, 0.6), rgba(255, 228, 181, 0.6));
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+            z-index: 0;
+          }
+        `}
+      </style>
+      <main className="flex flex-col items-center justify-center min-h-screen px-4 relative signup-page-bg">
+        <div className="relative z-10 w-full max-w-sm">
+          <Curtain isLoading={loading && isSuccess} onFinish={handleAnimationFinish} />
 
-      <div className="mt-12 mb-8">
-        <motion.div
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="inline-block bg-black text-white px-6 py-2 rounded-full shadow-lg pill-glow"
-        >
-          <h1 className="text-2xl font-bold mx-4">TackleIt</h1>
-        </motion.div>
-      </div>
+          <div className="mt-12 mb-8 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="inline-block bg-black text-white px-6 py-2 rounded-full shadow-lg pill-glow"
+            >
+              <h1 className="text-2xl font-bold mx-4">TackleIt</h1>
+            </motion.div>
+          </div>
 
-      <h1 className="text-4xl font-bold mb-6 text-gray-900">Create your account</h1>
+          <h1 className="text-4xl font-bold mb-6 text-gray-900 text-center">Create your account</h1>
 
-      <form className="flex flex-col gap-4 w-full max-w-sm" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={form.name}
-          onChange={handleChange}
-          className="px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
-          required
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          className="px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
-          required
-        />
-        <div className="relative">
-          <input
-            type={showPassword ? "text" : "password"}
-            name="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={handleChange}
-            className="w-full px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
-            required
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600"
-          >
-            {showPassword ? <EyeOff /> : <Eye />}
-          </button>
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+            <input
+              type="text"
+              name="name"
+              placeholder="Name"
+              value={form.name}
+              onChange={handleChange}
+              className="px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
+              required
+            />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={handleChange}
+              className="px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
+              required
+            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                value={form.password}
+                onChange={handleChange}
+                onFocus={() => setIsPasswordFocused(true)}
+                onBlur={() => setIsPasswordFocused(false)}
+                className="w-full px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                placeholder="Confirm Password"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600"
+              >
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+
+            <AnimatePresence>
+              {isPasswordFocused && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  <PasswordCriteria criteria={passwordCriteria} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="rounded-2xl overflow-hidden">
+              <TurnstileWidget onVerify={setTurnstileToken} />
+            </div>
+
+            <div className="p-1 rounded-full animate-border pill-glow">
+              <LoadingButton
+                type="submit"
+                isLoading={loading && !isSuccess}
+                className="bg-[#1f1f1f] text-white w-full px-4 py-3 rounded-full font-semibold transition cursor-pointer"
+                disabled={loading || !turnstileToken || !allCriteriaMet || form.password !== form.confirmPassword}>
+                Sign up
+              </LoadingButton>
+            </div>
+          </form>
+
+          <div className="my-4 text-gray-600 text-center">or</div>
+
+          <div className="rounded-3xl overflow-hidden mx-auto">
+            <GoogleLogin
+              onSuccess={handleGoogleSignup}
+              onError={() => {
+                console.log("Google signup failed");
+                toast.error("Google signup failed");
+              }}
+            />
+          </div>
+
+          <p className="mt-4 text-gray-700 text-center">
+            Already have an account?{" "}
+            <button
+              onClick={() => router.push("/signin")}
+              className="text-[#FFB100] font-semibold hover:underline"
+            >
+              Sign in
+            </button>
+          </p>
         </div>
-        <div className="relative">
-          <input
-            type={showConfirmPassword ? "text" : "password"}
-            name="confirmPassword"
-            placeholder="Confirm Password"
-            value={form.confirmPassword}
-            onChange={handleChange}
-            className="w-full px-4 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#FFB100] text-black"
-            required
-          />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600"
-          >
-            {showConfirmPassword ? <EyeOff /> : <Eye />}
-          </button>
-        </div>
-
-        <PasswordCriteria criteria={passwordCriteria} />
-
-        <div className="rounded-2xl overflow-hidden">
-          <TurnstileWidget onVerify={setTurnstileToken} />
-        </div>
-
-        <LoadingButton
-          type="submit"
-          isLoading={loading && !isSuccess}
-          className="bg-[#8B4513] text-white px-4 py-3 rounded-2xl font-semibold hover:bg-[#A0522D] transition button-glow"
-          disabled={loading || !turnstileToken || !allCriteriaMet || form.password !== form.confirmPassword}>
-          Sign up
-        </LoadingButton>
-      </form>
-
-      <div className="my-4 text-gray-600">or</div>
-
-      <div className="rounded-3xl overflow-hidden">
-        <GoogleLogin
-          onSuccess={handleGoogleSignup}
-          onError={() => {
-            console.log("Google signup failed");
-            toast.error("Google signup failed");
-          }}
-        />
-      </div>
-
-      <p className="mt-4 text-gray-700">
-        Already have an account?{" "}
-        <button
-          onClick={() => router.push("/signin")}
-          className="text-[#FFB100] font-semibold hover:underline"
-        >
-          Sign in
-        </button>
-      </p>
-    </main>
+      </main>
+    </>
   );
 }

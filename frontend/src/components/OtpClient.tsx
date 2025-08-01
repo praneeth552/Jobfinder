@@ -41,8 +41,8 @@ const OtpClient = () => {
     };
 
     return (
-        <main className="flex flex-col items-center justify-center min-h-screen bg-[#FFF5E1] px-4 relative animated-gradient-bg">
-            <Curtain isLoading={isSuccess} onFinish={handleAnimationFinish} />
+    <main className="flex flex-col items-center justify-center min-h-screen px-4 relative animated-gradient-bg">
+      <Curtain isLoading={loading && isSuccess} onFinish={handleAnimationFinish} />
             <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-2xl">
                 <h2 className="text-3xl font-bold text-center text-[#8B4513]">Enter OTP</h2>
                 <p className="text-center text-gray-600">

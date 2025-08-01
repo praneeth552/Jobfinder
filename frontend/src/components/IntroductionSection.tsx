@@ -2,7 +2,7 @@
 
 export default function IntroductionSection() {
   return (
-    <section className="flex flex-col items-center justify-center py-20 px-4 bg-[#FFF5E1]">
+    <section className="flex flex-col items-center justify-center py-20 px-4">
       <h3 className="text-4xl font-bold mb-4 text-gray-900 text-center">
         What is TackleIt?
       </h3>

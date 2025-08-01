@@ -89,7 +89,7 @@ export default function SigninPage() {
   };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-[#FFF5E1] px-4 animated-gradient-bg">
+    <main className="flex flex-col items-center justify-center min-h-screen px-4 animated-gradient-bg">
       <Curtain isLoading={isSuccess} onFinish={handleAnimationFinish} />
 
       <div className="mt-12 mb-8">
@@ -134,7 +134,7 @@ export default function SigninPage() {
             onClick={() => setShowPassword(!showPassword)}
             className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600"
           >
-            {showPassword ? <EyeOff /> : <Eye />}
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
         
@@ -142,14 +142,16 @@ export default function SigninPage() {
           <TurnstileWidget onVerify={setTurnstileToken} />
         </div>
 
-        <LoadingButton
-          type="submit"
-          isLoading={loading}
-          className="bg-[#8B4513] text-white px-4 py-3 rounded-2xl font-semibold hover:bg-[#A0522D] transition button-glow"
-          disabled={loading || !turnstileToken}
-        >
-          Sign in
-        </LoadingButton>
+        <div className="p-1 rounded-full animate-border pill-glow">
+          <LoadingButton
+            type="submit"
+            isLoading={loading}
+            className="bg-[#1f1f1f] text-white w-full px-4 py-3 rounded-full font-semibold transition cursor-pointer"
+            disabled={loading || !turnstileToken}
+          >
+            Sign in
+          </LoadingButton>
+        </div>
       </form>
 
       <div className="my-4 text-gray-600">or</div>

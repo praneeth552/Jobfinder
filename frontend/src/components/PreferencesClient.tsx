@@ -136,8 +136,9 @@ export default function PreferencesClient() {
   }
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-[#FFF5E1] to-[#FDEBD0] px-4 text-black py-12 animated-gradient-bg">
-      <WelcomeCurtain show={showWelcome} />
+    <main className="flex flex-col items-center justify-center min-h-screen px-4 text-black py-12 animated-gradient-bg">
+      <AnimatePresence>
+        {showWelcome && (
       <h1 className="text-4xl font-bold mb-8 text-[#8B4513] drop-shadow-md">Set Your Preferences</h1>
 
       <form

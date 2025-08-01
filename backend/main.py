@@ -38,4 +38,4 @@ app.include_router(payment.router, prefix="/payment", tags=["Payment"])  # ✅ P
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to the JobFinder API"}
+    return {"message": "Welcome to the Tackleit API"}

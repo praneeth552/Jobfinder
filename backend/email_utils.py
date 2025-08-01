@@ -26,3 +26,24 @@ async def send_email(subject: str, recipients: list, body: str):
 
     fm = FastMail(conf)
     await fm.send_message(message)
+
+async def send_pro_welcome_email(email: str, name: str):
+    subject = "Welcome to JobFinder Pro!"
+    body = f"""
+    <html>
+        <body>
+            <h2>Hi {name},</h2>
+            <p>Welcome to Tackleit Pro! You've successfully unlocked premium features:</p>
+            <ul>
+                <li>Generate recommendations once a week</li>
+                <li>Google Sheets Integration</li>
+                <li>Email updates for new jobs</li>
+                <li>Early access to beta features</li>
+            </ul>
+            <p>We're excited to have you on board!</p>
+            <p>Best,</p>
+            <p>The Tackleit Team</p>
+        </body>
+    </html>
+    """
+    await send_email(subject, [email], body)

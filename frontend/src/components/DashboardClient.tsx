@@ -40,6 +40,11 @@ export default function DashboardClient() {
   const userId = typeof window !== "undefined" ? Cookies.get("user_id") : null;
   const plan = typeof window !== "undefined" ? Cookies.get("plan_type") : "free";
 
+  useEffect(() => {
+    setIsClient(true);
+    setUserPlan((plan as "free" | "pro") || "free");
+  }, [plan]);
+
   const fetchExistingRecommendations = useCallback(async () => {
     if (!userId || !token) return;
     try {
@@ -184,7 +189,7 @@ export default function DashboardClient() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8, ease: "easeInOut" }}
-      className="min-h-screen bg-[#fdf6e3] animated-gradient-bg"
+      className="min-h-screen animated-gradient-bg"
     >
       <div className="container mx-auto py-12 px-4">
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
@@ -197,11 +202,11 @@ export default function DashboardClient() {
             Job Recommendations
           </motion.h1>
 
-          <div className="flex flex-wrap items-center justify-center md:justify-end gap-2 md:gap-4">
+          <div className="flex flex-col md:flex-row items-center justify-center md:justify-end gap-2 md:gap-4 w-full md:w-auto">
             <LoadingButton
               onClick={handleGenerateRecommendations}
               isLoading={isLoading}
-              className={`px-6 py-2 rounded-full font-semibold transition duration-300 ${
+              className={`px-6 py-2 rounded-full font-semibold transition duration-300 w-full md:w-auto ${
                 !isGenerationAllowed
                   ? "bg-gray-400 cursor-not-allowed text-white"
                   : "bg-green-600 hover:bg-green-700 text-white"
@@ -214,7 +219,7 @@ export default function DashboardClient() {
             {userPlan === "free" && (
               <button
                 onClick={() => router.push("/upgrade")}
-                className="px-6 py-2 rounded-full font-semibold transition duration-300 bg-yellow-500 hover:bg-yellow-600 text-white"
+                className="px-6 py-2 rounded-full font-semibold transition duration-300 bg-yellow-500 hover:bg-yellow-600 text-white w-full md:w-auto"
               >
                 Upgrade to Pro
               </button>

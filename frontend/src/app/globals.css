@@ -22,16 +22,32 @@
 }
 
 body {
-  background: var(--background);
+  background-image: url('/background.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(270deg, rgba(255, 245, 225, 0.6), rgba(253, 235, 208, 0.6), rgba(255, 218, 185, 0.6), rgba(255, 228, 181, 0.6));
+  background-size: 400% 400%;
+  animation: gradientAnimation 15s ease infinite;
+  z-index: -1;
 }
 
 /* Animated Gradient Background */
 .animated-gradient-bg {
-  background: linear-gradient(270deg, #FFF5E1, #FDEBD0, #FFDAB9, #FFE4B5);
-  background-size: 400% 400%;
-  animation: gradientAnimation 15s ease infinite;
+  /* This class can now be used to apply the overlay effect on specific containers if needed */
+  position: relative;
 }
 
 @keyframes gradientAnimation {
@@ -45,6 +61,7 @@ body {
   box-shadow: 0 0 10px rgba(255, 177, 0, 0.6),
               0 0 20px rgba(255, 177, 0, 0.4),
               0 0 30px rgba(255, 177, 0, 0.2);
+  transition: box-shadow 0.5s ease-in-out;
 }
 @keyframes shine {
   0% { left: -75%; }
@@ -53,6 +70,19 @@ body {
 
 .shine {
   animation: shine 2s linear infinite;
+}
+
+@keyframes hero-shine {
+  0% {
+    transform: translateX(-100%) skewX(-30deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-30deg);
+  }
+}
+
+.animate-hero-shine {
+  animation: hero-shine 3s ease-in-out infinite;
 }
 
 @keyframes breathing-glow {
@@ -71,4 +101,22 @@ body {
 
 .button-glow {
   animation: button-breathing-glow 3s ease-in-out infinite;
+}
+
+@keyframes borderAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-border {
+  background: linear-gradient(270deg, #FFB100, #FFD700, #FF8C00, #FFB100);
+  background-size: 400% 400%;
+  animation: borderAnimation 6s ease infinite;
 }

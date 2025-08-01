@@ -102,7 +102,7 @@ const UpgradePage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#fdf6e3] py-12 px-4 sm:px-6 lg:px-8 animated-gradient-bg">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 animated-gradient-bg">
       <div className="max-w-4xl mx-auto">
         <motion.div
           initial={{ y: -20, opacity: 0 }}

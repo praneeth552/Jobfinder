@@ -89,6 +89,11 @@ export default function Curtain({
               fontSize: "4rem",
               fontWeight: "bold",
               color: "#fff",
+              // position: "absolute",
+              // top: "50%",
+              // left: "50%",
+              // transform: "translate(-50%, -50%)",
+              // whiteSpace: "nowrap",
             }}
           >
             Ta<span ref={cRef}>c</span>kleIt

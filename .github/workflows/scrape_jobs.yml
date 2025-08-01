@@ -20,15 +20,29 @@ jobs:
 
     - name: Install dependencies
       run: |
+        python -m pip install --upgrade pip
         pip install -r scraper/requirements.txt
 
     - name: Install Playwright browsers
       run: |
         python -m playwright install
 
+    - name: Clear jobs collection before scraping
+      env:
+        MONGO_URI: ${{ secrets.MONGO_URI }}
+      run: |
+        python scraper/clear_jobs.py
+
     - name: Run scraper scripts
       env:
         MONGODB_URI: ${{ secrets.MONGO_URI }}
       run: |
+        python scraper/accenture_scraper.py
+        python scraper/adobe_scraper.py
+        python scraper/amazon_scraper.py
+        python scraper/deloitte_scraper.py
+        python scraper/google_scraper.py
         python scraper/infosys_scraper.py
+        python scraper/nvidia_scraper.py
+        python scraper/qualcomm_scraper.py
         python scraper/tcs_scraper.py
