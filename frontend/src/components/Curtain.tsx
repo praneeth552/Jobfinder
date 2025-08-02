@@ -12,55 +12,49 @@ export default function Curtain({
 }) {
   const [showCurtain, setShowCurtain] = useState(false);
   const [zooming, setZooming] = useState(false);
+  // State to hold the calculated transform-origin
+  const [transformOrigin, setTransformOrigin] = useState("50% 50%");
   const cRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
+    let preZoomTimer: NodeJS.Timeout;
     let zoomTimer: NodeJS.Timeout;
-    let fadeOutTimer: NodeJS.Timeout;
-  
+
     if (isLoading) {
-      setShowCurtain(true);
-      zoomTimer = setTimeout(() => {
+      setShowCurtain(true); // Raise the curtain
+
+      // 1. Wait for curtain to rise and layout to be stable
+      preZoomTimer = setTimeout(() => {
+        if (cRef.current) {
+          // Calculate the position of the 'c' relative to its parent container
+          const cRect = cRef.current.getBoundingClientRect();
+          const parentRect = cRef.current.parentElement!.getBoundingClientRect();
+          
+          const originX = ((cRect.left - parentRect.left) + cRect.width / 2) / parentRect.width * 100;
+          const originY = ((cRect.top - parentRect.top) + cRect.height / 2) / parentRect.height * 100;
+
+          setTransformOrigin(`${originX}% ${originY}%`);
+        }
+        
+        // 2. Start the zoom animation
         setZooming(true);
-  
-        // Wait full zoom duration (2s) then fade out and redirect
-        fadeOutTimer = setTimeout(() => {
-          onFinish(); // 🔥 trigger redirect here
-          setShowCurtain(false); // starts exit (fade out)
-        }, 2000); // match zoom duration exactly
+
+        // 3. After zoom duration, trigger the fade out
+        zoomTimer = setTimeout(() => {
+          setShowCurtain(false); // This starts the exit animation
+        }, 2000); // Match zoom duration
+
       }, 1500); // Initial delay before zoom
     }
-  
+
     return () => {
+      clearTimeout(preZoomTimer);
       clearTimeout(zoomTimer);
-      clearTimeout(fadeOutTimer);
     };
-  }, [isLoading, onFinish]);
-  
-  
-
-  const zoomVariants = {
-    initial: { scale: 1, x: 0, y: 0, opacity: 1 },
-    zoom: () => {
-      if (!cRef.current)
-        return { scale: 1, x: 0, y: 0, opacity: 1 };
-
-      const rect = cRef.current.getBoundingClientRect();
-      const centerX =
-        rect.left + rect.width / 2 - window.innerWidth / 2;
-      const centerY =
-        rect.top + rect.height / 2 - window.innerHeight / 2;
-
-      return {
-        scale: 50,
-        x: -centerX * 50,
-        y: -centerY * 50,
-        opacity: 0,
-      };
-    },
-  };
+  }, [isLoading]);
 
   return (
+    // Use onExitComplete to trigger the redirect *after* fade-out
     <AnimatePresence onExitComplete={onFinish}>
       {showCurtain && (
         <motion.div
@@ -68,33 +62,19 @@ export default function Curtain({
           animate={{ height: "100vh" }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
-          style={{
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            width: "100vw",
-            backgroundColor: "#000",
-            zIndex: 9999,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            overflow: "hidden",
-          }}
+          className="fixed bottom-0 left-0 w-full bg-black z-[9999] flex justify-center items-center overflow-hidden"
         >
           <motion.div
-            variants={zoomVariants}
+            variants={{
+              initial: { scale: 1, opacity: 1 },
+              // The zoom variant is now much simpler!
+              zoom: { scale: 50, opacity: 0 },
+            }}
             animate={zooming ? "zoom" : "initial"}
             transition={{ duration: 2, ease: "easeInOut" }}
-            style={{
-              fontSize: "4rem",
-              fontWeight: "bold",
-              color: "#fff",
-              // position: "absolute",
-              // top: "50%",
-              // left: "50%",
-              // transform: "translate(-50%, -50%)",
-              // whiteSpace: "nowrap",
-            }}
+            // Apply the calculated transform-origin here
+            style={{ transformOrigin: transformOrigin }}
+            className="text-4xl font-bold text-white"
           >
             Ta<span ref={cRef}>c</span>kleIt
           </motion.div>

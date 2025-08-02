@@ -26,21 +26,53 @@ const features = [
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: "easeOut" as const,
+    },
+  },
+};
+
 export default function FeaturesSection() {
   return (
     <section className="py-20 px-4 flex flex-col items-center">
-      <h3 className="text-4xl font-bold mb-12 text-gray-900 text-center">
+      <motion.h3
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.5 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="text-4xl font-bold mb-12 text-gray-900 text-center"
+      >
         Key Features
-      </h3>
+      </motion.h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl"
+      >
         {features.map((feature, index) => (
           <motion.div
             key={index}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: index * 0.2 }}
-            viewport={{ once: true }}
+            variants={itemVariants}
+            whileHover={{ scale: 1.03 }}
             className="bg-white rounded-lg p-8 shadow hover:shadow-md transition"
           >
             <feature.icon className="w-12 h-12 text-[#FFB100] mb-4 mx-auto" />
@@ -52,7 +84,7 @@ export default function FeaturesSection() {
             </p>
           </motion.div>
         ))}
-      </div>
+      </motion.div>
     </section>
   );
 }

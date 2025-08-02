@@ -120,3 +120,42 @@ body::before {
   background-size: 400% 400%;
   animation: borderAnimation 6s ease infinite;
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* This CSS creates the animated glowing border */
+.glow-form-wrapper {
+  position: relative;
+  /* This padding reveals the gradient background, creating the border effect */
+  padding: 4px; 
+  border-radius: 20px;
+  /* These are the colors for the moving border */
+  background: linear-gradient(270deg, #00ff00, #00ffff, #ff00ff, #00ff00);
+  background-size: 600% 600%;
+  /* This applies the looping animation defined below */
+  animation: borderGlow 8s ease infinite;
+}
+
+/* This is the animation that makes the colors move continuously */
+@keyframes borderGlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* This creates the blurred "glow" effect behind the border */
+.glow-form-wrapper::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  border-radius: 28px;
+  background: inherit;
+  /* This blur is what makes it "glow" */
+  filter: blur(20px);
+  z-index: -1;
+}

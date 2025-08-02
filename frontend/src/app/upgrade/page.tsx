@@ -46,7 +46,7 @@ const UpgradePage = () => {
         subscription_id: subscription_id,
         name: "JobFinder Pro",
         description: "Monthly Pro Membership",
-        handler: async function (response: { razorpay_payment_id: string; razorpay_subscription_id: string; razorpay_signature: string; }) {
+        handler: async function () {
           try {
             await axios.post(
               `${process.env.NEXT_PUBLIC_API_URL}/user/upgrade`,

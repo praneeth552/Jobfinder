@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import axios from "axios";
 import GoogleSheetsToggle from "@/components/GoogleSheetsToggle";
 import UserProfile from "@/components/UserProfile";
 import LoadingButton from "@/components/LoadingButton";
+import SimpleNavbar from "./SimpleNavbar";
 
 interface Recommendation {
   title: string;
@@ -34,7 +35,6 @@ export default function DashboardClient() {
   const [timeRemaining, setTimeRemaining] = useState<string>("");
 
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const token = typeof window !== "undefined" ? Cookies.get("token") : null;
   const userId = typeof window !== "undefined" ? Cookies.get("user_id") : null;
@@ -185,152 +185,156 @@ export default function DashboardClient() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8, ease: "easeInOut" }}
-      className="min-h-screen animated-gradient-bg"
-    >
-      <div className="container mx-auto py-12 px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-          <motion.h1
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            className="text-4xl md:text-5xl font-bold text-[#8B4513] text-center md:text-left"
-          >
-            Job Recommendations
-          </motion.h1>
-
-          <div className="flex flex-col md:flex-row items-center justify-center md:justify-end gap-2 md:gap-4 w-full md:w-auto">
-            <LoadingButton
-              onClick={handleGenerateRecommendations}
-              isLoading={isLoading}
-              className={`px-6 py-2 rounded-full font-semibold transition duration-300 w-full md:w-auto ${
-                !isGenerationAllowed
-                  ? "bg-gray-400 cursor-not-allowed text-white"
-                  : "bg-green-600 hover:bg-green-700 text-white"
-              }`}
-              disabled={isLoading || !isGenerationAllowed}
+    <>
+      <SimpleNavbar />
+      <div className="h-20" /> {/* Spacer for the fixed navbar */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, ease: "easeInOut" }}
+        className="min-h-screen animated-gradient-bg"
+      >
+        <div className="container mx-auto py-12 px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <motion.h1
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.8 }}
+              className="text-4xl md:text-5xl font-bold text-[#8B4513] text-center md:text-left"
             >
-              Get Personalized Jobs
-            </LoadingButton>
+              Job Recommendations
+            </motion.h1>
 
-            {userPlan === "free" && (
-              <button
-                onClick={() => router.push("/upgrade")}
-                className="px-6 py-2 rounded-full font-semibold transition duration-300 bg-yellow-500 hover:bg-yellow-600 text-white w-full md:w-auto"
+            <div className="flex flex-col md:flex-row items-center justify-center md:justify-end gap-2 md:gap-4 w-full md:w-auto">
+              <LoadingButton
+                onClick={handleGenerateRecommendations}
+                isLoading={isLoading}
+                className={`px-6 py-2 rounded-full font-semibold transition duration-300 w-full md:w-auto ${
+                  !isGenerationAllowed
+                    ? "bg-gray-400 cursor-not-allowed text-white"
+                    : "bg-green-600 hover:bg-green-700 text-white"
+                }`}
+                disabled={isLoading || !isGenerationAllowed}
               >
-                Upgrade to Pro
-              </button>
-            )}
+                Get Personalized Jobs
+              </LoadingButton>
 
-            {isClient && userPlan === "pro" && (
-              <GoogleSheetsToggle
-                isEnabled={isSheetsEnabled}
-                isLoading={isToggleLoading}
-                onToggle={handleSheetToggle}
+              {userPlan === "free" && (
+                <button
+                  onClick={() => router.push("/upgrade")}
+                  className="px-6 py-2 rounded-full font-semibold transition duration-300 bg-yellow-500 hover:bg-yellow-600 text-white w-full md:w-auto"
+                >
+                  Upgrade to Pro
+                </button>
+              )}
+
+              {isClient && userPlan === "pro" && (
+                <GoogleSheetsToggle
+                  isEnabled={isSheetsEnabled}
+                  isLoading={isToggleLoading}
+                  onToggle={handleSheetToggle}
+                />
+              )}
+
+              <UserProfile
+                userPlan={userPlan}
+                onLogout={handleLogout}
+                onEditPreferences={() => router.push("/preferences")}
               />
-            )}
-
-            <UserProfile
-              userPlan={userPlan}
-              onLogout={handleLogout}
-              onEditPreferences={() => router.push("/preferences")}
-            />
+            </div>
           </div>
-        </div>
 
-        {!isGenerationAllowed && timeRemaining && (
-          <p className="text-yellow-800 bg-yellow-100 border border-yellow-300 p-4 rounded mb-6 text-center font-semibold">
-            You can generate new recommendations in {timeRemaining}.
-            {userPlan === "free" &&
-              ` Upgrade to Pro for more frequent recommendations.`}
-          </p>
-        )}
-
-        {isLoading && (
-          <p className="text-center text-gray-600 text-lg">
-            Loading recommendations, this may take a moment...
-          </p>
-        )}
-
-        {error && (
-          <p className="text-center text-red-500 bg-red-100 p-4 rounded-lg">
-            {error}
-          </p>
-        )}
-
-        {!isLoading &&
-          !error &&
-          recommendations.length === 0 &&
-          !isFirstLoad && (
-            <p className="text-center text-gray-600 text-lg">
-              No recommendations found. Try generating a new list!
+          {!isGenerationAllowed && timeRemaining && (
+            <p className="text-yellow-800 bg-yellow-100 border border-yellow-300 p-4 rounded mb-6 text-center font-semibold">
+              You can generate new recommendations in {timeRemaining}.
+              {userPlan === "free" &&
+                ` Upgrade to Pro for more frequent recommendations.`}
             </p>
           )}
 
-        {recommendations.length > 0 && (
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: {},
-              visible: { transition: { staggerChildren: 0.1 } },
-            }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-          >
-            {recommendations.map((job, index) => (
-              <motion.div
-                key={index}
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: { opacity: 1, y: 0 },
-                }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                whileHover={{
-                  scale: 1.03,
-                  boxShadow: "0 10px 20px rgba(139,69,19,0.2)",
-                }}
-                className="bg-white rounded-xl shadow-md p-6 cursor-pointer transform transition transform duration-300 flex flex-col h-full"
-                onClick={() =>
-                  job.job_url && window.open(job.job_url, "_blank")
-                }
-              >
-                <div className="flex-grow">
-                  <h2 className="text-xl font-bold mb-2 text-[#B8860B] break-words">
-                    {job.title}
-                  </h2>
-                  <p className="text-gray-800 mb-1 break-words">
-                    <span className="font-semibold">Company:</span>{" "}
-                    {job.company}
-                  </p>
-                  <p className="text-gray-800 mb-3 break-words">
-                    <span className="font-semibold">Location:</span>{" "}
-                    {job.location}
-                  </p>
-                  {job.match_score && (
-                    <div className="w-full bg-gray-200 rounded-full h-2.5 mb-3">
-                      <div
-                        className="bg-blue-600 h-2.5 rounded-full"
-                        style={{ width: `${job.match_score}%` }}
-                      />
-                      <p className="text-sm text-gray-600 mt-1">
-                        Match Score: {job.match_score}/100
-                      </p>
-                    </div>
+          {isLoading && (
+            <p className="text-center text-gray-600 text-lg">
+              Loading recommendations, this may take a moment...
+            </p>
+          )}
+
+          {error && (
+            <p className="text-center text-red-500 bg-red-100 p-4 rounded-lg">
+              {error}
+            </p>
+          )}
+
+          {!isLoading &&
+            !error &&
+            recommendations.length === 0 &&
+            !isFirstLoad && (
+              <p className="text-center text-gray-600 text-lg">
+                No recommendations found. Try generating a new list!
+              </p>
+            )}
+
+          {recommendations.length > 0 && (
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.1 } },
+              }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            >
+              {recommendations.map((job, index) => (
+                <motion.div
+                  key={index}
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  whileHover={{
+                    scale: 1.03,
+                    boxShadow: "0 10px 20px rgba(139,69,19,0.2)",
+                  }}
+                  className="bg-white rounded-xl shadow-md p-6 cursor-pointer transform transition transform duration-300 flex flex-col h-full"
+                  onClick={() =>
+                    job.job_url && window.open(job.job_url, "_blank")
+                  }
+                >
+                  <div className="flex-grow">
+                    <h2 className="text-xl font-bold mb-2 text-[#B8860B] break-words">
+                      {job.title}
+                    </h2>
+                    <p className="text-gray-800 mb-1 break-words">
+                      <span className="font-semibold">Company:</span>{" "}
+                      {job.company}
+                    </p>
+                    <p className="text-gray-800 mb-3 break-words">
+                      <span className="font-semibold">Location:</span>{" "}
+                      {job.location}
+                    </p>
+                    {job.match_score && (
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 mb-3">
+                        <div
+                          className="bg-blue-600 h-2.5 rounded-full"
+                          style={{ width: `${job.match_score}%` }}
+                        />
+                        <p className="text-sm text-gray-600 mt-1">
+                          Match Score: {job.match_score}/100
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  {job.reason && (
+                    <p className="text-gray-600 italic text-sm mt-auto pt-4">
+                      &quot;{job.reason}&quot;
+                    </p>
                   )}
-                </div>
-                {job.reason && (
-                  <p className="text-gray-600 italic text-sm mt-auto pt-4">
-                    &quot;{job.reason}&quot;
-                  </p>
-                )}
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </div>
-    </motion.div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </div>
+      </motion.div>
+    </>
   );
 }
