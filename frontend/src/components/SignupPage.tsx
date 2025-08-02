@@ -86,24 +86,21 @@ export default function SignupPage() {
         <SimpleNavbar />
         <div className="relative z-10 w-full max-w-sm">
           <Curtain isLoading={isSuccess} onFinish={handleAnimationFinish} />
-          <div className="glow-form-wrapper">
-            {/* CHANGED: Responsive padding for better mobile view */}
-            <div className="bg-[#111] text-white p-6 sm:p-8 rounded-[16px] flex flex-col items-center">
-              {/* CHANGED: Responsive font size for the heading */}
-              <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-white text-center">Create your account</h2>
-              <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit}>
-                <input type="text" name="name" placeholder="Name" value={form.name} onChange={handleChange} className="px-4 py-3 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" required />
-                <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} className="px-4 py-3 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" required />
-                <div className="relative"><input type={showPassword ? "text" : "password"} name="password" placeholder="Password" value={form.password} onChange={handleChange} onFocus={() => setIsPasswordFocused(true)} onBlur={() => setIsPasswordFocused(false)} className="w-full px-4 py-3 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" required /><button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400">{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button></div>
-                <div className="relative"><input type={showConfirmPassword ? "text" : "password"} name="confirmPassword" placeholder="Confirm Password" value={form.confirmPassword} onChange={handleChange} className="w-full px-4 py-3 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" required /><button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400">{showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button></div>
-                <AnimatePresence>{isPasswordFocused && <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.3, ease: "easeInOut" }}><PasswordCriteria criteria={passwordCriteria} /></motion.div>}</AnimatePresence>
-                <div className="rounded-xl overflow-hidden"><TurnstileWidget onVerify={setTurnstileToken} /></div>
-                <LoadingButton type="submit" isLoading={loading && !isSuccess} className="bg-purple-600 hover:bg-purple-700 text-white w-full px-4 py-3 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500" disabled={loading || !turnstileToken || !allCriteriaMet || form.password !== form.confirmPassword}>Sign up</LoadingButton>
-              </form>
-              <div className="my-4 text-gray-400 text-sm flex items-center w-full"><div className="flex-grow border-t border-gray-600"></div><span className="px-2">OR</span><div className="flex-grow border-t border-gray-600"></div></div>
-              <div className="flex justify-center"><GoogleLogin onSuccess={handleGoogleSignup} onError={() => toast.error("Google signup failed")} theme="filled_black" /></div>
-              <p className="mt-6 text-gray-400 text-center">Already have an account?{" "}<button onClick={() => router.push("/signin")} className="text-purple-400 font-semibold hover:underline">Sign in</button></p>
-            </div>
+          {/* REMOVED: The <div className="glow-form-wrapper"> was here */}
+          <div className="bg-[#111] text-white p-6 sm:p-8 rounded-[16px] flex flex-col items-center">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-white text-center">Create your account</h2>
+            <form className="flex flex-col gap-3 w-full" onSubmit={handleSubmit}>
+              <input type="text" name="name" placeholder="Name" value={form.name} onChange={handleChange} className="px-4 py-2.5 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" required />
+              <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} className="px-4 py-2.5 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" required />
+              <div className="relative"><input type={showPassword ? "text" : "password"} name="password" placeholder="Password" value={form.password} onChange={handleChange} onFocus={() => setIsPasswordFocused(true)} onBlur={() => setIsPasswordFocused(false)} className="w-full px-4 py-2.5 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" required /><button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400">{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button></div>
+              <div className="relative"><input type={showConfirmPassword ? "text" : "password"} name="confirmPassword" placeholder="Confirm Password" value={form.confirmPassword} onChange={handleChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" required /><button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400">{showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button></div>
+              <AnimatePresence>{isPasswordFocused && <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.3, ease: "easeInOut" }}><PasswordCriteria criteria={passwordCriteria} /></motion.div>}</AnimatePresence>
+              <div className="rounded-xl overflow-hidden"><TurnstileWidget onVerify={setTurnstileToken} /></div>
+              <LoadingButton type="submit" isLoading={loading && !isSuccess} className="bg-purple-600 hover:bg-purple-700 text-white w-full px-4 py-2.5 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500" disabled={loading || !turnstileToken || !allCriteriaMet || form.password !== form.confirmPassword}>Sign up</LoadingButton>
+            </form>
+            <div className="my-3 text-gray-400 text-sm flex items-center w-full"><div className="flex-grow border-t border-gray-600"></div><span className="px-2">OR</span><div className="flex-grow border-t border-gray-600"></div></div>
+            <div className="flex justify-center"><GoogleLogin onSuccess={handleGoogleSignup} onError={() => toast.error("Google signup failed")} theme="filled_black" /></div>
+            <p className="mt-6 text-gray-400 text-center">Already have an account?{" "}<button onClick={() => router.push("/signin")} className="text-purple-400 font-semibold hover:underline">Sign in</button></p>
           </div>
         </div>
       </main>

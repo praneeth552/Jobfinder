@@ -128,80 +128,77 @@ export default function SigninPage() {
             transition={pageTransition}
             className="w-full max-w-sm"
           >
-            {/* This wrapper contains EVERYTHING else and creates the glow effect */}
-            <div className="glow-form-wrapper w-full">
-              <div className="bg-[#111] text-white p-8 rounded-[16px] flex flex-col items-center">
-                
-                <h2 className="text-3xl font-bold mb-6 text-white text-center">Sign in to your account</h2>
+            {/* REMOVED: The <div className="glow-form-wrapper"> was here */}
+            <div className="bg-[#111] text-white p-8 rounded-[16px] flex flex-col items-center">
+              
+              <h2 className="text-3xl font-bold mb-6 text-white text-center">Sign in to your account</h2>
 
-                <form
-                  className="flex flex-col gap-4 w-full"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleSignIn(e.currentTarget.email.value, e.currentTarget.password.value);
-                  }}
-                >
+              <form
+                className="flex flex-col gap-4 w-full"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSignIn(e.currentTarget.email.value, e.currentTarget.password.value);
+                }}
+              >
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="Email"
+                  className="px-4 py-3 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  required
+                />
+                <div className="relative">
                   <input
-                    name="email"
-                    type="email"
-                    placeholder="Email"
-                    className="px-4 py-3 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                     required
                   />
-                  <div className="relative">
-                    <input
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Password"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400"
-                    >
-                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                  </div>
-                  
-                  <div className="rounded-xl overflow-hidden">
-                    <TurnstileWidget onVerify={setTurnstileToken} />
-                  </div>
-
-                  <LoadingButton
-                    type="submit"
-                    isLoading={loading}
-                    className="bg-purple-600 hover:bg-purple-700 text-white w-full px-4 py-3 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500"
-                    disabled={loading || !turnstileToken}
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400"
                   >
-                    Sign in
-                  </LoadingButton>
-                </form>
-
-                <div className="my-4 text-gray-400 text-sm flex items-center w-full">
-                   <div className="flex-grow border-t border-gray-600"></div>
-                   <span className="px-2">OR</span>
-                   <div className="flex-grow border-t border-gray-600"></div>
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+                
+                <div className="rounded-xl overflow-hidden">
+                  <TurnstileWidget onVerify={setTurnstileToken} />
                 </div>
 
-                <GoogleLogin
-                  theme="filled_black"
-                  onSuccess={handleGoogleSignIn}
-                  onError={() => toast.error("Google Login Failed")}
-                />
-                
-                {/* MOVED INSIDE: The "Sign up" link is now the last item in the box */}
-                <p className="mt-6 text-gray-400">
-                  Don't have an account?{" "}
-                  <button
-                    onClick={() => handleNavigation("/?signup=true")}
-                    className="text-purple-400 font-semibold hover:underline"
-                  >
-                    Sign up
-                  </button>
-                </p>
+                <LoadingButton
+                  type="submit"
+                  isLoading={loading}
+                  className="bg-purple-600 hover:bg-purple-700 text-white w-full px-4 py-3 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500"
+                  disabled={loading || !turnstileToken}
+                >
+                  Sign in
+                </LoadingButton>
+              </form>
+
+              <div className="my-4 text-gray-400 text-sm flex items-center w-full">
+                  <div className="flex-grow border-t border-gray-600"></div>
+                  <span className="px-2">OR</span>
+                  <div className="flex-grow border-t border-gray-600"></div>
               </div>
+
+              <GoogleLogin
+                theme="filled_black"
+                onSuccess={handleGoogleSignIn}
+                onError={() => toast.error("Google Login Failed")}
+              />
+              
+              <p className="mt-6 text-gray-400">
+                Don't have an account?{" "}
+                <button
+                  onClick={() => handleNavigation("/?signup=true")}
+                  className="text-purple-400 font-semibold hover:underline"
+                >
+                  Sign up
+                </button>
+              </p>
             </div>
           </motion.div>
         )}
