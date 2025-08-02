@@ -87,9 +87,10 @@ export default function SignupPage() {
         <div className="relative z-10 w-full max-w-sm">
           <Curtain isLoading={isSuccess} onFinish={handleAnimationFinish} />
           <div className="glow-form-wrapper">
-            {/* THE CHANGE IS HERE: Replaced bg-[#111]/80 backdrop-blur-sm with a solid bg-[#111] */}
-            <div className="bg-[#111] text-white p-8 rounded-[16px] flex flex-col items-center">
-              <h2 className="text-3xl font-bold mb-6 text-white text-center">Create your account</h2>
+            {/* CHANGED: Responsive padding for better mobile view */}
+            <div className="bg-[#111] text-white p-6 sm:p-8 rounded-[16px] flex flex-col items-center">
+              {/* CHANGED: Responsive font size for the heading */}
+              <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-white text-center">Create your account</h2>
               <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit}>
                 <input type="text" name="name" placeholder="Name" value={form.name} onChange={handleChange} className="px-4 py-3 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" required />
                 <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} className="px-4 py-3 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" required />
