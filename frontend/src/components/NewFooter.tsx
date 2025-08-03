@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Mail, Linkedin, Github } from "lucide-react";
 
 const NewFooter = () => {
-  const myName = "kotyada Sai Praneeth";
+  const myName = "Kotyada Sai Praneeth";
   const myEmail = "saipraneeth2525@gmail.com";
   const currentYear = new Date().getFullYear();
 
@@ -17,12 +17,12 @@ const NewFooter = () => {
     {
       name: "LinkedIn",
       icon: <Linkedin />,
-      url: "https://www.linkedin.com/in/sai-praneeth-kotyada-a29199259/", 
+      url: "https://www.linkedin.com/in/sai-praneeth-kotyada-427358201/", 
     },
     {
       name: "GitHub",
       icon: <Github />,
-      url: "https://github.com/saipraneethkotyada", 
+      url: "https://github.com/praneeth552", 
     },
   ];
 
@@ -35,11 +35,23 @@ const NewFooter = () => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="text-center mb-8"
         >
-          <h3 className="text-3xl font-bold">Job Finder</h3>
+          <h3 className="text-3xl font-bold">Tackleit</h3>
           <p className="text-lg text-gray-400 mt-2">
             Connecting talent with opportunity through AI.
           </p>
         </motion.div>
+
+        <div className="flex justify-center items-center space-x-6 mb-8">
+          <a href="/about" className="text-gray-400 hover:text-white transition">About Us</a>
+          <a href="/privacy" className="text-gray-400 hover:text-white transition">Privacy Policy</a>
+          <a href="/terms" className="text-gray-400 hover:text-white transition">Terms & Conditions</a>
+        </div>
+
+        <div className="text-center mb-8">
+          <a href={"https://github.com/praneeth552/Jobfinder"} target="_blank" rel="noopener noreferrer" className="text-lg text-gray-400 hover:text-white transition border border-gray-600 rounded-full px-6 py-2">
+            Contribute on GitHub
+          </a>
+        </div>
 
         <div className="flex justify-center items-center space-x-6 mb-8">
           {socialLinks.map((link, index) => (

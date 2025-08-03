@@ -7,7 +7,7 @@ import re
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 ADOBE_API_URL = "https://adobe.wd5.myworkdayjobs.com/wday/cxs/adobe/external_experienced/jobs"
-BACKEND_ENDPOINT = "http://127.0.0.1:8000/jobs/"
+BACKEND_ENDPOINT = "https://jobfinder-backend-oex9.onrender.com/jobs/"
 
 HEADERS = {
     "Content-Type": "application/json",

@@ -40,7 +40,7 @@ PAYLOAD = {
     'jobFilters': '[]'
 }
 
-BACKEND_ENDPOINT = "http://127.0.0.1:8000/jobs/"
+BACKEND_ENDPOINT = "https://jobfinder-backend-oex9.onrender.com/jobs/"
 
 def fetch_accenture_jobs() -> List[Dict]:
     logging.info("Fetching Accenture job listings from API...")

@@ -13,6 +13,11 @@ const TechStack = () => {
     { name: 'FastAPI', logo: '/fastapi.svg' },
     { name: 'MongoDB', logo: '/mongodb.svg' },
     { name: 'Tailwind CSS', logo: '/tailwind.svg' },
+    { name: 'Gemini', logo: '/gemini.svg' }, // Added
+    { name: 'AWS', logo: '/aws.svg' }, // Added
+    { name: 'Playwright', logo: '/playwright.svg' }, // Added
+    { name: 'Vercel', logo: '/vercel.svg' }, // Suggested & Added
+    { name: 'Framer Motion', logo: '/framer.svg' }, // Suggested & Added
   ];
 
   const renderTrack = (trackKey: string) => (

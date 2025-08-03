@@ -6,7 +6,7 @@ import requests
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 GOOGLE_CAREERS_URL = "https://careers.google.com/jobs/"
-BACKEND_ENDPOINT = "http://127.0.0.1:8000/jobs/"
+BACKEND_ENDPOINT = "https://jobfinder-backend-oex9.onrender.com/jobs/"
 
 async def scrape_google_careers():
     logging.info(f"Navigating to {GOOGLE_CAREERS_URL} to scrape job data...")

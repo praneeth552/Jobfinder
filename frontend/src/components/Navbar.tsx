@@ -23,7 +23,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
     const interval = setInterval(() => {
       setDirection((prevDirection) => -prevDirection);
       setTextIndex((prevIndex) => (prevIndex + 1) % buttonTexts.length);
-    }, 3000); // Slowed down for better feel
+    }, 3000); // Slowed down to 3 seconds
     return () => clearInterval(interval);
   }, []);
 
@@ -62,9 +62,9 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
   };
 
   const slideVariants = {
-    enter: (direction: number) => ({ x: direction > 0 ? 30 : -30, opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (direction: number) => ({ x: direction < 0 ? 30 : -30, opacity: 0 }),
+    enter: (direction: number) => ({ y: direction > 0 ? 20 : -20, opacity: 0 }),
+    center: { y: 0, opacity: 1 },
+    exit: (direction: number) => ({ y: direction < 0 ? 20 : -20, opacity: 0 }),
   };
 
   const textColor = hasScrolled ? "text-gray-800" : "text-white";
@@ -90,6 +90,14 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
       {/* Desktop Menu */}
       <div className="hidden md:flex items-center space-x-4">
         <motion.button
+          onClick={() => router.push('/pricing')}
+          className={`px-6 py-2 font-semibold rounded-full transition-colors duration-300 ${textColor}`}
+          whileHover={{ scale: 1.05, backgroundColor: hasScrolled ? "rgba(0, 0, 0, 0.1)" : "rgba(255, 255, 255, 0.1)" }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Pricing
+        </motion.button>
+        <motion.button
           onClick={handleSignInClick}
           className={`px-6 py-2 font-semibold rounded-full transition-colors duration-300 ${textColor}`}
           whileHover={{ scale: 1.05, backgroundColor: hasScrolled ? "rgba(0, 0, 0, 0.1)" : "rgba(255, 255, 255, 0.1)" }}
@@ -112,7 +120,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
           className="px-6 py-2 font-semibold shadow relative overflow-hidden bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          style={{ minWidth: 200, textAlign: "center" }}
+          style={{ width: 220, height: 40, textAlign: "center" }}
         >
           <AnimatePresence initial={false} custom={direction} mode="wait">
             <motion.span
@@ -123,7 +131,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
               animate="center"
               exit="exit"
               transition={{
-                x: { type: "spring", stiffness: 300, damping: 30 },
+                y: { type: "spring", stiffness: 300, damping: 30 },
                 opacity: { duration: 0.2 },
               }}
               className="block"

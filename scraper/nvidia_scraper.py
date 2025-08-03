@@ -8,7 +8,7 @@ NVIDIA_API_URL = "https://nvidia.wd5.myworkdayjobs.com/wday/cxs/nvidia/NVIDIAExt
 HEADERS = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"}
 PAYLOAD = {"appliedFacets": {}, "limit": 20, "offset": 0, "searchText": ""}
 
-BACKEND_ENDPOINT = "http://127.0.0.1:8000/jobs/"
+BACKEND_ENDPOINT = "https://jobfinder-backend-oex9.onrender.com/jobs/"
 
 def fetch_nvidia_jobs() -> List[Dict]:
     logging.info("Fetching NVIDIA job listings from Workday API...")

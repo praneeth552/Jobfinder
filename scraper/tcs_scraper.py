@@ -14,7 +14,7 @@ HEADERS = {
 }
 PAYLOAD = {"jobCity":"","jobFunction":"","jobExperience":"","jobSkill":None,"pageNumber":"1","userText":"developer","jobTitleOrder":None,"jobCityOrder":None,"jobFunctionOrder":None,"jobExperienceOrder":None,"applyByOrder":None,"regular":True,"walkin":True}
 
-BACKEND_ENDPOINT = "http://127.0.0.1:8000/jobs/"
+BACKEND_ENDPOINT = "https://jobfinder-backend-oex9.onrender.com/jobs/"
 
 def fetch_tcs_jobs() -> List[Dict]:
     logging.info("Fetching TCS job listings from API...")

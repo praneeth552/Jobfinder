@@ -45,15 +45,16 @@ export default function SignupPage() {
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [passwordCriteria, setPasswordCriteria] = useState({ minLength: false, uppercase: false, lowercase: false, number: false, specialChar: false });
 
-  // --- Handler functions remain unchanged ---
   const validatePassword = (password: string) => setPasswordCriteria({ minLength: password.length >= 8, uppercase: /[A-Z]/.test(password), lowercase: /[a-z]/.test(password), number: /[0-9]/.test(password), specialChar: /[^A-Za-z0-9]/.test(password) });
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => { const { name, value } = e.target; setForm({ ...form, [name]: value }); if (name === "password") validatePassword(value); };
+  
   const allCriteriaMet = Object.values(passwordCriteria).every(Boolean);
+  const passwordsMatch = form.password === form.confirmPassword;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setLoading(true);
     if (!turnstileToken) { toast.error("Please complete the CAPTCHA challenge."); setLoading(false); return; }
-    if (form.password !== form.confirmPassword) { toast.error("Passwords do not match"); setLoading(false); return; }
+    if (!passwordsMatch) { toast.error("Passwords do not match"); setLoading(false); return; }
     if (!allCriteriaMet) { toast.error("Password does not meet all criteria."); setLoading(false); return; }
     try {
       const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup-otp`, { name: form.name, email: form.email, password: form.password, turnstile_token: turnstileToken });
@@ -82,21 +83,29 @@ export default function SignupPage() {
           .signup-page-bg { background-image: url('/background.jpeg'); background-size: cover; background-position: center; position: relative; }
           .signup-page-bg::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(270deg, rgba(255, 245, 225, 0.6), rgba(253, 235, 208, 0.6), rgba(255, 218, 185, 0.6), rgba(255, 228, 181, 0.6)); background-size: 400% 400%; animation: gradientAnimation 15s ease infinite; z-index: 0; }
       `}</style>
-      <main className="absolute w-full h-full flex flex-col items-center justify-center px-4 signup-page-bg py-8 sm:py-12">
+      {/* UPDATED: Added pt-24 and changed justify-center to justify-start for better mobile scrolling */}
+      <main className="absolute w-full h-full flex flex-col items-center justify-start pt-24 px-4 signup-page-bg py-8 sm:py-12 overflow-y-auto">
         <SimpleNavbar />
-        <div className="relative z-10 w-full max-w-sm">
+        {/* UPDATED: Changed z-10 to z-20 to fix overlap with navbar */}
+        <div className="relative z-20 w-full max-w-sm">
           <Curtain isLoading={isSuccess} onFinish={handleAnimationFinish} />
-          {/* REMOVED: The <div className="glow-form-wrapper"> was here */}
           <div className="bg-[#111] text-white p-6 sm:p-8 rounded-[16px] flex flex-col items-center">
             <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-white text-center">Create your account</h2>
             <form className="flex flex-col gap-3 w-full" onSubmit={handleSubmit}>
               <input type="text" name="name" placeholder="Name" value={form.name} onChange={handleChange} className="px-4 py-2.5 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" required />
               <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} className="px-4 py-2.5 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" required />
               <div className="relative"><input type={showPassword ? "text" : "password"} name="password" placeholder="Password" value={form.password} onChange={handleChange} onFocus={() => setIsPasswordFocused(true)} onBlur={() => setIsPasswordFocused(false)} className="w-full px-4 py-2.5 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" required /><button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400">{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button></div>
-              <div className="relative"><input type={showConfirmPassword ? "text" : "password"} name="confirmPassword" placeholder="Confirm Password" value={form.confirmPassword} onChange={handleChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" required /><button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400">{showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button></div>
+              <div className="relative">
+                {/* UPDATED: Added dynamic border for instant password match feedback */}
+                <input 
+                  type={showConfirmPassword ? "text" : "password"} name="confirmPassword" placeholder="Confirm Password" value={form.confirmPassword} onChange={handleChange} 
+                  className={`w-full px-4 py-2.5 rounded-xl border bg-gray-800 text-white focus:outline-none focus:ring-2 ${!passwordsMatch && form.confirmPassword.length > 0 ? 'border-red-500 focus:ring-red-500' : 'border-gray-600 focus:ring-purple-500'}`} required 
+                />
+                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400">{showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button>
+              </div>
               <AnimatePresence>{isPasswordFocused && <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.3, ease: "easeInOut" }}><PasswordCriteria criteria={passwordCriteria} /></motion.div>}</AnimatePresence>
               <div className="rounded-xl overflow-hidden"><TurnstileWidget onVerify={setTurnstileToken} /></div>
-              <LoadingButton type="submit" isLoading={loading && !isSuccess} className="bg-purple-600 hover:bg-purple-700 text-white w-full px-4 py-2.5 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500" disabled={loading || !turnstileToken || !allCriteriaMet || form.password !== form.confirmPassword}>Sign up</LoadingButton>
+              <LoadingButton type="submit" isLoading={loading && !isSuccess} className="bg-purple-600 hover:bg-purple-700 text-white w-full px-4 py-2.5 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500" disabled={loading || !turnstileToken || !allCriteriaMet || !passwordsMatch}>Sign up</LoadingButton>
             </form>
             <div className="my-3 text-gray-400 text-sm flex items-center w-full"><div className="flex-grow border-t border-gray-600"></div><span className="px-2">OR</span><div className="flex-grow border-t border-gray-600"></div></div>
             <div className="flex justify-center"><GoogleLogin onSuccess={handleGoogleSignup} onError={() => toast.error("Google signup failed")} theme="filled_black" /></div>

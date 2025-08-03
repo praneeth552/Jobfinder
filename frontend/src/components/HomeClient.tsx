@@ -11,7 +11,7 @@ import FeaturesSection from "@/components/FeaturesSection";
 import SignupPage from "@/components/SignupPage";
 import IntroductionSection from "@/components/IntroductionSection";
 import ContactForm from "@/components/ContactForm";
-import Footer from "@/components/Footer";
+import NewFooter from "@/components/NewFooter";
 import TechStack from "@/components/TechStack";
 import "@/components/TechStack.css";
 
@@ -76,7 +76,7 @@ export default function HomeClient() {
             <ProblemSolutionSection />
             <FeaturesSection />
             <ContactForm />
-            <Footer />
+            <NewFooter />
           </motion.div>
         )}
       </AnimatePresence>

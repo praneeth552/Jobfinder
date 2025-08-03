@@ -6,7 +6,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 DELOITTE_API_URL = "https://careersatdeloitte.com/api/v1/elasticsearch/vacancies?workAreasFilterType=whereHasAll&order=newest_first&page=1&per_page=10&withFilterUris=1"
 
-BACKEND_ENDPOINT = "http://127.0.0.1:8000/jobs/"
+BACKEND_ENDPOINT = "https://jobfinder-backend-oex9.onrender.com/jobs/"
 
 def scrape_deloitte():
     logging.info("Fetching Deloitte job listings from API...")
