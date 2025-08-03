@@ -24,10 +24,10 @@ export default function SigninPage() {
 
   const handleNavigation = (path: string) => {
     setIsExiting(true);
-    setTimeout(() => router.push(path), 500); // Match the animation duration
+    setTimeout(() => router.push(path), 500);
   };
 
-  const handleSignIn = async (email: string, password:string) => {
+  const handleSignIn = async (email: string, password: string) => {
     if (!turnstileToken) {
       toast.error("Please complete the CAPTCHA challenge.");
       return;
@@ -83,7 +83,7 @@ export default function SigninPage() {
       setLoading(false);
     }
   };
-  
+
   const handleAnimationFinish = () => {
     if (isSuccess) {
       router.replace(redirectPath);
@@ -91,18 +91,9 @@ export default function SigninPage() {
   };
 
   const pageVariants = {
-    initial: {
-      opacity: 0,
-      x: "100vw",
-    },
-    in: {
-      opacity: 1,
-      x: 0,
-    },
-    out: {
-      opacity: 0,
-      x: "-100vw",
-    },
+    initial: { opacity: 0, x: "100vw" },
+    in: { opacity: 1, x: 0 },
+    out: { opacity: 0, x: "-100vw" },
   };
 
   const pageTransition = {
@@ -110,13 +101,11 @@ export default function SigninPage() {
     ease: "anticipate" as const,
     duration: 0.5,
   };
-  
-  // New variants for the form fade-out
+
   const formVariants = {
     visible: { opacity: 1, transition: { duration: 0.2 } },
     hidden: { opacity: 0, transition: { duration: 0.2 } },
   };
-
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen px-4 py-8 animated-gradient-bg overflow-hidden">
@@ -133,13 +122,11 @@ export default function SigninPage() {
             transition={pageTransition}
             className="w-full max-w-sm"
           >
-            {/* ADDED: Wrapper to control fade-out on success */}
-            <motion.div
-              animate={isSuccess ? "hidden" : "visible"}
-              variants={formVariants}
-            >
-              <div className="bg-[#111] text-white p-8 rounded-[16px] flex flex-col items-center">
-                <h2 className="text-3xl font-bold mb-6 text-white text-center">Sign in to your account</h2>
+            <motion.div animate={isSuccess ? "hidden" : "visible"} variants={formVariants}>
+              <div className="bg-white/10 backdrop-blur-xl text-black p-8 rounded-2xl flex flex-col items-center shadow-lg border border-white/20">
+                <h2 className="text-3xl font-bold mb-6 text-black text-center">
+                  Sign in to your account
+                </h2>
                 <form
                   className="flex flex-col gap-4 w-full"
                   onSubmit={(e) => {
@@ -151,7 +138,7 @@ export default function SigninPage() {
                     name="email"
                     type="email"
                     placeholder="Email"
-                    className="px-4 py-3 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="px-4 py-3 rounded-xl border border-white/30 bg-white/80 text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-purple-500"
                     required
                   />
                   <div className="relative">
@@ -159,18 +146,18 @@ export default function SigninPage() {
                       name="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Password"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-600 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-4 py-3 rounded-xl border border-white/30 bg-white/80 text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-purple-500"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400"
+                      className="absolute inset-y-0 right-0 px-3 flex items-center text-black"
                     >
                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
                   </div>
-                  
+
                   <div className="rounded-xl overflow-hidden">
                     <TurnstileWidget onVerify={setTurnstileToken} />
                   </div>
@@ -185,23 +172,23 @@ export default function SigninPage() {
                   </LoadingButton>
                 </form>
 
-                <div className="my-4 text-gray-400 text-sm flex items-center w-full">
-                    <div className="flex-grow border-t border-gray-600"></div>
-                    <span className="px-2">OR</span>
-                    <div className="flex-grow border-t border-gray-600"></div>
+                <div className="my-4 text-black text-sm flex items-center w-full">
+                  <div className="flex-grow border-t border-white/30" />
+                  <span className="px-2">OR</span>
+                  <div className="flex-grow border-t border-white/30" />
                 </div>
 
                 <GoogleLogin
-                  theme="filled_black"
+                  theme="outline"
                   onSuccess={handleGoogleSignIn}
                   onError={() => toast.error("Google Login Failed")}
                 />
-                
-                <p className="mt-6 text-gray-400">
-                  Don't have an account?{" "}
+
+                <p className="mt-6 text-black">
+                  Don&apos;t have an account?{" "}
                   <button
                     onClick={() => handleNavigation("/?signup=true")}
-                    className="text-purple-400 font-semibold hover:underline"
+                    className="text-black font-semibold hover:underline"
                   >
                     Sign up
                   </button>

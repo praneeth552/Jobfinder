@@ -14,6 +14,7 @@ const buttonTexts = ["Got Ideas?", "Want to Collaborate?"];
 export default function Navbar({ onGetStarted }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
+  const [isOverContactForm, setIsOverContactForm] = useState(false);
   const router = useRouter();
 
   const [textIndex, setTextIndex] = useState(0);
@@ -30,6 +31,13 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
   useEffect(() => {
     const handleScroll = () => {
       setHasScrolled(window.scrollY > 10);
+
+      const contactSection = document.getElementById("contact-section");
+      if (contactSection) {
+        const { top, bottom } = contactSection.getBoundingClientRect();
+        const isOver = top < 50 && bottom > 50; // 50 is approx navbar height
+        setIsOverContactForm(isOver);
+      }
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -67,7 +75,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
     exit: (direction: number) => ({ y: direction < 0 ? 20 : -20, opacity: 0 }),
   };
 
-  const textColor = hasScrolled ? "text-gray-800" : "text-white";
+  const textColor = hasScrolled && !isOverContactForm ? "text-gray-800" : "text-white";
   const mobileBgColor = hasScrolled
     ? "bg-white/80 backdrop-blur-md"
     : "bg-black/20 backdrop-blur-md";
@@ -143,7 +151,15 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
       </div>
 
       {/* Mobile Menu Button */}
-      <div className="md:hidden">
+      <div className="md:hidden flex items-center space-x-4">
+        <motion.button
+          onClick={() => router.push('/pricing')}
+          className={`px-4 py-2 font-semibold rounded-full transition-colors duration-300 ${textColor}`}
+          whileHover={{ scale: 1.05, backgroundColor: hasScrolled ? "rgba(0, 0, 0, 0.1)" : "rgba(255, 255, 255, 0.1)" }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Pricing
+        </motion.button>
         <button onClick={() => setIsMenuOpen(!isMenuOpen)} className={`transition-colors duration-300 ${textColor}`}>
           {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
