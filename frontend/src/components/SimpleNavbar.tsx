@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import ContactForm from "./ContactForm";
+import MobileContactModal from "./MobileContactModal"; // Import the new mobile modal
 
 const buttonTexts = ["Got Ideas?", "Want to Collaborate?"];
 
@@ -12,12 +13,20 @@ export default function SimpleNavbar({ alwaysWhiteText = false }: { alwaysWhiteT
   const [isContactModalOpen, setContactModalOpen] = useState(false);
   const [textIndex, setTextIndex] = useState(0);
   const [direction, setDirection] = useState(1);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setDirection((prevDirection) => -prevDirection);
       setTextIndex((prevIndex) => (prevIndex + 1) % buttonTexts.length);
-    }, 3000); // Slowed down to 3 seconds
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -94,36 +103,40 @@ export default function SimpleNavbar({ alwaysWhiteText = false }: { alwaysWhiteT
         </div>
       </motion.nav>
 
-      <AnimatePresence>
-        {isContactModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/70 flex items-center justify-center z-[10000] p-4"
-            onClick={closeModal}
-          >
+      {isMobile ? (
+        <MobileContactModal isOpen={isContactModalOpen} onClose={closeModal} />
+      ) : (
+        <AnimatePresence>
+          {isContactModalOpen && (
             <motion.div
-              initial={{ scale: 0.9, y: -30 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: -30 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="relative w-full max-w-lg bg-gray-800 rounded-2xl shadow-xl"
-              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/70 flex items-center justify-center z-[10000] p-4"
+              onClick={closeModal}
             >
-              <div className="absolute top-3 right-3 z-20">
-                <button
-                  onClick={closeModal}
-                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                >
-                  <X size={20} className="text-white" />
-                </button>
-              </div>
-              <ContactForm />
+              <motion.div
+                initial={{ scale: 0.9, y: -30 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: -30 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="relative w-full max-w-lg bg-gray-800 rounded-2xl shadow-xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="absolute top-3 right-3 z-20">
+                  <button
+                    onClick={closeModal}
+                    className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                  >
+                    <X size={20} className="text-white" />
+                  </button>
+                </div>
+                <ContactForm />
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+      )}
     </>
   );
 }
