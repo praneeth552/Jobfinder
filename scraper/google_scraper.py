@@ -11,34 +11,31 @@ BACKEND_ENDPOINT = "https://jobfinder-backend-oex9.onrender.com/jobs/"
 async def scrape_google_careers():
     logging.info(f"Navigating to {GOOGLE_CAREERS_URL} to scrape job data...")
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        browser = await p.chromium.launch(headless=False)
         page = await browser.new_page()
         try:
             await page.goto(GOOGLE_CAREERS_URL, timeout=60000)
-            
-            # Wait for the search input field to be visible, indicating the page is loaded
-            await page.wait_for_selector("input[aria-label='Search jobs']", timeout=30000)
 
-            # Now, wait for the job cards to appear. This might take a moment.
-            await page.wait_for_selector("div.gc-card", timeout=30000)
+            # Wait for the job cards to appear.
+            await page.wait_for_selector("div.sMn82b", timeout=30000)
 
-            job_cards = await page.locator("div.gc-card").all()
+            job_cards = await page.locator("div.sMn82b").all()
             if not job_cards:
                 logging.warning("No job cards found with Playwright selectors.")
                 return
 
             logging.info(f"Found {len(job_cards)} job cards. Processing...")
             for index, card in enumerate(job_cards[:20], start=1):
-                title_element = await card.locator("h3.gc-card__title").first.text_content()
+                title_element = await card.locator("h3.QJPWVe").first.text_content()
                 title = title_element.strip() if title_element else "N/A"
 
-                location_element = await card.locator("span.gc-card__location").first.text_content()
-                location = location_element.strip() if location_element else "N/A"
+                location_elements = await card.locator("span.r0wTof").all_text_contents()
+                location = "; ".join([loc.strip() for loc in location_elements]) if location_elements else "N/A"
 
-                link_element = await card.locator("a.gc-card__link").first.get_attribute('href')
-                job_url = f"{GOOGLE_CAREERS_URL}{link_element}" if link_element else "Not available"
+                link_element = await card.locator("a.WpHeLc").first.get_attribute('href')
+                job_url = f"https://careers.google.com/{link_element}" if link_element else "Not available"
 
-                description = "Description not available in list view." # Placeholder
+                description = "Description not available in list view."  # Placeholder
 
                 payload = {
                     "title": title,

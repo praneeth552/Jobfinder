@@ -188,7 +188,7 @@ export default function SignupPage() {
           <div className="bg-white/10 backdrop-blur-xl p-6 sm:p-8 rounded-2xl flex flex-col items-center shadow-lg border border-white/20">
             <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-black text-center">Create your account</h2>
 
-            <form className="flex flex-col gap-3 w-full" onSubmit={handleSubmit}>
+            <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit}>
               <input
                 type="text"
                 name="name"
@@ -268,13 +268,13 @@ export default function SignupPage() {
               </div>
 
               <LoadingButton
-                type="submit"
-                isLoading={loading && !isSuccess}
-                className="submit-button-swipe bg-purple-600 hover:bg-purple-700 text-white w-full px-4 py-2.5 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500"
-                disabled={loading || !turnstileToken || !allCriteriaMet || !passwordsMatch}
-              >
-                Sign up
-              </LoadingButton>
+                    type="submit"
+                    isLoading={loading}
+                    className="submit-button-swipe bg-purple-600 hover:bg-purple-700 text-white w-full px-4 py-3 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500"
+                    disabled={loading || !turnstileToken}
+                  >
+                    Sign up
+                  </LoadingButton>
             </form>
 
             <div className="my-3 text-black text-sm flex items-center w-full">
