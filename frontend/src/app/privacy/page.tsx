@@ -5,7 +5,7 @@ import NewFooter from '@/components/NewFooter';
 const PrivacyPolicy = () => {
   return (
     <div className="bg-gray-900 text-white min-h-screen">
-      <SimpleNavbar />
+      <SimpleNavbar alwaysWhiteText={true} />
       <main className="pt-20">
         <div className="container mx-auto px-4 py-16">
           <h1 className="text-4xl font-bold text-center mb-8">Privacy Policy</h1>

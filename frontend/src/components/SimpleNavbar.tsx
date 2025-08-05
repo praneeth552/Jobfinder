@@ -7,7 +7,7 @@ import ContactForm from "./ContactForm";
 
 const buttonTexts = ["Got Ideas?", "Want to Collaborate?"];
 
-export default function SimpleNavbar() {
+export default function SimpleNavbar({ alwaysWhiteText = false }: { alwaysWhiteText?: boolean }) {
   const [hasScrolled, setHasScrolled] = useState(false);
   const [isContactModalOpen, setContactModalOpen] = useState(false);
   const [textIndex, setTextIndex] = useState(0);
@@ -44,8 +44,8 @@ export default function SimpleNavbar() {
     exit: (direction: number) => ({ y: direction < 0 ? 20 : -20, opacity: 0 }),
   };
 
-  const textColor = "text-gray-800";
-  const logoShadow = 'rgba(0,0,0,0.5)';
+  const textColor = hasScrolled && !alwaysWhiteText ? "text-gray-800" : "text-white";
+  const logoShadow = hasScrolled && !alwaysWhiteText ? 'rgba(0,0,0,0.5)' : 'rgb(255,255,255)';
 
   return (
     <>
@@ -100,7 +100,7 @@ export default function SimpleNavbar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000] p-4"
+            className="fixed inset-0 bg-black/70 flex items-center justify-center z-[10000] p-4"
             onClick={closeModal}
           >
             <motion.div
@@ -108,15 +108,15 @@ export default function SimpleNavbar() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: -30 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="relative w-full max-w-2xl"
+              className="relative w-full max-w-lg bg-gray-800 rounded-2xl shadow-xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="absolute -top-2 -right-2 z-20">
+              <div className="absolute top-3 right-3 z-20">
                 <button
                   onClick={closeModal}
-                  className="p-2 rounded-full bg-white/50 hover:bg-white/80 transition-colors"
+                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
                 >
-                  <X size={20} className="text-gray-800" />
+                  <X size={20} className="text-white" />
                 </button>
               </div>
               <ContactForm />

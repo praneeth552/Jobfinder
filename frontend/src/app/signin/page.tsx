@@ -20,12 +20,7 @@ export default function SigninPage() {
   const [redirectPath, setRedirectPath] = useState("/dashboard");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [isExiting, setIsExiting] = useState(false);
-
-  const handleNavigation = (path: string) => {
-    setIsExiting(true);
-    setTimeout(() => router.push(path), 500);
-  };
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const handleSignIn = async (email: string, password: string) => {
     if (!turnstileToken) {
@@ -111,8 +106,8 @@ export default function SigninPage() {
     <main className="flex flex-col items-center justify-center min-h-screen px-4 py-8 animated-gradient-bg overflow-hidden">
       <SimpleNavbar />
       <Curtain isLoading={isSuccess} onFinish={handleAnimationFinish} />
-      <AnimatePresence mode="wait" onExitComplete={() => setIsExiting(false)}>
-        {!isExiting && (
+      <AnimatePresence mode="wait" onExitComplete={() => router.push('/?signup=true')}>
+        {!isNavigating && (
           <motion.div
             key="signin"
             initial="initial"
@@ -187,8 +182,8 @@ export default function SigninPage() {
                 <p className="mt-6 text-black">
                   Don&apos;t have an account?{" "}
                   <button
-                    onClick={() => handleNavigation("/?signup=true")}
-                    className="text-black font-semibold hover:underline"
+                    onClick={() => setIsNavigating(true)}
+                    className="text-purple-600 font-semibold hover:underline"
                   >
                     Sign up
                   </button>

@@ -194,22 +194,22 @@ export default function DashboardClient() {
         transition={{ duration: 0.8, ease: "easeInOut" }}
         className="min-h-screen animated-gradient-bg"
       >
-        <div className="container mx-auto py-12 px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
             <motion.h1
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8 }}
-              className="text-4xl md:text-5xl font-bold text-[#8B4513] text-center md:text-left"
+              className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#8B4513] text-center md:text-left"
             >
               Job Recommendations
             </motion.h1>
 
-            <div className="flex flex-col md:flex-row items-center justify-center md:justify-end gap-2 md:gap-4 w-full md:w-auto">
+            <div className="flex flex-col sm:flex-row items-center justify-center md:justify-end gap-3 w-full md:w-auto">
               <LoadingButton
                 onClick={handleGenerateRecommendations}
                 isLoading={isLoading}
-                className={`px-6 py-2 rounded-full font-semibold transition duration-300 w-full md:w-auto ${
+                className={`px-6 py-2.5 rounded-full font-semibold transition duration-300 w-full sm:w-auto ${
                   !isGenerationAllowed
                     ? "bg-gray-400 cursor-not-allowed text-white"
                     : "bg-green-600 hover:bg-green-700 text-white"
@@ -222,7 +222,7 @@ export default function DashboardClient() {
               {userPlan === "free" && (
                 <button
                   onClick={() => router.push("/upgrade")}
-                  className="px-6 py-2 rounded-full font-semibold transition duration-300 bg-yellow-500 hover:bg-yellow-600 text-white w-full md:w-auto"
+                  className="px-6 py-2.5 rounded-full font-semibold transition duration-300 bg-yellow-500 hover:bg-yellow-600 text-white w-full sm:w-auto"
                 >
                   Upgrade to Pro
                 </button>
@@ -245,7 +245,7 @@ export default function DashboardClient() {
           </div>
 
           {!isGenerationAllowed && timeRemaining && (
-            <p className="text-yellow-800 bg-yellow-100 border border-yellow-300 p-4 rounded mb-6 text-center font-semibold">
+            <p className="text-yellow-800 bg-yellow-100 border border-yellow-300 p-4 rounded-lg mb-6 text-center font-semibold text-sm sm:text-base">
               You can generate new recommendations in {timeRemaining}.
               {userPlan === "free" &&
                 ` Upgrade to Pro for more frequent recommendations.`}
@@ -281,7 +281,7 @@ export default function DashboardClient() {
                 hidden: {},
                 visible: { transition: { staggerChildren: 0.1 } },
               }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             >
               {recommendations.map((job, index) => (
                 <motion.div
@@ -295,20 +295,20 @@ export default function DashboardClient() {
                     scale: 1.03,
                     boxShadow: "0 10px 20px rgba(139,69,19,0.2)",
                   }}
-                  className="bg-white rounded-xl shadow-md p-6 cursor-pointer transform transition transform duration-300 flex flex-col h-full"
+                  className="bg-white rounded-xl shadow-md p-5 cursor-pointer transform transition-transform duration-300 flex flex-col h-full"
                   onClick={() =>
                     job.job_url && window.open(job.job_url, "_blank")
                   }
                 >
                   <div className="flex-grow">
-                    <h2 className="text-xl font-bold mb-2 text-[#B8860B] break-words">
+                    <h2 className="text-lg sm:text-xl font-bold mb-2 text-[#B8860B] break-words">
                       {job.title}
                     </h2>
-                    <p className="text-gray-800 mb-1 break-words">
+                    <p className="text-sm sm:text-base text-gray-800 mb-1 break-words">
                       <span className="font-semibold">Company:</span>{" "}
                       {job.company}
                     </p>
-                    <p className="text-gray-800 mb-3 break-words">
+                    <p className="text-sm sm:text-base text-gray-800 mb-3 break-words">
                       <span className="font-semibold">Location:</span>{" "}
                       {job.location}
                     </p>
@@ -318,14 +318,14 @@ export default function DashboardClient() {
                           className="bg-blue-600 h-2.5 rounded-full"
                           style={{ width: `${job.match_score}%` }}
                         />
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="text-xs sm:text-sm text-gray-600 mt-1">
                           Match Score: {job.match_score}/100
                         </p>
                       </div>
                     )}
                   </div>
                   {job.reason && (
-                    <p className="text-gray-600 italic text-sm mt-auto pt-4">
+                    <p className="text-gray-600 italic text-xs sm:text-sm mt-auto pt-4">
                       &quot;{job.reason}&quot;
                     </p>
                   )}

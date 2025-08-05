@@ -159,3 +159,43 @@ body::before {
   filter: blur(20px);
   z-index: -1;
 }
+
+.submit-button-swipe {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* This is the new color layer that wipes across on hover */
+.submit-button-swipe::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background-color: #51416c; /* A slightly brighter purple for the hover state */
+  transition: left 0.5s ease;
+  z-index: -1;
+}
+
+.submit-button-swipe:hover::after {
+  left: 0;
+}
+
+/* This is the shimmer layer */
+.submit-button-swipe::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.4), transparent);
+  transition: left 0.5s ease;
+  z-index: 0; /* Sits above the color wipe but below the text */
+}
+
+.submit-button-swipe:hover::before {
+  left: 100%;
+}

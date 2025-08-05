@@ -35,7 +35,7 @@ jobs:
 
     - name: Run scraper scripts
       env:
-        MONGODB_URI: ${{ secrets.MONGO_URI }}
+        MONGO_URI: ${{ secrets.MONGO_URI }}
       run: |
         python scraper/accenture_scraper.py
         python scraper/adobe_scraper.py

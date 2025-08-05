@@ -41,7 +41,7 @@ const PublicPricingPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <SimpleNavbar />
+      <SimpleNavbar alwaysWhiteText={true} />
       <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <motion.div
