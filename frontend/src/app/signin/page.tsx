@@ -41,6 +41,7 @@ export default function SigninPage() {
       Cookies.set("user_id", data.user_id, { expires: 1 });
       Cookies.set("plan_type", data.plan_type || "free", { expires: 1 });
       setRedirectPath(data.is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
+      toast.success("Sign-in successful!");
       setIsSuccess(true);
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
@@ -65,6 +66,7 @@ export default function SigninPage() {
       Cookies.set("user_id", data.user_id, { expires: 1 });
       Cookies.set("plan_type", data.plan_type || "free", { expires: 1 });
       setRedirectPath(data.is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
+      toast.success("Sign-in successful!");
       setIsSuccess(true);
     } catch (error: unknown) {
       let errorMessage = "An unexpected error occurred.";
@@ -160,7 +162,7 @@ export default function SigninPage() {
                   <LoadingButton
                     type="submit"
                     isLoading={loading}
-                    className="bg-purple-600 hover:bg-purple-700 text-white w-full px-4 py-3 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500"
+                    className="submit-button-swipe bg-purple-600 hover:bg-purple-700 text-white w-full px-4 py-3 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500"
                     disabled={loading || !turnstileToken}
                   >
                     Sign in

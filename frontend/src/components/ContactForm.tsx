@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import toast, { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast"; 
 import axios from "axios";
 import { Mic } from 'lucide-react';
 import LoadingButton from "./LoadingButton";
@@ -125,31 +125,37 @@ const ContactForm = () => {
 
 
   return (
-    <section id="contact-section" className="w-full py-10 sm:py-16 bg-transparent relative z-10">
-      <Toaster position="top-center" toastOptions={{ style: { zIndex: 9999 } }} />
+    <section id="contact-section" className="py-20 bg-gray-900 relative z-10">
+      
       <div className="container mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-center mb-8"
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="text-center mb-12"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold text-white">Let’s Collaborate</h2>
-          <p className="text-base sm:text-lg text-gray-300 mt-2">
+          <h2 className="text-4xl font-bold text-white">Let’s Collaborate</h2>
+          <p className="text-lg text-gray-300 mt-2">
             I’d love to hear your suggestions or build something great together.
           </p>
         </motion.div>
 
-        <motion.form
-          onSubmit={handleSubmit}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-          className="bg-transparent p-4 sm:p-8 rounded-2xl"
-        >
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-gray-300 font-semibold mb-2 text-sm sm:text-base">
+        {/* This wrapper div creates the glow effect via the global CSS */}
+        <div className="glow-form-wrapper max-w-2xl mx-auto">
+          <motion.form
+            onSubmit={handleSubmit}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+            className="bg-[#111] p-8 rounded-[16px]"
+          >
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.6, ease: "easeOut" }}
+              className="mb-6"
+            >
+              <label htmlFor="name" className="block text-gray-300 font-semibold mb-2">
                 Name
               </label>
               <input
@@ -158,13 +164,18 @@ const ContactForm = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-900 text-white"
+                className="w-full px-4 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white"
                 required
               />
-            </div>
+            </motion.div>
 
-            <div>
-              <label htmlFor="email" className="block text-gray-300 font-semibold mb-2 text-sm sm:text-base">
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.8, ease: "easeOut" }}
+              className="mb-6"
+            >
+              <label htmlFor="email" className="block text-gray-300 font-semibold mb-2">
                 Email
               </label>
               <input
@@ -173,13 +184,18 @@ const ContactForm = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-900 text-white"
+                className="w-full px-4 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white"
                 required
               />
-            </div>
+            </motion.div>
 
-            <div>
-              <label htmlFor="interest" className="block text-gray-300 font-semibold mb-2 text-sm sm:text-base">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 1, ease: "easeOut" }}
+              className="mb-6"
+            >
+              <label htmlFor="interest" className="block text-gray-300 font-semibold mb-2">
                 How can I help you?
               </label>
               <select
@@ -187,17 +203,22 @@ const ContactForm = () => {
                 name="interest"
                 value={formData.interest}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-900 text-white"
+                className="w-full px-4 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white"
               >
                 <option>Suggest a feature</option>
                 <option>Report a bug</option>
                 <option>Collaborate with you</option>
                 <option>Just saying hi</option>
               </select>
-            </div>
+            </motion.div>
 
-            <div className="relative">
-              <label htmlFor="message" className="block text-gray-300 font-semibold mb-2 text-sm sm:text-base">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.2, ease: "easeOut" }}
+              className="mb-6 relative"
+            >
+              <label htmlFor="message" className="block text-gray-300 font-semibold mb-2">
                 Message / Suggestion
               </label>
               <textarea
@@ -205,18 +226,18 @@ const ContactForm = () => {
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
-                rows={4}
-                className="w-full px-4 py-2.5 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-900 text-white pr-10"
+                rows={5}
+                className="w-full px-4 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white pr-10"
                 required
               ></textarea>
               <button
                 type="button"
                 onClick={handleMicClick}
-                className={`absolute right-3 top-11 text-gray-400 hover:text-purple-500 ${isRecording ? 'text-red-500 animate-pulse' : ''}`}
+                className={`absolute right-3 top-[48px] text-gray-400 hover:text-purple-500 ${isRecording ? 'text-red-500 animate-pulse' : ''}`}
               >
-                <Mic size={20} />
+                <Mic size={24} />
               </button>
-            </div>
+            </motion.div>
 
             <div className="text-center pt-4">
               <LoadingButton
@@ -227,8 +248,8 @@ const ContactForm = () => {
                 Submit
               </LoadingButton>
             </div>
-          </div>
-        </motion.form>
+          </motion.form>
+        </div>
       </div>
     </section>
   );

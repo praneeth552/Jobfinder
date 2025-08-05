@@ -76,6 +76,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
   };
 
   const textColor = hasScrolled && !isOverContactForm ? "text-gray-800" : "text-white";
+  const mobileTextColor = hasScrolled ? "text-gray-800" : "text-white";
   const mobileBgColor = hasScrolled
     ? "bg-white/80 backdrop-blur-md"
     : "bg-black/20 backdrop-blur-md";
@@ -125,7 +126,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
           layout
           transition={{ type: "spring", stiffness: 400, damping: 40 }}
           onClick={handleCollaborateClick}
-          className="px-6 py-2 font-semibold shadow relative overflow-hidden bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full"
+          className="submit-button-swipe px-6 py-2 font-semibold shadow relative overflow-hidden bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           style={{ width: 220, height: 40, textAlign: "center" }}
@@ -192,7 +193,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
             </motion.button>
             <motion.button
               onClick={handleCollaborateClick}
-              className="px-6 py-2 font-semibold shadow-lg bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full"
+              className="submit-button-swipe px-6 py-2 font-semibold shadow-lg bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >

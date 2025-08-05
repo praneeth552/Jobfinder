@@ -14,6 +14,7 @@ import ContactForm from "@/components/ContactForm";
 import NewFooter from "@/components/NewFooter";
 import TechStack from "@/components/TechStack";
 import "@/components/TechStack.css";
+import axios from "axios";
 
 export default function HomeClient() {
   const [loadingFinished, setLoadingFinished] = useState(false);
@@ -28,6 +29,18 @@ export default function HomeClient() {
     if (hasLoaded === "true") {
       setLoadingFinished(true);
     }
+
+    // Warm-up request to the backend
+    const warmUpBackend = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/warmup`);
+        console.log("Backend warm-up successful:", response.data.message);
+      } catch (error) {
+        console.error("Backend warm-up failed:", error);
+      }
+    };
+
+    warmUpBackend();
   }, []);
 
   useEffect(() => {

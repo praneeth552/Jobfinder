@@ -209,7 +209,7 @@ export default function DashboardClient() {
               <LoadingButton
                 onClick={handleGenerateRecommendations}
                 isLoading={isLoading}
-                className={`px-6 py-2.5 rounded-full font-semibold transition duration-300 w-full sm:w-auto ${
+                className={`submit-button-swipe px-6 py-2.5 rounded-full font-semibold transition duration-300 w-full sm:w-auto ${
                   !isGenerationAllowed
                     ? "bg-gray-400 cursor-not-allowed text-white"
                     : "bg-green-600 hover:bg-green-700 text-white"
@@ -222,7 +222,7 @@ export default function DashboardClient() {
               {userPlan === "free" && (
                 <button
                   onClick={() => router.push("/upgrade")}
-                  className="px-6 py-2.5 rounded-full font-semibold transition duration-300 bg-yellow-500 hover:bg-yellow-600 text-white w-full sm:w-auto"
+                  className="submit-button-swipe px-6 py-2.5 rounded-full font-semibold transition duration-300 bg-yellow-500 hover:bg-yellow-600 text-white w-full sm:w-auto"
                 >
                   Upgrade to Pro
                 </button>

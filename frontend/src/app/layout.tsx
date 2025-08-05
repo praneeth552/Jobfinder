@@ -10,7 +10,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <body>
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ""}>
-          <Toaster position="top-center" />
+          <Toaster position="top-center" toastOptions={{ style: { zIndex: 9999 } }} />
           {children}
         </GoogleOAuthProvider>
       </body>

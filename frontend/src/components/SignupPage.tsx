@@ -270,7 +270,7 @@ export default function SignupPage() {
               <LoadingButton
                 type="submit"
                 isLoading={loading && !isSuccess}
-                className="bg-purple-600 hover:bg-purple-700 text-white w-full px-4 py-2.5 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500"
+                className="submit-button-swipe bg-purple-600 hover:bg-purple-700 text-white w-full px-4 py-2.5 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500"
                 disabled={loading || !turnstileToken || !allCriteriaMet || !passwordsMatch}
               >
                 Sign up

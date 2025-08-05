@@ -170,7 +170,7 @@ const UpgradePage = () => {
               <LoadingButton
                 onClick={handleUpgrade}
                 isLoading={isLoading}
-                className="w-full px-6 py-3 rounded-full font-semibold text-white transition duration-300 bg-green-600 hover:bg-green-700"
+                className="submit-button-swipe w-full px-6 py-3 rounded-full font-semibold text-white transition duration-300 bg-green-600 hover:bg-green-700"
               >
                 Upgrade to Pro
               </LoadingButton>

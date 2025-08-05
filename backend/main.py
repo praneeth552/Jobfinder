@@ -36,6 +36,12 @@ app.include_router(user.router, prefix="/user", tags=["User"])
 app.include_router(contact.router, tags=["Contact"])
 app.include_router(payment.router, prefix="/payment", tags=["Payment"])  # ✅ Payment router
 
+
+@app.get("/warmup")
+async def warmup():
+    return {"message": "Backend is warm and ready!"}
+
+
 @app.get("/")
 async def root():
     return {"message": "Welcome to the Tackleit API"}

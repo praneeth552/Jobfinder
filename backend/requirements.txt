@@ -17,3 +17,6 @@ Jinja2
 python-multipart
 gunicorn
 setuptools
+pymongo[srv]
+python-dotenv
+playwright

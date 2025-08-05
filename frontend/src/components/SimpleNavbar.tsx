@@ -68,7 +68,7 @@ export default function SimpleNavbar({ alwaysWhiteText = false }: { alwaysWhiteT
             layout
             transition={{ type: "spring", stiffness: 400, damping: 40 }}
             onClick={openModal}
-            className="px-6 py-2 font-semibold shadow relative overflow-hidden bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full"
+            className="submit-button-swipe px-6 py-2 font-semibold shadow relative overflow-hidden bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             style={{ width: 220, height: 40, textAlign: "center" }}
