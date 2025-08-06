@@ -1,0 +1,42 @@
+
+service: tackleit-backend
+
+frameworkVersion: '4'
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: us-east-1 # You can change this to your preferred AWS region
+  environment:
+    MONGO_URI: ${env:MONGO_URI}
+    SECRET_KEY: ${env:SECRET_KEY}
+    GOOGLE_CLIENT_ID: ${env:GOOGLE_CLIENT_ID}
+    GOOGLE_REDIRECT_URI: ${env:GOOGLE_REDIRECT_URI}
+    GEMINI_API_KEY: ${env:GEMINI_API_KEY}
+    RAZORPAY_KEY_ID: ${env:RAZORPAY_KEY_ID}
+    RAZORPAY_KEY_SECRET: ${env:RAZORPAY_KEY_SECRET}
+    RAZORPAY_PRO_PLAN_ID: ${env:RAZORPAY_PRO_PLAN_ID}
+    TURNSTILE_SECRET_KEY: ${env:TURNSTILE_SECRET_KEY}
+    MAIL_USERNAME: ${env:MAIL_USERNAME}
+    MAIL_PASSWORD: ${env:MAIL_PASSWORD}
+    MAIL_FROM: ${env:MAIL_FROM}
+    MAIL_PORT: ${env:MAIL_PORT}
+    MAIL_SERVER: ${env:MAIL_SERVER}
+    GOOGLE_SCOPES: ${env:GOOGLE_SCOPES}
+    MAIL_FROM_NAME: ${env:MAIL_FROM_NAME}
+    MAIL_TLS: ${env:MAIL_TLS}
+    MAIL_SSL: ${env:MAIL_SSL}
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+
+functions:
+  api:
+    handler: main.handler
+    events:
+      - httpApi: '*'
+

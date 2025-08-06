@@ -11,10 +11,14 @@ from routes import (
     payment
 )
 from dotenv import load_dotenv
+from mangum import Mangum
 
 load_dotenv()
 
 app = FastAPI()
+
+# This is the handler that AWS Lambda will invoke
+handler = Mangum(app)
 
 origins = [
     "http://localhost",

@@ -38,3 +38,19 @@ htmlcov/
 # Swap files
 *.swp
 *.swo
+
+# Next.js build output
+.next/
+out/
+
+# Serverless build artifacts
+.serverless/
+*.zip
+
+# Build directories
+dist/
+build/
+
+# Temporary files
+*.tmp
+*.temp
