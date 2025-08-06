@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 import { Mic } from 'lucide-react';
 import LoadingButton from './LoadingButton';
@@ -141,6 +141,7 @@ const MobileContactForm = () => {
         transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
         className="bg-[#111] p-8 rounded-[16px]"
       >
+        <Toaster />
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
