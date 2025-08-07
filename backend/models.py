@@ -42,6 +42,7 @@ class User(BaseModel):
     is_first_time_user: bool = True
     preferences: Optional[UserPreferences] = None
     plan_type: PlanType = PlanType.free  # 🔥 default to 'free'
+    last_resume_upload: Optional[datetime] = None
     created_at: datetime = datetime.utcnow()
     updated_at: datetime = datetime.utcnow()
 

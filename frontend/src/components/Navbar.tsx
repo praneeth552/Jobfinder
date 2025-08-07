@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+import Link from "next/link";
+
 interface NavbarProps {
   onGetStarted: (x: number, y: number) => void;
 }
@@ -88,13 +90,14 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
         hasScrolled ? "bg-white/10 backdrop-blur-xl shadow-lg" : "bg-transparent"
       }`}
     >
-      <motion.div
-        className={`text-2xl font-bold cursor-pointer transition-colors duration-300 ${textColor}`}
-        onClick={() => (window.location.href = "/")}
-        whileHover={{ scale: 1.05, textShadow: `0px 0px 8px ${hasScrolled ? 'rgba(0,0,0,0.5)' : 'rgb(255,255,255)'}` }}
-      >
-        TackleIt
-      </motion.div>
+      <Link href="/workflow">
+        <motion.div
+          className={`text-2xl font-bold cursor-pointer transition-colors duration-300 ${textColor}`}
+          whileHover={{ scale: 1.05, textShadow: `0px 0px 8px ${hasScrolled ? 'rgba(0,0,0,0.5)' : 'rgb(255,255,255)'}` }}
+        >
+          TackleIt
+        </motion.div>
+      </Link>
 
       {/* Desktop Menu */}
       <div className="hidden md:flex items-center space-x-4">

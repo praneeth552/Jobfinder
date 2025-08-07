@@ -135,6 +135,7 @@ const UpgradePage = () => {
             <p className="text-center text-gray-500 mb-6">For casual job seekers</p>
             <ul className="space-y-4 text-gray-700">
               <Feature text="Generate recommendations once a month" included={true} />
+              <Feature text="Monthly resume uploads" included={true} />
               <Feature text="Google Sheets Integration" included={false} />
               <Feature text="Email updates for new jobs" included={false} />
               <Feature text="Early access to beta features" included={false} />
@@ -162,6 +163,7 @@ const UpgradePage = () => {
             <p className="text-center text-gray-500 mb-6">For serious professionals</p>
             <ul className="space-y-4 text-gray-700">
               <Feature text="Generate recommendations once a week" included={true} />
+              <Feature text="Weekly resume uploads" included={true} />
               <Feature text="Google Sheets Integration" included={true} />
               <Feature text="Email updates for new jobs" included={true} />
               <Feature text="Early access to beta features" included={true} />

@@ -17,7 +17,9 @@ Jinja2
 python-multipart
 gunicorn
 setuptools
-pymongo[srv]
-python-dotenv
 playwright
 beautifulsoup4
+spacy
+nltk
+pdfminer.six
+docx2txt

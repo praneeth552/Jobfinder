@@ -8,7 +8,6 @@ const TechStack = () => {
   const tech = [
     { name: 'Next.js', logo: '/next.svg' },
     { name: 'React', logo: '/react.svg' },
-    { name: 'TypeScript', logo: '/typescript.svg' },
     { name: 'Python', logo: '/python.svg' },
     { name: 'FastAPI', logo: '/fastapi.svg' },
     { name: 'MongoDB', logo: '/mongodb.svg' },
@@ -16,7 +15,7 @@ const TechStack = () => {
     { name: 'Gemini', logo: '/gemini.svg' }, // Added
     { name: 'AWS', logo: '/aws.svg' }, // Added
     { name: 'Playwright', logo: '/playwright.svg' }, // Added
-    { name: 'Vercel', logo: '/vercel.svg' }, // Suggested & Added
+    { name: 'GitHub Actions', logo: '/github-actions.svg' }, // Suggested & Added
     { name: 'Framer Motion', logo: '/framer.svg' }, // Suggested & Added
   ];
 

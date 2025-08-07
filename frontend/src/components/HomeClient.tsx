@@ -69,7 +69,7 @@ export default function HomeClient() {
   };
 
   return (
-    <main className="relative overflow-hidden animated-gradient-bg">
+    <main className="relative overflow-hidden animated-gradient-bg min-h-screen">
       <AnimatePresence>
         {!loadingFinished && <LoadingScreen onFinish={handleFinishLoading} />}
       </AnimatePresence>

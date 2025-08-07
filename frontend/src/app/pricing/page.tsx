@@ -74,6 +74,7 @@ const PublicPricingPage = () => {
               <p className="text-center text-gray-500 mb-6">For casual job seekers</p>
               <ul className="space-y-4 text-gray-300">
                 <Feature text="Generate recommendations once a month" included={true} />
+                <Feature text="Monthly resume uploads" included={true} />
                 <Feature text="Google Sheets Integration" included={false} />
                 <Feature text="Email updates for new jobs" included={false} />
                 <Feature text="Early access to beta features" included={false} />
@@ -101,6 +102,7 @@ const PublicPricingPage = () => {
               <p className="text-center text-gray-500 mb-6">For serious professionals</p>
               <ul className="space-y-4 text-gray-300">
                 <Feature text="Generate recommendations once a week" included={true} />
+                <Feature text="Weekly resume uploads" included={true} />
                 <Feature text="Google Sheets Integration" included={true} />
                 <Feature text="Email updates for new jobs" included={true} />
                 <Feature text="Early access to beta features" included={true} />
@@ -109,7 +111,7 @@ const PublicPricingPage = () => {
                 <LoadingButton
                   onClick={handlePublicUpgradeClick}
                   isLoading={false}
-                  className="w-full px-6 py-3 rounded-full font-semibold text-white transition duration-300 bg-purple-600 hover:bg-purple-700"
+                  className="submit-button-swipe w-full px-6 py-3 rounded-full font-semibold text-white transition duration-300 bg-purple-600 hover:bg-purple-700"
                 >
                   {isLoggedIn ? "Go to Upgrade" : "Sign In to Upgrade"}
                 </LoadingButton>
