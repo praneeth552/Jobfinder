@@ -1,12 +1,20 @@
+import os
 import requests
 import logging
 import json
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+BACKEND_ENDPOINT = os.getenv("NEXT_PUBLIC_API_URL")
+
+if not BACKEND_ENDPOINT:
+    logging.error("NEXT_PUBLIC_API_URL environment variable not set.")
+    exit(1)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 DELOITTE_API_URL = "https://careersatdeloitte.com/api/v1/elasticsearch/vacancies?workAreasFilterType=whereHasAll&order=newest_first&page=1&per_page=10&withFilterUris=1"
-
-BACKEND_ENDPOINT = "https://jobfinder-backend-oex9.onrender.com/jobs/"
 
 def scrape_deloitte():
     logging.info("Fetching Deloitte job listings from API...")
@@ -43,7 +51,7 @@ def scrape_deloitte():
 
             logging.info(f"[{i}] {title} at {location_str} — {job_url}")
             try:
-                post_resp = requests.post(BACKEND_ENDPOINT, json=payload)
+                post_resp = requests.post(f"{BACKEND_ENDPOINT}/jobs/", json=payload)
                 post_resp.raise_for_status()
                 logging.info(f"Successfully posted job '{title}' to backend.")
             except requests.exceptions.RequestException as e:

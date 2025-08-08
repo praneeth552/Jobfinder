@@ -24,7 +24,7 @@ import SimpleNavbar from "@/components/SimpleNavbar";
 
 const Section = ({ title, icon, children, className, isActive, stepNumber }: any) => (
   <motion.div
-    className={`bg-white/10 backdrop-blur-md p-6 rounded-2xl border shadow-lg relative overflow-hidden transition-all duration-500 ${isActive
+    className={`bg-white/10 backdrop-blur-md p-6 rounded-2xl border shadow-lg relative transition-all duration-500 ${isActive
       ? "border-purple-400 bg-white/20 shadow-purple-500/25"
       : "border-white/20"
       } ${className}`}
@@ -35,7 +35,7 @@ const Section = ({ title, icon, children, className, isActive, stepNumber }: any
   >
     {stepNumber && (
       <div
-        className={`absolute -top-3 -left-3 w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold shadow-lg border-2 transition-all duration-500 z-20 ${isActive
+        className={`absolute -top-5 -left-5 w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold shadow-lg border-2 transition-all duration-500 z-20 ${isActive
           ? "bg-purple-500 text-white border-purple-400 shadow-purple-500/50"
           : "bg-gray-700 text-gray-300 border-gray-600"
           }`}
@@ -178,7 +178,7 @@ const WorkflowPage = () => {
     <div className="min-h-screen bg-gray-900 text-white font-sans">
       <SimpleNavbar alwaysWhiteText={true}/>
 
-      <div className="pt-20 p-4 md:p-8">
+      <div className="p-4 pt-32 md:p-8 md:pt-32">
         <motion.div
           className="text-center mb-12 md:mb-16"
           initial={{ opacity: 0, y: -50 }}

@@ -107,6 +107,7 @@ export default function HomeClient() {
           </motion.div>
         )}
       </AnimatePresence>
+      <div className="bottom-fade-effect" />
     </main>
   );
 }

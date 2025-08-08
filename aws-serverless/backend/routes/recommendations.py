@@ -13,8 +13,45 @@ load_dotenv()
 
 router = APIRouter()
 
+# --- Database Collections ---
+users_collection = db["users"]
+resumes_collection = db["resumes"]
+recommendations_collection = db["recommendations"]
+jobs_collection = db["jobs"]
+
 # Configure Gemini
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+
+def build_prompt(user_profile, jobs):
+    # Truncate job descriptions to keep the prompt size reasonable
+    for job in jobs:
+        if 'description' in job and job['description']:
+            job['description'] = job['description'][:500] + '...'
+
+    prompt = f"""
+You are an expert AI Job Recommendation Assistant. Your task is to analyze a detailed user profile and a list of available jobs, then return a ranked list of the most suitable job recommendations.
+
+User Profile:
+{user_profile}
+
+Available Job Postings:
+{json.dumps([{'title': job.get('title'), 'company': job.get('company'), 'location': job.get('location'), 'description': job.get('description', 'No description available'), 'job_url': job.get('job_url')} for job in jobs], indent=2)}
+
+Based on the user's profile, please provide a ranked list of the top 5-10 job recommendations from the list provided. It is crucial that you return the best possible matches. For each recommendation, calculate a 'match_score' from 0 to 100, where 100 is a perfect match. Also, provide a brief 'reason' for why the job is a good match.
+
+IMPORTANT: Your final output MUST be a single, valid JSON array of objects. Each object in the array should strictly follow this format:
+{{
+  "title": "...",
+  "company": "...",
+  "location": "...",
+  "match_score": ...,
+  "reason": "...",
+  "job_url": "..."
+}}
+
+Do not include any text, explanations, or markdown formatting before or after the JSON array.
+"""
+    return prompt
 
 @router.post("/generate_recommendations/{user_id}")
 async def generate_recommendations(user_id: str):
@@ -23,128 +60,93 @@ async def generate_recommendations(user_id: str):
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid user ID format")
 
-    user = await db.users.find_one({"_id": user_object_id})
-
+    user = await users_collection.find_one({"_id": user_object_id})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Rate limiting logic
-    last_recommendation = await db.recommendations.find_one(
-        {"user_id": user_id},
-        sort=[("generated_at", -1)]
+    # Rate limiting logic (no changes here)
+    last_recommendation = await recommendations_collection.find_one(
+        {"user_id": user_id}, sort=[("generated_at", -1)]
     )
-
     if last_recommendation:
-        last_generated_at = last_recommendation["generated_at"]
-        now = datetime.utcnow()
-        time_since_last_generation = now - last_generated_at
+        time_since = datetime.utcnow() - last_recommendation["generated_at"]
+        if user.get("plan_type") == "free" and time_since.days < 30:
+            raise HTTPException(status_code=429, detail="Free users can generate recommendations once every 30 days.")
+        if user.get("plan_type") == "pro" and time_since.days < 7:
+            raise HTTPException(status_code=429, detail="Pro users can generate recommendations once every 7 days.")
 
-        if user.get("plan_type") == "free":
-            if time_since_last_generation.days < 30:
-                raise HTTPException(status_code=429, detail="Free users can generate recommendations once every 30 days.")
-        elif user.get("plan_type") == "pro":
-            if time_since_last_generation.days < 7:
-                raise HTTPException(status_code=429, detail="Pro users can generate recommendations once every 7 days.")
-
+    # --- Build User Profile for Prompt ---
+    user_profile_parts = []
+    
+    # 1. Prioritize saved resume data
+    resume_data = await resumes_collection.find_one({"user_id": user_object_id})
+    if resume_data:
+        user_profile_parts.append("---" + " From Resume ---")
+        if resume_data.get("name"): user_profile_parts.append(f"Name: {resume_data['name']}")
+        if resume_data.get("roles"): user_profile_parts.append(f"Desired Roles: {', '.join(resume_data['roles'])}")
+        if resume_data.get("skills"): user_profile_parts.append(f"Skills: {', '.join(resume_data['skills'])}")
+        if resume_data.get("experience_summary"): user_profile_parts.append("Experience Summary:\n" + "\n".join(f"- {exp}" for exp in resume_data['experience_summary']))
+        if resume_data.get("education"): user_profile_parts.append("Education:\n" + "\n".join(f"- {edu}" for edu in resume_data['education']))
+    
+    # 2. Append manual preferences
     preferences = user.get("preferences", {})
-    if not preferences:
-        raise HTTPException(status_code=400, detail="User preferences not set")
+    if preferences:
+        user_profile_parts.append("\n--- Additional Preferences ---")
+        if preferences.get('role'): user_profile_parts.append(f"Roles: {', '.join(preferences['role'])}")
+        if preferences.get('location'): user_profile_parts.append(f"Location: {', '.join(preferences['location'])}")
+        if preferences.get('tech_stack'): user_profile_parts.append(f"Tech Stack: {', '.join(preferences['tech_stack'])}")
+        if preferences.get('experience_level'): user_profile_parts.append(f"Experience Level: {preferences['experience_level']}")
+        if preferences.get('company_size'): user_profile_parts.append(f"Company Size: {', '.join(preferences['company_size'])}")
+        if preferences.get('job_type'): user_profile_parts.append(f"Job Type: {', '.join(preferences['job_type'])}")
+        if preferences.get('work_arrangement'): user_profile_parts.append(f"Work Arrangement: {', '.join(preferences['work_arrangement'])}")
 
-    print("--- Generating Recommendations ---")
-    print(f"User ID: {user_id}")
-    print(f"User Preferences: {json.dumps(preferences, indent=2)}")
+    if not user_profile_parts:
+        raise HTTPException(status_code=400, detail="User has no resume data or preferences set.")
 
-    jobs_cursor = db.jobs.find({})
-    jobs = await jobs_cursor.to_list(length=200) 
+    user_profile_string = "\n".join(user_profile_parts)
+    
+    print(f"--- Generating Recommendations for User: {user_id} ---")
+    print(f"Compiled User Profile:\n{user_profile_string}")
 
+    # --- Fetch Jobs and Generate ---
+    jobs_cursor = jobs_collection.find({})
+    jobs = await jobs_cursor.to_list(length=200)
     if not jobs:
         raise HTTPException(status_code=404, detail="No jobs found in the database")
 
-    # Truncate job descriptions to keep the prompt size reasonable
-    for job in jobs:
-        if 'description' in job and job['description']:
-            job['description'] = job['description'][:500] + '...'
-
-    prompt = f"""
-    You are an expert AI Job Recommendation Assistant. Your task is to analyze user preferences and a list of available jobs, then return a ranked list of the most suitable job recommendations.
-
-    User Preferences:
-- Role: {', '.join(preferences.get('role', []))}
-- Location: {', '.join(preferences.get('location', []))}
-- Tech Stack: {', '.join(preferences.get('tech_stack', []))}
-- Experience Level: {preferences.get('experience_level', 'Not specified')}
-- Company Size: {', '.join(preferences.get('company_size', []))}
-- Job Type: {', '.join(preferences.get('job_type', []))}
-- Work Arrangement: {', '.join(preferences.get('work_arrangement', []))}
-
-    Available Job Postings:
-    {json.dumps([{'title': job.get('title'), 'company': job.get('company'), 'location': job.get('location'), 'description': job.get('description', 'No description available'), 'job_url': job.get('job_url')} for job in jobs], indent=2)}
-
-    Based on the user's preferences, please provide a ranked list of the top 5-10 job recommendations from the list provided. It is crucial that you return the best possible matches, even if none of them are a perfect fit. For each recommendation, calculate a 'match_score' from 0 to 100, where 100 is a perfect match. Also, provide a brief 'reason' for why the job is a good match.
-
-    IMPORTANT: Your final output MUST be a single, valid JSON array of objects. Each object in the array should strictly follow this format:
-    {{
-      "title": "...",
-      "company": "...",
-      "location": "...",
-      "match_score": ...,
-      "reason": "...",
-      "job_url": "..."
-    }}
-
-    Do not include any text, explanations, or markdown formatting before or after the JSON array.
-    """
+    prompt = build_prompt(user_profile_string, jobs)
 
     try:
         print("Sending prompt to Gemini API...")
         model = genai.GenerativeModel("gemini-1.5-flash-latest")
         response = model.generate_content(prompt)
-        
-        print("Received response from Gemini API.")
         cleaned_response_text = response.text.strip().replace("```json", "").replace("```", "").strip()
-        
-        print("Attempting to parse JSON...")
         recommended_jobs_data = json.loads(cleaned_response_text)
-        print("Successfully parsed JSON.")
-        
         recommended_jobs = [RecommendedJob(**job) for job in recommended_jobs_data]
-
-    except (json.JSONDecodeError, ValueError) as e:
-        print(f"--- ERROR: Failed to parse JSON from Gemini response ---")
-        print(f"Error: {e}")
-        print(f"Raw response text was:\n---\n{response.text}\n---")
-        raise HTTPException(status_code=500, detail="Failed to parse recommendations from AI. The format was invalid.")
     except Exception as e:
-        print(f"--- ERROR: An unexpected error occurred with the Gemini API ---")
-        print(f"Error: {e}")
-        raise HTTPException(status_code=500, detail=f"An error occurred while generating recommendations: {e}")
+        print(f"--- ERROR --- \nFailed to generate or parse recommendations: {e}\nRaw Response:\n{response.text if 'response' in locals() else 'No response'}")
+        raise HTTPException(status_code=500, detail="Failed to get or parse recommendations from AI.")
 
+    # --- Save and Return Recommendations ---
     recommendation_data = {
         "user_id": user_id,
         "recommended_jobs": [job.dict() for job in recommended_jobs],
         "generated_at": datetime.utcnow()
     }
-
-    await db.recommendations.update_one(
-        {"user_id": user_id},
-        {"$set": recommendation_data},
-        upsert=True
+    await recommendations_collection.update_one(
+        {"user_id": user_id}, {"$set": recommendation_data}, upsert=True
     )
 
-    # If user has enabled sheets integration, write to their sheet
     if user.get("sheets_enabled") and user.get("plan_type") == "pro":
         await write_to_sheet(user_id, [job.dict() for job in recommended_jobs])
 
     return recommendation_data
 
-
 @router.get("/recommendations/{user_id}")
 async def get_recommendations(user_id: str):
-    rec = await db.recommendations.find_one({"user_id": user_id})
-    
+    rec = await recommendations_collection.find_one({"user_id": user_id})
     if not rec:
         raise HTTPException(status_code=404, detail="No recommendations found. Please generate them first.")
-
     return {
         "recommended_jobs": rec.get("recommended_jobs", []),
         "generated_at": rec.get("generated_at"),

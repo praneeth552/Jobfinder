@@ -172,7 +172,7 @@ export default function PreferencesClient() {
       const token = Cookies.get("token");
       if (token) {
         try {
-          const { data } = await axios.get(`http://127.0.0.1:8000/preferences`, {
+          const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/preferences`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           if (data && Object.keys(data).length > 0) {
@@ -228,7 +228,7 @@ export default function PreferencesClient() {
     formData.append("file", file);
 
     try {
-      const { data } = await axios.post(`http://127.0.0.1:8000/preferences/parse-resume`, formData, {
+      const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/preferences/parse-resume`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${Cookies.get("token")}`
@@ -319,7 +319,7 @@ export default function PreferencesClient() {
 
     // First, confirm the upload to trigger the rate limit timestamp
     try {
-      await axios.post(`http://127.0.0.1:8000/preferences/confirm-upload`, {}, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/preferences/confirm-upload`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
     } catch (error) {
@@ -352,7 +352,7 @@ export default function PreferencesClient() {
     if (editableData) {
       const toastId = toast.loading("Saving your detailed resume profile...");
       try {
-        await axios.post(`http://127.0.0.1:8000/preferences/save-resume`, {
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/preferences/save-resume`, {
           shouldSaveToProfile,
           resumeData: editableData
         }, {
@@ -382,7 +382,7 @@ export default function PreferencesClient() {
     if (!isSubmitting) setIsSubmitting(true);
     const toastId = toast.loading("Saving your preferences...");
     try {
-      await axios.post(`http://127.0.0.1:8000/preferences`, preferences, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/preferences`, preferences, {
         headers: { Authorization: `Bearer ${Cookies.get("token")}` }
       });
       toast.success("Preferences saved successfully!", { id: toastId });

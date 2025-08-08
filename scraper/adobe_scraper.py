@@ -1,14 +1,22 @@
+import os
 import requests
 import logging
 from typing import List, Dict
 import re
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+BACKEND_ENDPOINT = os.getenv("NEXT_PUBLIC_API_URL")
+
+if not BACKEND_ENDPOINT:
+    logging.error("NEXT_PUBLIC_API_URL environment variable not set.")
+    exit(1)
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 ADOBE_API_URL = "https://adobe.wd5.myworkdayjobs.com/wday/cxs/adobe/external_experienced/jobs"
-BACKEND_ENDPOINT = "https://jobfinder-backend-oex9.onrender.com/jobs/"
-
 HEADERS = {
     "Content-Type": "application/json",
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
@@ -86,7 +94,7 @@ def scrape_adobe():
 
         # Push to backend
         try:
-            backend_response = requests.post(BACKEND_ENDPOINT, json=payload)
+            backend_response = requests.post(f"{BACKEND_ENDPOINT}/jobs/", json=payload)
             backend_response.raise_for_status()
             logging.info(f"Successfully sent job '{title}' to backend.")
         except requests.exceptions.RequestException as e:

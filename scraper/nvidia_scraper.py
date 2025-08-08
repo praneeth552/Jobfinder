@@ -1,14 +1,22 @@
+import os
 import requests
 import logging
 from typing import List, Dict
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+BACKEND_ENDPOINT = os.getenv("NEXT_PUBLIC_API_URL")
+
+if not BACKEND_ENDPOINT:
+    logging.error("NEXT_PUBLIC_API_URL environment variable not set.")
+    exit(1)
 
 logging.basicConfig(level=logging.INFO)
 
 NVIDIA_API_URL = "https://nvidia.wd5.myworkdayjobs.com/wday/cxs/nvidia/NVIDIAExternalCareerSite/jobs"
 HEADERS = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"}
 PAYLOAD = {"appliedFacets": {}, "limit": 20, "offset": 0, "searchText": ""}
-
-BACKEND_ENDPOINT = "https://jobfinder-backend-oex9.onrender.com/jobs/"
 
 def fetch_nvidia_jobs() -> List[Dict]:
     logging.info("Fetching NVIDIA job listings from Workday API...")
@@ -43,7 +51,7 @@ def scrape_nvidia():
 
         logging.info(f"[{i}] {title} at {location} — {job_url}")
         try:
-            post_resp = requests.post(BACKEND_ENDPOINT, json=payload)
+            post_resp = requests.post(f"{BACKEND_ENDPOINT}/jobs/", json=payload)
             post_resp.raise_for_status()
             logging.info("Posted successfully.")
         except Exception as e:

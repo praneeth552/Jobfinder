@@ -14,54 +14,55 @@ if not BACKEND_ENDPOINT:
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-def scrape_infosys():
-    logging.info("Fetching Infosys job listings from API.")
+def scrape_intel():
+    logging.info("Fetching INTEL job listings from API.")
 
-    # Infosys jobs API URL
-    INFOSYS_API_URL = "https://intapgateway.infosysapps.com/careersci/search/intapjbsrch/getCareerSearchJobs?sourceId=1,21&searchText=ALL"
+    # INTEL jobs API URL
+    INTEL_API_URL = "https://intel.wd1.myworkdayjobs.com/wday/cxs/intel/External/jobs"
 
     # Headers to mimic browser request
     HEADERS = {
+        "Content-Type": "application/json",
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
-        "Accept": "application/json, text/plain, */*",
+        "Accept": "application/json"
+    }
+
+    # Payload required by the Workday API
+    PAYLOAD = {
+        "appliedFacets": {},
+        "limit": 20,
+        "offset": 0,
+        "searchText": "software"
     }
 
     try:
-        response = requests.get(INFOSYS_API_URL, headers=HEADERS)
+        response = requests.post(INTEL_API_URL, headers=HEADERS, json=PAYLOAD)
         response.raise_for_status()
+        data = response.json()
     except Exception as e:
-        logging.error(f"Failed to fetch data from Infosys API: {e}")
+        logging.error(f"Failed to fetch data from INTEL API: {e}")
         return
 
-    data = response.json()
-
-    # If API returns a list directly
-    jobs = data[:20] if isinstance(data, list) else data.get("careerSearchJobs", [])[:20]
+    jobs = data.get("jobPostings", [])
 
     logging.info(f"Fetched {len(jobs)} jobs. Processing each now...")
 
     for index, job in enumerate(jobs, start=1):
-        # Extracting necessary fields
-        title = job.get("postingTitle", "N/A")
-        location = job.get("location", "N/A")
-        reference_code = job.get("referenceCode")
-        posting_id = job.get("postingId")
-        min_exp = job.get("minExperienceLevel")
-        max_exp = job.get("maxExperienceLevel")
-        skills = job.get("technicalRequirement") or job.get("preferredSkills") or "N/A"
-
-        # Construct job URL if postingId exists
-        if reference_code:
-            job_url = f"https://career.infosys.com/jobdesc?jobReferenceCode={reference_code}&rc=0&jobType=normal"
+        title = job.get("title", "N/A")
+        location = job.get("locationsText", "N/A")
+        external_path = job.get("externalPath", "")
+        
+        if external_path:
+            job_url = f"https://intel.wd1.myworkdayjobs.com/en-US/External{external_path}"
         else:
             job_url = "Not available"
 
-        # Create description combining experience and skills
-        description = f"Experience: {min_exp}-{max_exp} years. Skills: {skills}."
+        # Placeholder for description as it's not in the list view
+        description = "Full description available on the job page."
 
         payload = {
             "title": title,
-            "company": "Infosys",
+            "company": "Intel",
             "location": location,
             "job_url": job_url,
             "description": description
@@ -77,7 +78,7 @@ def scrape_infosys():
         except requests.exceptions.RequestException as e:
             logging.error(f"Error sending job '{title}' to backend: {e}")
 
-    logging.info("Infosys scraping completed successfully.")
+    logging.info("Intel scraping completed successfully.")
 
 if __name__ == "__main__":
-    scrape_infosys()
+    scrape_intel()

@@ -1,6 +1,16 @@
+import os
 import requests
 import logging
 from typing import List, Dict
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+BACKEND_ENDPOINT = os.getenv("NEXT_PUBLIC_API_URL")
+
+if not BACKEND_ENDPOINT:
+    logging.error("NEXT_PUBLIC_API_URL environment variable not set.")
+    exit(1)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -39,8 +49,6 @@ PAYLOAD = {
     'debugQuery': 'false',
     'jobFilters': '[]'
 }
-
-BACKEND_ENDPOINT = "https://jobfinder-backend-oex9.onrender.com/jobs/"
 
 def fetch_accenture_jobs() -> List[Dict]:
     logging.info("Fetching Accenture job listings from API...")
@@ -84,7 +92,7 @@ def scrape_accenture():
 
         logging.info(f"[{i}] {title} at {location_str} — {job_url}")
         try:
-            post_resp = requests.post(BACKEND_ENDPOINT, json=payload)
+            post_resp = requests.post(f"{BACKEND_ENDPOINT}/jobs/", json=payload)
             post_resp.raise_for_status()
             logging.info(f"Successfully posted job '{title}' to backend.")
         except requests.exceptions.RequestException as e:

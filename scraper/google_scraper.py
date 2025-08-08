@@ -2,16 +2,25 @@ import asyncio
 from playwright.async_api import async_playwright
 import logging
 import requests
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+BACKEND_ENDPOINT = os.getenv("NEXT_PUBLIC_API_URL")
+
+if not BACKEND_ENDPOINT:
+    logging.error("NEXT_PUBLIC_API_URL environment variable not set.")
+    exit(1)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 GOOGLE_CAREERS_URL = "https://careers.google.com/jobs/"
-BACKEND_ENDPOINT = "https://jobfinder-backend-oex9.onrender.com/jobs/"
 
 async def scrape_google_careers():
     logging.info(f"Navigating to {GOOGLE_CAREERS_URL} to scrape job data...")
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
+        browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
         try:
             await page.goto(GOOGLE_CAREERS_URL, timeout=60000)
@@ -47,7 +56,7 @@ async def scrape_google_careers():
 
                 logging.info(f"[{index}] {title} | {location} | {job_url}")
                 try:
-                    backend_response = requests.post(BACKEND_ENDPOINT, json=payload)
+                    backend_response = requests.post(f"{BACKEND_ENDPOINT}/jobs/", json=payload)
                     backend_response.raise_for_status()
                     logging.info(f"Successfully sent job '{title}' to backend.")
                 except requests.exceptions.RequestException as e:

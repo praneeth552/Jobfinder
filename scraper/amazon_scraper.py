@@ -1,14 +1,21 @@
 import asyncio
 import requests
-# from playwright.async_api import async_playwright
 import logging
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+BACKEND_ENDPOINT = os.getenv("NEXT_PUBLIC_API_URL")
+
+if not BACKEND_ENDPOINT:
+    logging.error("NEXT_PUBLIC_API_URL environment variable not set.")
+    exit(1)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 BASE_URL = "https://www.amazon.jobs"
 SEARCH_URL = BASE_URL + "/en/search.json?offset=0&result_limit=20&sort=relevant&category%5B%5D=software-development&category%5B%5D=engineering-hardware&category%5B%5D=engineering-operations-it-support&category%5B%5D=project-program-product-management-technical&job_type%5B%5D=Full-Time&country%5B%5D=IND"
-
-BACKEND_ENDPOINT = "https://jobfinder-backend-oex9.onrender.com/jobs/"
 
 async def scrape_amazon_jobs():
     logging.info("Fetching Amazon job listings...")
@@ -36,7 +43,7 @@ async def scrape_amazon_jobs():
             logging.info(f"[{index}] {title} | {location} | {job_url}")
 
             try:
-                backend_response = requests.post(BACKEND_ENDPOINT, json=payload)
+                backend_response = requests.post(f"{BACKEND_ENDPOINT}/jobs/", json=payload)
                 backend_response.raise_for_status()
                 logging.info(f"Successfully sent job '{title}' to backend.")
             except requests.exceptions.RequestException as e:

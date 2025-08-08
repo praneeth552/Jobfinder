@@ -1,6 +1,16 @@
+import os
 import requests
 import logging
 from typing import List, Dict
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+BACKEND_ENDPOINT = os.getenv("NEXT_PUBLIC_API_URL")
+
+if not BACKEND_ENDPOINT:
+    logging.error("NEXT_PUBLIC_API_URL environment variable not set.")
+    exit(1)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -13,8 +23,6 @@ HEADERS = {
     "Referer": "https://ibegin.tcsapps.com/candidate/"
 }
 PAYLOAD = {"jobCity":"","jobFunction":"","jobExperience":"","jobSkill":None,"pageNumber":"1","userText":"developer","jobTitleOrder":None,"jobCityOrder":None,"jobFunctionOrder":None,"jobExperienceOrder":None,"applyByOrder":None,"regular":True,"walkin":True}
-
-BACKEND_ENDPOINT = "https://jobfinder-backend-oex9.onrender.com/jobs/"
 
 def fetch_tcs_jobs() -> List[Dict]:
     logging.info("Fetching TCS job listings from API...")
@@ -58,7 +66,7 @@ def scrape_tcs():
 
         logging.info(f"[{i}] {title} at {location} — {job_url}")
         try:
-            post_resp = requests.post(BACKEND_ENDPOINT, json=payload)
+            post_resp = requests.post(f"{BACKEND_ENDPOINT}/jobs/", json=payload)
             post_resp.raise_for_status()
             logging.info(f"Successfully posted job '{title}' to backend.")
         except requests.exceptions.RequestException as e:

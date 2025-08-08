@@ -11,9 +11,17 @@ google-api-python-client
 google-generativeai
 razorpay
 httpx
+uvicorn
 dnspython
 Jinja2
 python-multipart
+gunicorn
 setuptools
+playwright
+beautifulsoup4
+spacy
+nltk
+pdfminer.six
+docx2txt
 mangum
 werkzeug
