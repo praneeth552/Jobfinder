@@ -116,15 +116,35 @@ async def generate_recommendations(user_id: str):
 
     prompt = build_prompt(user_profile_string, jobs)
 
+    response = None  # Initialize response to None
     try:
         print("Sending prompt to Gemini API...")
         model = genai.GenerativeModel("gemini-1.5-flash-latest")
         response = model.generate_content(prompt)
+        # It's possible for the model to return an empty response or a response with no text
+        if not response or not response.text:
+            print(f"--- ERROR --- \nGemini API returned an empty or invalid response.\nFull Response object: {response}")
+            raise HTTPException(status_code=500, detail="AI model returned an empty response.")
+
         cleaned_response_text = response.text.strip().replace("```json", "").replace("```", "").strip()
+        
+        # Handle empty JSON
+        if not cleaned_response_text:
+            print(f"--- ERROR --- \nCleaned response text is empty.\nRaw Response:\n{response.text}")
+            raise HTTPException(status_code=500, detail="AI model returned an empty JSON response.")
+
         recommended_jobs_data = json.loads(cleaned_response_text)
         recommended_jobs = [RecommendedJob(**job) for job in recommended_jobs_data]
+    except json.JSONDecodeError as e:
+        print(f"--- JSON DECODE ERROR --- \nFailed to parse JSON: {e}\nCleaned Response Text:\n'{cleaned_response_text}'")
+        raise HTTPException(status_code=500, detail="Failed to parse AI recommendation response.")
     except Exception as e:
-        print(f"--- ERROR --- \nFailed to generate or parse recommendations: {e}\nRaw Response:\n{response.text if 'response' in locals() else 'No response'}")
+        error_message = f"--- ERROR --- \nFailed to generate or parse recommendations: {e}"
+        if response and response.text:
+            error_message += f"\nRaw Response:\n{response.text}"
+        else:
+            error_message += "\nNo response object or text was received from the AI."
+        print(error_message)
         raise HTTPException(status_code=500, detail="Failed to get or parse recommendations from AI.")
 
     # --- Save and Return Recommendations ---

@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.responses import Response
 from routes import (
     auth,
     jobs,
@@ -12,6 +13,7 @@ from routes import (
 )
 from dotenv import load_dotenv
 from mangum import Mangum
+import re
 
 load_dotenv()
 
@@ -19,6 +21,23 @@ app = FastAPI()
 
 # This is the handler that AWS Lambda will invoke
 handler = Mangum(app)
+
+# Middleware to normalize URL paths
+@app.middleware("http")
+async def normalize_path(request: Request, call_next):
+    # Use regex to replace multiple slashes with a single slash
+    # and remove a trailing slash if it's not the root path
+    path = request.scope["path"]
+    normalized_path = re.sub(r'/+', '/', path)
+    if len(normalized_path) > 1 and normalized_path.endswith('/'):
+        normalized_path = normalized_path[:-1]
+    
+    if path != normalized_path:
+        request.scope["path"] = normalized_path
+
+    response = await call_next(request)
+    return response
+
 
 origins = [
     "http://localhost",
