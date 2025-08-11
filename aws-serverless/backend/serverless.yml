@@ -40,4 +40,13 @@ functions:
 
 package:
   patterns:
-    - '!./**'
+    - 'main.py'
+    - 'routes/**'
+    - 'services/**'
+    - 'database.py'
+    - 'email_utils.py'
+    - 'models.py'
+    - 'utils.py'
+    - 'client_secret.json'
+    - 'requirements.txt'
+    - 'Dockerfile'
