@@ -77,6 +77,40 @@ export default function DashboardClient() {
   }, [fetchExistingRecommendations]);
 
   useEffect(() => {
+    const fetchSheetStatus = async () => {
+      if (!userId || !token || plan !== 'pro') return;
+      setIsToggleLoading(true);
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/sheets/status`,
+          {
+            params: { user_id: userId },
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setIsSheetsEnabled(res.data.enabled);
+      } catch (error) {
+        console.error("Failed to fetch sheet status:", error);
+      } finally {
+        setIsToggleLoading(false);
+      }
+    };
+
+    const checkRedirectStatus = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("sheets_success") === "true") {
+            // Refetch status and remove query param
+            fetchSheetStatus();
+            const newUrl = window.location.pathname;
+            router.replace(newUrl, undefined, { shallow: true });
+        }
+    }
+
+    fetchSheetStatus();
+    checkRedirectStatus();
+  }, [userId, token, plan, router]);
+
+  useEffect(() => {
     if (!lastGenerationDate) {
       setIsGenerationAllowed(true);
       return;
