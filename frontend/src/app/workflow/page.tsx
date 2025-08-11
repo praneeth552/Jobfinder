@@ -1,3 +1,4 @@
+// Force rebuild
 "use client";
 
 import { motion } from "framer-motion";
@@ -87,10 +88,12 @@ const WorkflowPage = () => {
       id: 2,
       title: "Resume Upload & AI Parsing",
       icon: <Upload size={24} className="text-purple-300" />,
-      description: "Users upload their resume which is parsed by advanced AI to extract skills, experience, and preferences.",
+      description: "Users upload their resume, which is parsed by a sophisticated pipeline to extract skills, experience, and preferences.",
       tech: [
-        { name: "Google Gemini", icon: <Sparkles size={20} className="text-yellow-400" /> },
-        { name: "PDF/DOC Parsing", icon: <Code size={20} className="text-blue-400" /> }
+        { name: "pdfminer.six", icon: <Code size={20} className="text-red-400" /> },
+        { name: "python-docx", icon: <Code size={20} className="text-blue-400" /> },
+        { name: "spaCy", icon: <BrainCircuit size={20} className="text-green-400" /> },
+        { name: "NLTK", icon: <BrainCircuit size={20} className="text-yellow-400" /> }
       ]
     },
     {
@@ -146,12 +149,14 @@ const WorkflowPage = () => {
     },
     {
       id: 8,
-      title: "Cloud Deployment",
+      title: "Cloud Deployment & Automation",
       icon: <Cloud size={24} className="text-purple-300" />,
-      description: "The entire application is deployed on scalable AWS infrastructure with continuous integration.",
+      description: "The backend is deployed as a Docker container on AWS Lambda and automated with GitHub Actions for CI/CD.",
       tech: [
-        { name: "AWS Amplify", icon: <Cloud size={20} className="text-orange-400" /> },
-        { name: "AWS API Gateway", icon: <Server size={20} className="text-orange-400" /> }
+        { name: "AWS Lambda", icon: <Cloud size={20} className="text-orange-400" /> },
+        { name: "Docker", icon: <Code size={20} className="text-blue-400" /> },
+        { name: "GitHub Actions", icon: <Github size={20} className="text-gray-400" /> },
+        { name: "API Gateway", icon: <Server size={20} className="text-orange-400" /> }
       ]
     }
   ];
