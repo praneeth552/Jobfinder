@@ -27,8 +27,8 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install Serverless Framework
-        run: npm install -g serverless
+      - name: Install Serverless Framework v3
+        run: npm install -g serverless@3.38.0
 
       - name: Deploy to AWS
         working-directory: ./aws-serverless/backend
