@@ -102,7 +102,7 @@ export default function DashboardClient() {
             // Refetch status and remove query param
             fetchSheetStatus();
             const newUrl = window.location.pathname;
-            router.replace(newUrl, { shallow: true });
+            router.replace(newUrl);
         }
     }
 
