@@ -1,0 +1,55 @@
+name: Deploy Backend to AWS Lambda
+
+on:
+  push:
+    branches:
+      - main # Triggers on push to the main branch
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Serverless Framework
+        run: npm install -g serverless
+
+      - name: Deploy to AWS
+        working-directory: ./aws-serverless/backend
+        run: serverless deploy --stage dev
+        env:
+          # Pass all necessary secrets to the Serverless deployment
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID }}
+          RAZORPAY_KEY_SECRET: ${{ secrets.RAZORPAY_KEY_SECRET }}
+          RAZORPAY_PRO_PLAN_ID: ${{ secrets.RAZORPAY_PRO_PLAN_ID }}
+          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          MAIL_PORT: ${{ secrets.MAIL_PORT }}
+          MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
+          GOOGLE_SCOPES: ${{ secrets.GOOGLE_SCOPES }}
+          MAIL_FROM_NAME: ${{ secrets.MAIL_FROM_NAME }}
+          MAIL_TLS: ${{ secrets.MAIL_TLS }}
+          MAIL_SSL: ${{ secrets.MAIL_SSL }}

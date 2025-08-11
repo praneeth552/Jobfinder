@@ -1,12 +1,17 @@
-
 service: tackleit-backend
 
 frameworkVersion: '4'
 
 provider:
   name: aws
-  runtime: python3.9
-  region: us-east-1 # You can change this to your preferred AWS region
+  region: us-east-1
+  architecture: x86_64 # Use x86_64 to match the GitHub Actions runner environment
+  
+  ecr:
+    images:
+      appimage:
+        path: ./ # Build from the Dockerfile in the current directory
+
   environment:
     MONGO_URI: ${env:MONGO_URI}
     SECRET_KEY: ${env:SECRET_KEY}
@@ -27,20 +32,12 @@ provider:
     MAIL_TLS: ${env:MAIL_TLS}
     MAIL_SSL: ${env:MAIL_SSL}
 
-plugins:
-  - serverless-python-requirements
-
-custom:
-  pythonRequirements:
-    dockerizePip: true
-    dockerImage: public.ecr.aws/sam/build-python3.9:latest-arm64
-  hooks:
-    before:package:createDeploymentArtifacts:
-      - python3 download_nlp_data.py
-
 functions:
   api:
-    handler: main.handler
+    image: appimage
     events:
       - httpApi: '*'
 
+package:
+  patterns:
+    - '!./**'
