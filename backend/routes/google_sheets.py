@@ -69,7 +69,7 @@ async def oauth_callback(request: Request):
 
     credentials = flow.credentials
     await create_sheet_if_not_exists(state, credentials.to_json())
-    return RedirectResponse("http://localhost:3000/dashboard?sheets_success=true")
+    return RedirectResponse("https://tackleit.xyz/dashboard?sheets_success=true")
 
 @router.get("/status")
 async def get_sheet_status(user_id: str):
