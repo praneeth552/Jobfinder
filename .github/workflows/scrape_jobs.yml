@@ -2,7 +2,7 @@ name: Scrape Jobs Weekly
 
 on:
   schedule:
-    - cron: '0 1 * * 1' # Runs weekly on Monday at 1 AM UTC (disabled for now)
+    - cron: '0 1 * * 1' # Runs weekly on Monday at 1 AM UTC
   workflow_dispatch: # Allows manual trigger from GitHub Actions UI
 
 jobs:
@@ -31,12 +31,14 @@ jobs:
     - name: Clear jobs collection before scraping
       env:
         MONGO_URI: ${{ secrets.MONGO_URI }}
+        NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
       run: |
         python scraper/clear_jobs.py
 
     - name: Run scraper scripts
       env:
         MONGO_URI: ${{ secrets.MONGO_URI }}
+        NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
       run: |
         python scraper/accenture_scraper.py
         python scraper/adobe_scraper.py
