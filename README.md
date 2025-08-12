@@ -192,19 +192,19 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID="your_google_client_id"
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/saipraneethkotyada/Tackleit/issues).
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/praneeth552/Tackleit/issues).
 
 ---
 
 ## 👤 Author
 
-**Sai Praneeth Kotyada**
+**Kotyada Sai Praneeth**
 
--   **GitHub**: [@saipraneethkotyada](https://github.com/praneeth552)
--   **LinkedIn**: [Sai Praneeth Kotyada](https://www.linkedin.com/in/sai-praneeth-kotyada-427358201/)
+-   **GitHub**: [@kotyadasaipraneeth](https://github.com/praneeth552)
+-   **LinkedIn**: [Kotyada Sai Praneeth](https://www.linkedin.com/in/sai-praneeth-kotyada-427358201/)
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License. See the `LICENSE` file for more details.
+This project is licensed under the MIT License. See the [`LICENSE`](LICENSE) file for more details.
