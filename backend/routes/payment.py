@@ -67,4 +67,5 @@ async def create_pro_subscription(current_user: dict = Depends(get_current_user)
         }
 
     except Exception as e:
+        print(f"Razorpay API Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))

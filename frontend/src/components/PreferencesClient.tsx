@@ -603,7 +603,15 @@ export default function PreferencesClient() {
         router.push("/dashboard");
       }
     } catch (err) {
-      const errorMsg = axios.isAxiosError(err) && err.response?.data?.detail ? err.response.data.detail : "Failed to save preferences.";
+      let errorMsg = "Failed to save preferences.";
+      if (axios.isAxiosError(err) && err.response?.data?.detail) {
+        const detail = err.response.data.detail;
+        if (Array.isArray(detail) && detail[0]?.msg) {
+          errorMsg = detail[0].msg;
+        } else if (typeof detail === 'string') {
+          errorMsg = detail;
+        }
+      }
       toast.error(errorMsg, { id: toastId });
     } finally {
       setIsSubmitting(false);
