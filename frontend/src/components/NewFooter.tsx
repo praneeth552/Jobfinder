@@ -43,8 +43,10 @@ const NewFooter = () => {
 
         <div className="flex justify-center items-center space-x-6 mb-8">
           <a href="/about" className="text-gray-400 hover:text-white transition">About Us</a>
+          <a href="/contact" className="text-gray-400 hover:text-white transition">Contact Us</a>
           <a href="/privacy" className="text-gray-400 hover:text-white transition">Privacy Policy</a>
           <a href="/terms" className="text-gray-400 hover:text-white transition">Terms & Conditions</a>
+          <a href="/refund" className="text-gray-400 hover:text-white transition">Refund Policy</a>
         </div>
 
         <div className="text-center mb-8">

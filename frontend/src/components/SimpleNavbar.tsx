@@ -53,8 +53,9 @@ export default function SimpleNavbar({ alwaysWhiteText = false }: { alwaysWhiteT
     exit: (direction: number) => ({ y: direction < 0 ? 20 : -20, opacity: 0 }),
   };
 
-  const textColor = hasScrolled && !alwaysWhiteText ? "text-gray-800" : "text-white";
-  const logoShadow = hasScrolled && !alwaysWhiteText ? 'rgba(0,0,0,0.5)' : 'rgb(255,255,255)';
+  const isTextWhite = !hasScrolled && alwaysWhiteText;
+  const textColor = isTextWhite ? "text-white" : "text-gray-800";
+  const logoShadow = isTextWhite ? 'rgb(255,255,255)' : 'rgba(0,0,0,0.5)';
 
   return (
     <>
