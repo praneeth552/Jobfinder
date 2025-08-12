@@ -50,7 +50,7 @@ const NewFooter = () => {
         </div>
 
         <div className="text-center mb-8">
-          <a href={"https://github.com/praneeth552/Tackleit"} target="_blank" rel="noopener noreferrer" className="text-lg text-gray-400 hover:text-white transition border border-gray-600 rounded-full px-6 py-2">
+          <a href={"https://github.com/praneeth552/Jobfinder"} target="_blank" rel="noopener noreferrer" className="text-lg text-gray-400 hover:text-white transition border border-gray-600 rounded-full px-6 py-2">
             Contribute on GitHub
           </a>
         </div>

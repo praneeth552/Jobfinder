@@ -192,7 +192,7 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID="your_google_client_id"
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/praneeth552/Tackleit/issues).
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/praneeth552/Jobfinder/issues).
 
 ---
 
