@@ -16,7 +16,7 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
 
   return (
     <section
-      className="flex flex-col items-center justify-center min-h-screen px-4"
+      className="flex flex-col items-center justify-center min-h-[calc(var(--vh,1vh)*100)] px-4"
     >
       <motion.h2
         initial={{ opacity: 0, y: 30 }}

@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Cookies from "js-cookie";
 import axios from "axios";
 import GoogleSheetsToggle from "@/components/GoogleSheetsToggle";
 import UserProfile from "@/components/UserProfile";
 import LoadingButton from "@/components/LoadingButton";
 import SimpleNavbar from "./SimpleNavbar";
+import { toast } from "react-hot-toast";
 
 interface Recommendation {
   title: string;
@@ -35,6 +36,7 @@ export default function DashboardClient() {
   const [timeRemaining, setTimeRemaining] = useState<string>("");
 
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const token = typeof window !== "undefined" ? Cookies.get("token") : null;
   const userId = typeof window !== "undefined" ? Cookies.get("user_id") : null;
@@ -43,7 +45,14 @@ export default function DashboardClient() {
   useEffect(() => {
     setIsClient(true);
     setUserPlan((plan as "free" | "pro") || "free");
-  }, [plan]);
+
+    const upgradeSuccess = searchParams.get("upgrade_success");
+    if (upgradeSuccess === "true") {
+      toast.success("Welcome to Pro! Enjoy your new features.");
+      // Remove the query parameter from the URL
+      router.replace(window.location.pathname, undefined);
+    }
+  }, [plan, searchParams, router]);
 
   const fetchExistingRecommendations = useCallback(async () => {
     if (!userId || !token) return;
@@ -274,6 +283,7 @@ export default function DashboardClient() {
                 userPlan={userPlan}
                 onLogout={handleLogout}
                 onEditPreferences={() => router.push("/preferences")}
+                onBilling={() => router.push("/billing")}
               />
             </div>
           </div>

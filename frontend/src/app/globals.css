@@ -25,6 +25,7 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   position: relative;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* Background image layer */
@@ -213,7 +214,7 @@ body::after {
 
 .bottom-fade-effect {
   position: fixed;
-  bottom: 0;
+  bottom: env(safe-area-inset-bottom);
   left: 0;
   width: 100%;
   height: 6rem; /* Increased height */
@@ -223,4 +224,19 @@ body::after {
   mask-image: linear-gradient(to top, black 20%, transparent 100%);
   -webkit-mask-image: linear-gradient(to top, black 20%, transparent 100%);
   z-index: 40;
+}
+
+@keyframes github-glow {
+  0%, 100% {
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.2), 0 0 10px rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    border-color: rgba(255, 255, 255, 1);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4);
+  }
+}
+
+.github-glow-button {
+  animation: github-glow 4s ease-in-out infinite;
 }

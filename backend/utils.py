@@ -52,3 +52,28 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     # Convert ObjectId to string for JSON serialization if needed elsewhere
     user["_id"] = str(user["_id"])
     return user
+
+from datetime import datetime
+
+async def get_current_pro_user(current_user: dict = Depends(get_current_user)):
+    """
+    Dependency to verify if the current user has an active pro subscription.
+    """
+    email = current_user.get("email")
+    user = await db.users.find_one({"email": email})
+
+    if not user:
+        raise HTTPException(status_code=403, detail="User not found.")
+
+    plan_status = user.get("plan_status")
+    valid_until = user.get("subscription_valid_until")
+
+    is_pro = plan_status == "active" and valid_until and valid_until > datetime.utcnow()
+
+    if not is_pro:
+        raise HTTPException(
+            status_code=403,
+            detail="This feature is available for Pro users only. Please upgrade your plan.",
+        )
+
+    return current_user

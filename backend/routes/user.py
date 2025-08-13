@@ -31,3 +31,19 @@ async def upgrade_to_pro(current_user: dict = Depends(get_current_user)):
     await send_pro_welcome_email(user_email, user_name)
 
     return {"message": "User successfully upgraded to Pro"}
+
+@router.get("/subscription", status_code=status.HTTP_200_OK)
+async def get_subscription_details(current_user: dict = Depends(get_current_user)):
+    user_email = current_user.get("email")
+    user = await users_collection.find_one({"email": user_email})
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    return {
+        "plan_status": user.get("plan_status"),
+        "subscription_valid_until": user.get("subscription_valid_until"),
+    }

@@ -1,0 +1,160 @@
+.billingContainer {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(139, 69, 19, 0.1);
+}
+
+.sectionCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.sectionCard:hover {
+  transform: translateY(-2px);
+}
+
+.title {
+  color: #8b4513;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+}
+
+.loadingSpinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+.errorMessage {
+  background-color: #fff5f5;
+  color: #c53030;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  margin: 2rem auto;
+  max-width: 400px;
+}
+
+.userInfoCard,
+.planFeaturesCard,
+.paymentHistoryCard {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.userInfoCard:hover,
+.planFeaturesCard:hover,
+.paymentHistoryCard:hover {
+  transform: translateY(-2px);
+}
+
+.featuresList {
+  list-style: none;
+  padding: 0;
+}
+
+.featuresList li {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+  color: #4a5568;
+}
+
+.featuresList li:before {
+  content: "✓";
+  color: #48bb78;
+  margin-right: 0.75rem;
+}
+
+.button {
+  width: 100%;
+  padding: 0.8rem;
+  margin-top: 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.upgradeButton {
+  composes: button;
+  background: linear-gradient(135deg, #ffd700, #daa520);
+  color: white;
+  border: none;
+}
+
+.manageButton {
+  composes: button;
+  background: white;
+  border: 2px solid #8b4513;
+  color: #8b4513;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.paymentTable {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.paymentTable th,
+.paymentTable td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.paymentTable th {
+  background-color: #f7fafc;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.paymentTable tr:hover {
+  background-color: #f7fafc;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .billingContainer {
+    padding: 1rem;
+    margin: 1rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+}

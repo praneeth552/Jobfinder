@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from bson import ObjectId
 from database import db
 from models import Recommendation, RecommendedJob
@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import os
 import json
 from services.google_sheets import write_to_sheet
+from utils import get_current_pro_user, get_current_user
 
 load_dotenv()
 
@@ -53,8 +54,9 @@ Do not include any text, explanations, or markdown formatting before or after th
 """
     return prompt
 
-@router.post("/generate_recommendations/{user_id}")
-async def generate_recommendations(user_id: str):
+@router.post("/generate_recommendations")
+async def generate_recommendations(current_user: dict = Depends(get_current_pro_user)):
+    user_id = current_user.get("_id")
     try:
         user_object_id = ObjectId(user_id)
     except Exception:
@@ -162,8 +164,9 @@ async def generate_recommendations(user_id: str):
 
     return recommendation_data
 
-@router.get("/recommendations/{user_id}")
-async def get_recommendations(user_id: str):
+@router.get("/recommendations")
+async def get_recommendations(current_user: dict = Depends(get_current_user)):
+    user_id = current_user.get("_id")
     rec = await recommendations_collection.find_one({"user_id": user_id})
     if not rec:
         raise HTTPException(status_code=404, detail="No recommendations found. Please generate them first.")

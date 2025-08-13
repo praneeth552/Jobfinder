@@ -9,7 +9,8 @@ from routes import (
     google_sheets,
     user,
     contact,
-    payment
+    payment,
+    webhooks
 )
 from dotenv import load_dotenv
 from mangum import Mangum
@@ -67,6 +68,7 @@ app.include_router(google_sheets.router, prefix="/sheets", tags=["Google Sheets"
 app.include_router(user.router, prefix="/user", tags=["User"])
 app.include_router(contact.router, tags=["Contact"])
 app.include_router(payment.router, prefix="/payment", tags=["Payment"])  # ✅ Payment router
+app.include_router(webhooks.router, prefix="/webhooks", tags=["Webhooks"])
 
 
 @app.get("/warmup")

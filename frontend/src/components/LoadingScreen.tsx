@@ -29,7 +29,7 @@ export default function LoadingScreen({ onFinish }: { onFinish?: () => void }) {
       initial={{ y: 0 }}
       animate={shouldSlideUp ? { y: "-100%" } : { y: 0 }}
       transition={{ duration: 1.5, ease: "easeInOut" }}
-      className="fixed top-0 left-0 w-screen h-screen bg-black flex flex-col items-center justify-center z-50"
+      className="fixed top-0 left-0 w-screen h-[calc(var(--vh,1vh)*100)] bg-black flex flex-col items-center justify-center z-50"
       style={{ pointerEvents: shouldSlideUp ? "none" : "auto" }}
       aria-label="Loading screen"
     >

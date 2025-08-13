@@ -55,7 +55,7 @@ const UpgradePage = () => {
             );
             Cookies.set("plan_type", "pro");
             alert("Payment Successful! You're now a Pro user.");
-            router.push("/dashboard");
+            router.push("/dashboard?upgrade_success=true");
           } catch (err: unknown) {
             let errorMessage = "An unexpected error occurred.";
             if (err && typeof err === "object" && "response" in err) {

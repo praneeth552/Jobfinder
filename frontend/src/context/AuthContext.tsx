@@ -12,7 +12,7 @@ interface AuthContextProps {
   setPlanType: (plan: "free" | "pro") => void;
 }
 
-const AuthContext = createContext<AuthContextProps | null>(null);
+export const AuthContext = createContext<AuthContextProps | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);

@@ -41,7 +41,7 @@ const NewFooter = () => {
           </p>
         </motion.div>
 
-        <div className="flex justify-center items-center space-x-6 mb-8">
+        <div className="flex flex-col md:flex-row flex-wrap justify-center items-center space-y-4 md:space-y-0 md:space-x-6 mb-8">
           <a href="/about" className="text-gray-400 hover:text-white transition">About Us</a>
           <a href="/contact" className="text-gray-400 hover:text-white transition">Contact Us</a>
           <a href="/privacy" className="text-gray-400 hover:text-white transition">Privacy Policy</a>
@@ -50,7 +50,7 @@ const NewFooter = () => {
         </div>
 
         <div className="text-center mb-8">
-          <a href={"https://github.com/praneeth552/Jobfinder"} target="_blank" rel="noopener noreferrer" className="text-lg text-gray-400 hover:text-white transition border border-gray-600 rounded-full px-6 py-2">
+          <a href={"https://github.com/praneeth552/Jobfinder"} target="_blank" rel="noopener noreferrer" className="text-lg text-gray-400 hover:text-white transition border border-gray-600 rounded-full px-6 py-2 github-glow-button">
             Contribute on GitHub
           </a>
         </div>

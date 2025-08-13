@@ -1,16 +1,24 @@
 "use client";
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { User, LogOut, Star, Settings } from 'lucide-react';
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { User, LogOut, Star, Settings } from "lucide-react";
+
+import { CreditCard } from "lucide-react";
 
 interface UserProfileProps {
-  userPlan: 'free' | 'pro';
+  userPlan: "free" | "pro";
   onLogout: () => void;
   onEditPreferences: () => void;
+  onBilling: () => void;
 }
 
-const UserProfile = ({ userPlan, onLogout, onEditPreferences }: UserProfileProps) => {
+const UserProfile = ({
+  userPlan,
+  onLogout,
+  onEditPreferences,
+  onBilling,
+}: UserProfileProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -22,7 +30,7 @@ const UserProfile = ({ userPlan, onLogout, onEditPreferences }: UserProfileProps
         className="flex items-center gap-2 rounded-full bg-white p-2 shadow-md"
       >
         <User className="text-[#8B4513]" />
-        {userPlan === 'pro' && (
+        {userPlan === "pro" && (
           <span className="flex items-center gap-1 bg-yellow-400 text-white px-2 py-1 rounded-full text-xs font-semibold">
             <Star size={12} />
             Pro
@@ -52,6 +60,20 @@ const UserProfile = ({ userPlan, onLogout, onEditPreferences }: UserProfileProps
                   Edit Preferences
                 </button>
               </li>
+              {userPlan === "pro" && (
+                <li>
+                  <button
+                    onClick={() => {
+                      onBilling();
+                      setIsOpen(false);
+                    }}
+                    className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <CreditCard size={16} />
+                    Billing
+                  </button>
+                </li>
+              )}
               <li>
                 <button
                   onClick={() => {

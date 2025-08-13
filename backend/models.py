@@ -42,6 +42,9 @@ class User(BaseModel):
     is_first_time_user: bool = True
     preferences: Optional[UserPreferences] = None
     plan_type: PlanType = PlanType.free  # 🔥 default to 'free'
+    razorpay_subscription_id: Optional[str] = None
+    plan_status: Optional[str] = None # e.g., 'active', 'cancelled', 'halted'
+    subscription_valid_until: Optional[datetime] = None
     last_resume_upload: Optional[datetime] = None
     created_at: datetime = datetime.utcnow()
     updated_at: datetime = datetime.utcnow()

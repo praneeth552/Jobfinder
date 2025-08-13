@@ -11,6 +11,7 @@ from database import db
 import os
 from dotenv import load_dotenv
 from bson import ObjectId
+from utils import get_current_pro_user, get_current_user
 
 load_dotenv()
 router = APIRouter()
@@ -26,13 +27,11 @@ SCOPES = [
 REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
 
 @router.get("/auth")
-async def authorize_sheet_access(user_id: str):
+async def authorize_sheet_access(current_user: dict = Depends(get_current_pro_user)):
     """
     Starts the OAuth 2.0 flow for the user to grant access to their Google Sheets.
     """
-    user = await db.users.find_one({"_id": ObjectId(user_id)})
-    if not user or user.get("plan_type") != "pro":
-        raise HTTPException(status_code=403, detail="Google Sheets integration is a Pro feature.")
+    user_id = current_user.get("_id")
 
     print(f"--- USING REDIRECT URI: '{REDIRECT_URI}' ---")
     flow = Flow.from_client_secrets_file(
@@ -72,14 +71,16 @@ async def oauth_callback(request: Request):
     return RedirectResponse("https://tackleit.xyz/dashboard?sheets_success=true")
 
 @router.get("/status")
-async def get_sheet_status(user_id: str):
+async def get_sheet_status(current_user: dict = Depends(get_current_user)):
+    user_id = current_user.get("_id")
     user = await db.users.find_one({"_id": ObjectId(user_id)})
     if user and user.get("sheets_enabled"):
         return {"enabled": True}
     return {"enabled": False}
 
 @router.post("/disable")
-async def disable_sheet_sync(user_id: str):
+async def disable_sheet_sync(current_user: dict = Depends(get_current_user)):
+    user_id = current_user.get("_id")
     await db.users.update_one(
         {"_id": ObjectId(user_id)},
         {"$set": {"sheets_enabled": False}}

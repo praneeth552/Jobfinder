@@ -58,8 +58,14 @@ async def create_pro_subscription(current_user: dict = Depends(get_current_user)
             "plan_id": plan_id,
             "customer_id": razorpay_customer_id,
             "customer_notify": 1,
-            "total_count": 12,  # Example: 12 monthly payments
+            "total_count": 12,
         })
+
+        # Save the subscription ID to the user's record
+        await users_collection.update_one(
+            {"email": user_email},
+            {"$set": {"razorpay_subscription_id": subscription["id"]}}
+        )
 
         return {
             "subscription_id": subscription["id"],
@@ -67,4 +73,30 @@ async def create_pro_subscription(current_user: dict = Depends(get_current_user)
         }
 
     except Exception as e:
+        print(f"Razorpay API Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/create-portal-session", status_code=status.HTTP_200_OK)
+async def create_portal_session(current_user: dict = Depends(get_current_user)):
+    user_email = current_user.get("email")
+    user = await users_collection.find_one({"email": user_email})
+
+    if not user or not user.get("razorpay_customer_id"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User is not a Razorpay customer.",
+        )
+
+    try:
+        # This is a placeholder for where you would call the Razorpay API
+        # to create a customer portal session.
+        #
+        # Example (conceptual):
+        # portal_session = razorpay_client.customer.create_portal_session(user["razorpay_customer_id"])
+        # return {"portal_url": portal_session["url"]}
+        
+        # For now, returning a dummy URL. Replace with your actual implementation.
+        return {"portal_url": "https://razorpay.com/docs/customer-portal/"}
+    except Exception as e:
+        print(f"Razorpay Portal Session Error: {e}")
+        raise HTTPException(status_code=500, detail="Could not create customer portal session.")
