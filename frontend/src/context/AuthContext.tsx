@@ -1,7 +1,7 @@
 // frontend/context/AuthContext.tsx
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
 
@@ -12,6 +12,7 @@ interface AuthContextProps {
   planType: "free" | "pro";
   isAuthenticated: boolean;
   setPlanType: (plan: "free" | "pro") => void;
+  fetchUser: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextProps | null>(null);
@@ -21,8 +22,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
   const [planType, setPlanType] = useState<"free" | "pro">("free");
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  useEffect(() => {
+  const fetchUser = useCallback(async () => {
     const storedToken = Cookies.get("token");
     const storedUserId = Cookies.get("user_id");
     const storedPlan = Cookies.get("plan_type") as "free" | "pro" | undefined;
@@ -34,24 +36,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setPlanType(storedPlan);
       }
 
-      const fetchUserName = async () => {
-        try {
-          const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/me`, {
-            headers: { Authorization: `Bearer ${storedToken}` },
-          });
-          setUserName(res.data.name);
-        } catch (error) {
-          console.error("Failed to fetch user name", error);
-        }
-      };
-
-      fetchUserName();
+      try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/me`, {
+          headers: { Authorization: `Bearer ${storedToken}` },
+        });
+        setUserName(res.data.name);
+      } catch (error) {
+        console.error("Failed to fetch user name", error);
+        // Clear cookies if the token is invalid
+        Cookies.remove("token");
+        Cookies.remove("user_id");
+        Cookies.remove("plan_type");
+        setToken(null);
+        setUserId(null);
+        setUserName(null);
+        setPlanType("free");
+      }
     }
+    setIsInitialized(true);
   }, []);
 
   return (
     <AuthContext.Provider
-      value={{ token, userId, userName, planType, isAuthenticated: !!token, setPlanType }}
+      value={{ token, userId, userName, planType, isAuthenticated: !!token, setPlanType, fetchUser }}
     >
       {children}
     </AuthContext.Provider>
@@ -59,3 +66,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export const useAuth = () => useContext(AuthContext)!;
+
+export const useAuthInitializer = () => {
+  const { fetchUser } = useAuth();
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+};

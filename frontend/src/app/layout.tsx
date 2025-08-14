@@ -4,6 +4,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Toaster } from 'react-hot-toast';
 import ViewportHeightSetter from '@/components/ViewportHeightSetter';
 import { AuthProvider } from "@/context/AuthContext";
+import AuthInitializer from "@/components/AuthInitializer";
 
 export const metadata = {
   /* ... */ };
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ""}>
           <AuthProvider>
+            <AuthInitializer />
             <ViewportHeightSetter />
             <Toaster position="top-center" toastOptions={{ style: { zIndex: 9999 } }} />
             {children}

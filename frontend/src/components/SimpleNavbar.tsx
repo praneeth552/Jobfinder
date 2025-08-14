@@ -10,7 +10,7 @@ import MobileContactModal from "./MobileContactModal";
 const buttonTexts = ["Got Ideas?", "Want to Collaborate?"];
 
 export default function SimpleNavbar({ alwaysWhiteText = false }: { alwaysWhiteText?: boolean }) {
-  const [hasScrolled, setHasScrolled] = useState(true);
+  const [hasScrolled, setHasScrolled] = useState(false);
   const [isContactModalOpen, setContactModalOpen] = useState(false);
   const [textIndex, setTextIndex] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -35,7 +35,7 @@ export default function SimpleNavbar({ alwaysWhiteText = false }: { alwaysWhiteT
 
   useEffect(() => {
     const handleScroll = () => {
-      
+      setHasScrolled(window.scrollY > 10);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);

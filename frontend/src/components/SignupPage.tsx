@@ -182,7 +182,7 @@ export default function SignupPage() {
       `}</style>
 
       <SimpleNavbar />
-      <main className="absolute w-full h-full flex flex-col items-center justify-start pt-28 sm:pt-20 px-4 signup-page-bg py-8 sm:py-12 overflow-y-auto">
+      <main className="absolute w-full h-full flex flex-col items-center justify-start pt-20 sm:pt-28 px-4 signup-page-bg py-8 sm:py-12 overflow-y-auto">
         <div className="relative z-20 w-full max-w-sm">
           <Curtain isLoading={isSuccess} onFinish={handleAnimationFinish} />
           <div className="bg-white/10 backdrop-blur-xl p-6 sm:p-8 rounded-2xl flex flex-col items-center shadow-lg border border-white/20">
