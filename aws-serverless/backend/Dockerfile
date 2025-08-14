@@ -7,9 +7,6 @@ COPY . ${LAMBDA_TASK_ROOT}
 # Copy the requirements file
 COPY requirements.txt ${LAMBDA_TASK_ROOT}
 
-# Install build tools like gcc
-RUN yum install -y gcc
-
 # Install the specified packages from requirements.txt
 RUN pip install -r requirements.txt
 

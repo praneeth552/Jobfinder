@@ -86,20 +86,17 @@ async def create_portal_session(current_user: dict = Depends(get_current_user)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User is not a Razorpay customer.",
         )
-    
-    subscription_id = user.get("razorpay_subscription_id")
-    if not subscription_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Razorpay subscription ID not found for this user.",
-        )
 
     try:
-        portal_session = razorpay_client.invoice.create({
-            "type": "link",
-            "subscription_id": subscription_id
-        })
-        return {"portal_url": portal_session["short_url"]}
+        # This is a placeholder for where you would call the Razorpay API
+        # to create a customer portal session.
+        #
+        # Example (conceptual):
+        # portal_session = razorpay_client.customer.create_portal_session(user["razorpay_customer_id"])
+        # return {"portal_url": portal_session["url"]}
+        
+        # For now, returning a dummy URL. Replace with your actual implementation.
+        return {"portal_url": "https://razorpay.com/docs/customer-portal/"}
     except Exception as e:
         print(f"Razorpay Portal Session Error: {e}")
         raise HTTPException(status_code=500, detail="Could not create customer portal session.")

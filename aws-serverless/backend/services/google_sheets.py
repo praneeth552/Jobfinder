@@ -86,4 +86,3 @@ async def write_to_sheet(user_id: str, data: list):
 
     except Exception as e:
         print(f"An error occurred writing to the sheet: {e}")
-
