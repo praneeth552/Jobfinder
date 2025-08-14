@@ -2,15 +2,19 @@ import "./globals.css";
 import type { ReactNode } from "react";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Toaster } from 'react-hot-toast';
-import ViewportHeightSetter from '@/components/ViewportHeightSetter';
+// import ViewportHeightSetter from '@/components/ViewportHeightSetter';
 import { AuthProvider } from "@/context/AuthContext";
 import AuthInitializer from "@/components/AuthInitializer";
 
 export const metadata = {
-  title: "Tackleit - AI Job Search",
+  metadataBase: new URL('https://tackleit.xyz'),
+  title: {
+    default: 'Tackleit',
+    template: `%s - Tackleit`,
+  },
   description: "Tackleit is an AI-powered job search platform that helps you find the perfect job.",
   icons: {
-    icon: "/icon.svg",
+    icon: "/favicon.svg",
   },
 };
 
@@ -29,7 +33,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ""}>
           <AuthProvider>
             <AuthInitializer />
-            <ViewportHeightSetter />
+            {/* <ViewportHeightSetter /> */}
             <Toaster position="top-center" toastOptions={{ style: { zIndex: 9999 } }} />
             {children}
           </AuthProvider>

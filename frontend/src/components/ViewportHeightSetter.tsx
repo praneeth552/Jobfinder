@@ -1,29 +1,27 @@
-"use client";
+// "use client";
 
-import { useEffect } from 'react';
+// import { useEffect } from 'react';
 
-const ViewportHeightSetter = () => {
-  useEffect(() => {
-    const setVh = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-    };
+// const ViewportHeightSetter = () => {
+//   useEffect(() => {
+//     const setVh = () => {
+//       const vh = window.innerHeight * 0.01;
+//       document.documentElement.style.setProperty('--vh', `${vh}px`);
+//     };
 
-    setVh();
+//     setVh();
 
-    const handleResize = () => {
-      setVh();
-    };
+//     const handleResize = () => {
+//       setVh();
+//     };
 
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('scroll', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('scroll', handleResize);
-    };
-  }, []);
+//     window.addEventListener('resize', handleResize);
+//     return () => {
+//       window.removeEventListener('resize', handleResize);
+//     };
+//   }, []);
 
-  return null;
-};
+//   return null;
+// };
 
-export default ViewportHeightSetter;
+// export default ViewportHeightSetter;
