@@ -15,7 +15,7 @@ const buttonTexts = ["Got Ideas?", "Want to Collaborate?"];
 
 export default function Navbar({ onGetStarted }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [hasScrolled, setHasScrolled] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(true);
   const [isOverContactForm, setIsOverContactForm] = useState(false);
   const router = useRouter();
 
@@ -32,7 +32,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
 
   useEffect(() => {
     const handleScroll = () => {
-      setHasScrolled(window.scrollY > 10);
+      
 
       const contactSection = document.getElementById("contact-section");
       if (contactSection) {
