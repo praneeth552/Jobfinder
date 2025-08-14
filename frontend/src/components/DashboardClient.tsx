@@ -243,12 +243,12 @@ export default function DashboardClient() {
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8 }}
-              className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#8B4513] text-center md:text-left"
+              className="text-2xl sm:text-3xl font-bold text-[#8B4513] text-center md:text-left"
             >
               Job Recommendations
             </motion.h1>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center md:justify-end gap-3 w-full md:w-auto">
+            <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 w-full md:w-auto">
               <LoadingButton
                 onClick={handleGenerateRecommendations}
                 isLoading={isLoading}

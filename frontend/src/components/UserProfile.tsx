@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, LogOut, Star, Settings } from "lucide-react";
-
+import { useAuth } from "@/context/AuthContext";
 import { CreditCard } from "lucide-react";
 
 interface UserProfileProps {
@@ -20,6 +20,7 @@ const UserProfile = ({
   onBilling,
 }: UserProfileProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { userName } = useAuth();
 
   return (
     <div className="relative">
@@ -30,6 +31,7 @@ const UserProfile = ({
         className="flex items-center gap-2 rounded-full bg-white p-2 shadow-md"
       >
         <User className="text-[#8B4513]" />
+        {userName && <span className="text-sm font-medium text-gray-700">{userName}</span>}
         {userPlan === "pro" && (
           <span className="flex items-center gap-1 bg-yellow-400 text-white px-2 py-1 rounded-full text-xs font-semibold">
             <Star size={12} />
@@ -60,20 +62,18 @@ const UserProfile = ({
                   Edit Preferences
                 </button>
               </li>
-              {userPlan === "pro" && (
-                <li>
-                  <button
-                    onClick={() => {
-                      onBilling();
-                      setIsOpen(false);
-                    }}
-                    className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    <CreditCard size={16} />
-                    Billing
-                  </button>
-                </li>
-              )}
+              <li>
+                <button
+                  onClick={() => {
+                    onBilling();
+                    setIsOpen(false);
+                  }}
+                  className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <CreditCard size={16} />
+                  Billing
+                </button>
+              </li>
               <li>
                 <button
                   onClick={() => {

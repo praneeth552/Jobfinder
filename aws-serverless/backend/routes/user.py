@@ -48,41 +48,18 @@ async def get_subscription_details(current_user: dict = Depends(get_current_user
         "subscription_valid_until": user.get("subscription_valid_until"),
     }
 
-
 @router.get("/me", status_code=status.HTTP_200_OK)
-async def get_user_details(current_user: dict = Depends(get_current_user)):
+async def get_user_me(current_user: dict = Depends(get_current_user)):
     user_email = current_user.get("email")
-    if not user_email:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User not authenticated",
-        )
-
     user = await users_collection.find_one({"email": user_email})
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
+    
+    # Convert ObjectId to string for JSON serialization
+    user["_id"] = str(user["_id"])
 
-    return {
-        "name": user.get("name"),
-        "email": user.get("email"),
-        "plan_type": user.get("plan_type", "free"),
-        "is_first_time_user": user.get("is_first_time_user", True),
-        "user_id": str(user.get("_id")),
-        "sheets_enabled": user.get("sheets_enabled", False)
-    }
-
-@router.get("/{user_id}/plan")
-async def get_user_plan(user_id: str):
-    try:
-        user_object_id = ObjectId(user_id)
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid user ID format")
-
-    user = await users_collection.find_one({"_id": user_object_id})
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return {"plan_type": user.get("plan_type", "free")}
+    return user

@@ -49,7 +49,7 @@ export default function BillingPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/subscription/upgrade`,
+        `${process.env.NEXT_PUBLIC_API_URL}/payment/create-pro-subscription`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -57,6 +57,20 @@ export default function BillingPage() {
       window.location.href = response.data.checkout_url;
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to process upgrade");
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/payment/create-portal-session`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      window.location.href = response.data.portal_url;
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to open management portal");
     }
   };
 
@@ -109,8 +123,8 @@ export default function BillingPage() {
           transition={{ delay: 0.2 }}
           className={styles.sectionCard}
         >
-          <h2 className="text-xl font-semibold mb-4">Account Details</h2>
-          <div className="grid gap-3">
+          <h2 className="text-xl font-semibold mb-4 text-black">Account Details</h2>
+          <div className="grid gap-3 text-black">
             <p>
               <strong>Name:</strong> {user.name}
             </p>
@@ -139,21 +153,19 @@ export default function BillingPage() {
           transition={{ delay: 0.3 }}
           className={styles.sectionCard}
         >
-          <h2 className="text-xl font-semibold mb-4">Plan Features</h2>
+          <h2 className="text-xl font-semibold mb-4 text-black">Plan Features</h2>
           {user.plan_type === "pro" ? (
             <>
               <ul className={styles.featuresList}>
-                <motion.li whileHover={{ x: 5 }}>Unlimited access</motion.li>
-                <motion.li whileHover={{ x: 5 }}>Priority support</motion.li>
-                <motion.li whileHover={{ x: 5 }}>All premium features</motion.li>
+                <motion.li whileHover={{ x: 5 }}>Weekly Job Recommendations</motion.li>
+                <motion.li whileHover={{ x: 5 }}>Export Jobs to Google Sheets</motion.li>
+                <motion.li whileHover={{ x: 5 }}>Full access to all new features</motion.li>
               </ul>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className={styles.manageButton}
-                onClick={() =>
-                  (window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/subscription/manage`)
-                }
+                onClick={handleManageSubscription}
               >
                 Manage Subscription
               </motion.button>
@@ -161,13 +173,13 @@ export default function BillingPage() {
           ) : (
             <>
               <ul className={styles.featuresList}>
-                <motion.li whileHover={{ x: 5 }}>Basic access</motion.li>
-                <motion.li whileHover={{ x: 5 }}>Limited features</motion.li>
+                <motion.li whileHover={{ x: 5 }}>Monthly Job Recommendations</motion.li>
+                <motion.li whileHover={{ x: 5 }}>Standard Feature Access</motion.li>
               </ul>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className={styles.upgradeButton}
+                className={`${styles.upgradeButton} submit-button-swipe`}
                 onClick={handleUpgrade}
               >
                 Upgrade to Pro
@@ -183,7 +195,7 @@ export default function BillingPage() {
             transition={{ delay: 0.4 }}
             className={styles.sectionCard}
           >
-            <h2 className="text-xl font-semibold mb-4">Payment History</h2>
+            <h2 className="text-xl font-semibold mb-4 text-black">Payment History</h2>
             <div className="overflow-x-auto">
               <table className={styles.paymentTable}>
                 <thead>

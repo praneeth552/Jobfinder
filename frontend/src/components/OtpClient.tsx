@@ -3,8 +3,8 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import toast from "react-hot-toast";
-import Curtain from "@/components/Curtain";
 import LoadingButton from "@/components/LoadingButton";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const OtpClient = () => {
     const router = useRouter();
@@ -12,7 +12,6 @@ const OtpClient = () => {
     const email = searchParams.get("email");
     const [otp, setOtp] = useState("");
     const [loading, setLoading] = useState(false);
-    const [isSuccess, setIsSuccess] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -20,7 +19,7 @@ const OtpClient = () => {
         try {
             await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-otp`, { email, otp });
             toast.success("Verification successful! Please sign in.");
-            setIsSuccess(true);
+            router.replace("/signin");
         } catch (error: unknown) {
             let errorMessage = "An unexpected error occurred.";
             if (error && typeof error === "object" && "response" in error) {
@@ -34,15 +33,9 @@ const OtpClient = () => {
         }
     };
 
-    const handleAnimationFinish = () => {
-        if (isSuccess) {
-            router.replace("/signin");
-        }
-    };
-
     return (
     <main className="flex flex-col items-center justify-center min-h-screen px-4 relative animated-gradient-bg">
-      <Curtain isLoading={loading && isSuccess} onFinish={handleAnimationFinish} />
+      {loading && <LoadingSpinner />}
             <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-2xl">
                 <h2 className="text-3xl font-bold text-center text-[#8B4513]">Enter OTP</h2>
                 <p className="text-center text-gray-600">

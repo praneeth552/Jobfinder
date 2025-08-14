@@ -95,3 +95,4 @@ async def handle_contact_form(form: ContactForm):
         raise HTTPException(status_code=500, detail="Failed to send message via all channels.")
 
     return {"message": "Your message has been received successfully!"}
+

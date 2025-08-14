@@ -1,12 +1,13 @@
 .tech-stack-container {
   padding: 4rem 0;
   text-align: center;
+  background-color: white;
 }
 
 .tech-stack-title {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #8B4513;
+  color: #333;
   margin-bottom: 3rem;
 }
 
@@ -15,36 +16,72 @@
   overflow: hidden;
   position: relative;
   display: flex;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
 }
 
 .tech-stack-track {
   display: flex;
   flex-shrink: 0;
-  animation: scroll 30s linear infinite;
+  animation: scroll 40s linear infinite;
+  will-change: transform;
 }
 
-.tech-item {
-  width: 220px; /* Adjusted width */
+.tech-stack-marquee:hover .tech-stack-track {
+  animation-play-state: paused;
+}
+
+.tech-logo-container {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  background-color: white;
-  border-radius: 0.75rem;
-  margin: 0 1rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  color: black; /* Set text color to black */
+  padding: 0 4rem;
+  gap: 1rem; /* Add gap for text */
 }
 
 .tech-logo {
   height: 40px;
-  max-width: 100px;
-  margin-right: 1rem;
+  width: auto;
+  max-width: 100px; /* Adjust max-width */
+  filter: grayscale(100%);
+  transition: filter 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
+  opacity: 0.7;
+  flex-shrink: 0; /* Prevent logo from shrinking */
 }
 
-.tech-item img[src*="next.svg"] {
+.tech-name {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 600;
+  color: #4a5568; /* gray-700 */
+  white-space: nowrap;
+  transition: color 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
+  opacity: 0.7;
+}
+
+.tech-stack-marquee:hover .tech-logo,
+.tech-stack-marquee:hover .tech-name {
+  filter: grayscale(0%);
+  opacity: 1;
+}
+
+.tech-stack-marquee:hover .tech-name {
+    color: #000;
+}
+
+.tech-logo-container:hover .tech-logo,
+.tech-logo-container:hover .tech-name {
+  transform: scale(1.1);
+}
+
+.tech-logo[src*="next.svg"] {
   height: 25px;
+}
+
+/* More specific selector for AWS logo */
+.tech-logo-container img.tech-logo[src*="aws.svg"] {
+  height: 45px !important;
+  width: auto !important;
 }
 
 @keyframes scroll {
@@ -54,8 +91,4 @@
   to {
     transform: translateX(-100%);
   }
-}
-
-.tech-stack-marquee:hover .tech-stack-track {
-  animation-play-state: paused;
 }

@@ -12,19 +12,42 @@ const TechStack = () => {
     { name: 'FastAPI', logo: '/fastapi.svg' },
     { name: 'MongoDB', logo: '/mongodb.svg' },
     { name: 'Tailwind CSS', logo: '/tailwind.svg' },
-    { name: 'Gemini', logo: '/gemini.svg' }, // Added
-    { name: 'AWS', logo: '/aws.svg' }, // Added
-    { name: 'Playwright', logo: '/playwright.svg' }, // Added
-    { name: 'GitHub Actions', logo: '/github-actions.svg' }, // Suggested & Added
-    { name: 'Framer Motion', logo: '/framer.svg' }, // Suggested & Added
+    { name: 'Gemini', logo: '/gemini.svg' },
+    { name: 'AWS', logo: '/aws.svg' },
+    { name: 'Playwright', logo: '/playwright.svg' },
+    { name: 'GitHub Actions', logo: '/github-actions.svg' },
+    { name: 'Framer Motion', logo: '/framer.svg' },
+    { name: 'Razorpay', logo: '/razorpay.svg' },
   ];
 
-  const renderTrack = (trackKey: string) => (
+  // Names to display next to logos
+  const namesToDisplay = [
+    'FastAPI',
+    'Tailwind CSS',
+    'Gemini',
+    'Playwright',
+    'GitHub Actions',
+    'Framer Motion',
+    'React',
+    'Python',
+  ];
+
+  const renderTrack = (trackKey: string, isPriority: boolean) => (
     <div className="tech-stack-track" key={trackKey}>
       {tech.map((t, index) => (
-        <div className="tech-item" key={`${trackKey}-${index}`}>
-          <Image src={t.logo} alt={t.name} className="tech-logo" width={24} height={24} />
-          <span>{t.name}</span>
+        <div className="tech-logo-container" key={`${trackKey}-${index}`}>
+          <Image
+            src={t.logo}
+            alt={t.name}
+            className="tech-logo"
+            width={100}
+            height={40}
+            style={{ objectFit: 'contain' }}
+            priority={isPriority} // Add priority prop
+          />
+          {namesToDisplay.includes(t.name) && (
+            <span className="tech-name">{t.name}</span>
+          )}
         </div>
       ))}
     </div>
@@ -34,8 +57,8 @@ const TechStack = () => {
     <div className="tech-stack-container">
       <h2 className="tech-stack-title">Powered by the latest technologies</h2>
       <div className="tech-stack-marquee">
-        {renderTrack('track1')}
-        {renderTrack('track2')}
+        {renderTrack('track1', true)} {/* First track is priority */}
+        {renderTrack('track2', false)} {/* Second track is not */}
       </div>
     </div>
   );

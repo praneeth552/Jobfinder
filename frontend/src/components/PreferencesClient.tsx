@@ -12,6 +12,7 @@ import { Check, ChevronsUpDown, Briefcase, Mail, Phone, User, GraduationCap, Spa
 
 import WelcomeCurtain from "@/components/WelcomeCurtain";
 import LoadingButton from "@/components/LoadingButton";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 // --- Data Constants (Expanded) ---
 const ROLES = [
@@ -371,6 +372,7 @@ export default function PreferencesClient() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isParsing, setIsParsing] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Modal flow state
   const [editableData, setEditableData] = useState<ParsedResumeData | null>(null);
@@ -618,12 +620,18 @@ export default function PreferencesClient() {
     }
   };
 
-  if (loading) return <div className="flex justify-center items-center min-h-screen bg-gray-100">Loading...</div>;
+  const handleWelcomeAnimationComplete = () => {
+    setIsRedirecting(true);
+    router.push("/dashboard");
+  };
+
+  if (loading) return <LoadingSpinner />;
 
   return (
     <>
       <style>{`.pref-page-bg { background-image: url('/background.jpeg'); background-size: cover; background-position: center; position: relative; overflow: hidden; } .pref-page-bg::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(270deg, rgba(255, 245, 225, 0.6), rgba(253, 235, 208, 0.6), rgba(255, 218, 185, 0.6), rgba(255, 228, 181, 0.6)); background-size: 400% 400%; animation: gradientAnimation 15s ease infinite; z-index: 0; } @keyframes gradientAnimation { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } } .pill-glow { box-shadow: 0 0 15px rgba(255, 177, 0, 0.5), 0 0 30px rgba(255, 177, 0, 0.3); }`}</style>
-      <AnimatePresence>{showWelcome && <WelcomeCurtain show={showWelcome} />}</AnimatePresence>
+      <AnimatePresence>{showWelcome && <WelcomeCurtain show={showWelcome} onAnimationComplete={handleWelcomeAnimationComplete} />}</AnimatePresence>
+      {isRedirecting && <LoadingSpinner />}
       <main className="flex flex-col items-center min-h-screen px-4 py-12 pref-page-bg">
         <div className="relative z-10 w-full flex flex-col items-center">
           <div className="mb-8 text-center">

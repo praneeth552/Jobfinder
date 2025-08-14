@@ -2,9 +2,10 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
+import { usePathname } from 'next/navigation'; // Import usePathname
 import { X } from "lucide-react";
 import ContactForm from "./ContactForm";
-import MobileContactModal from "./MobileContactModal"; // Import the new mobile modal
+import MobileContactModal from "./MobileContactModal";
 
 const buttonTexts = ["Got Ideas?", "Want to Collaborate?"];
 
@@ -14,6 +15,8 @@ export default function SimpleNavbar({ alwaysWhiteText = false }: { alwaysWhiteT
   const [textIndex, setTextIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const [isMobile, setIsMobile] = useState(false);
+  
+  const pathname = usePathname(); // Get the current path
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -53,9 +56,20 @@ export default function SimpleNavbar({ alwaysWhiteText = false }: { alwaysWhiteT
     exit: (direction: number) => ({ y: direction < 0 ? 20 : -20, opacity: 0 }),
   };
 
-  const isTextWhite = !hasScrolled && alwaysWhiteText;
-  const textColor = isTextWhite ? "text-white" : "text-gray-800";
-  const logoShadow = isTextWhite ? 'rgb(255,255,255)' : 'rgba(0,0,0,0.5)';
+  // Determine text color based on scroll, page, and props
+  const alwaysWhiteTextPaths = ['/workflow', '/pricing'];
+  const isAlwaysWhitePage = alwaysWhiteTextPaths.includes(pathname);
+
+  let textColor = 'text-gray-800'; // Default to black
+  let logoShadow = 'rgba(0,0,0,0.5)';
+
+  if (isAlwaysWhitePage) {
+    textColor = 'text-white';
+    logoShadow = 'rgb(255,255,255)';
+  } else if (!hasScrolled && alwaysWhiteText) {
+    textColor = 'text-white';
+    logoShadow = 'rgb(255,255,255)';
+  }
 
   return (
     <>

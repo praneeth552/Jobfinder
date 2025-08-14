@@ -47,3 +47,19 @@ async def get_subscription_details(current_user: dict = Depends(get_current_user
         "plan_status": user.get("plan_status"),
         "subscription_valid_until": user.get("subscription_valid_until"),
     }
+
+@router.get("/me", status_code=status.HTTP_200_OK)
+async def get_user_me(current_user: dict = Depends(get_current_user)):
+    user_email = current_user.get("email")
+    user = await users_collection.find_one({"email": user_email})
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    
+    # Convert ObjectId to string for JSON serialization
+    user["_id"] = str(user["_id"])
+
+    return user

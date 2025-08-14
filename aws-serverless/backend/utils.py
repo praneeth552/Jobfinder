@@ -26,6 +26,8 @@ def create_access_token(data: dict, expires_delta: int = 3600):
     to_encode.update({"exp": time.time() + expires_delta})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
+from database import db
+
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=401,

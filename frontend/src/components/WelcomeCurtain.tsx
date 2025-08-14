@@ -2,12 +2,15 @@
 
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
 import HandwritingEffect from "./HandwritingEffect";
 
-export default function WelcomeCurtain({ show }: { show: boolean }) {
+interface WelcomeCurtainProps {
+  show: boolean;
+  onAnimationComplete: () => void;
+}
+
+export default function WelcomeCurtain({ show, onAnimationComplete }: WelcomeCurtainProps) {
   const [curtainUp, setCurtainUp] = useState(false);
-  const router = useRouter();
 
   const handleHandwritingComplete = useCallback(() => {
     setTimeout(() => {
@@ -15,12 +18,8 @@ export default function WelcomeCurtain({ show }: { show: boolean }) {
     }, 700); // A brief pause after text is written
   }, []);
 
-  const handleExitComplete = () => {
-    router.push("/dashboard");
-  };
-
   return (
-    <AnimatePresence onExitComplete={handleExitComplete}>
+    <AnimatePresence onExitComplete={onAnimationComplete}>
       {show && !curtainUp && (
         <motion.div
           initial={{ y: "100%" }}
