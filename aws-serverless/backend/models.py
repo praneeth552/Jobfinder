@@ -45,6 +45,7 @@ class User(BaseModel):
     razorpay_subscription_id: Optional[str] = None
     plan_status: Optional[str] = None # e.g., 'active', 'cancelled', 'halted'
     subscription_valid_until: Optional[datetime] = None
+    last_resume_upload: Optional[datetime] = None
     created_at: datetime = datetime.utcnow()
     updated_at: datetime = datetime.utcnow()
 

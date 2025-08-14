@@ -11,10 +11,12 @@ import LoadingButton from "@/components/LoadingButton";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
 import SimpleNavbar from "@/components/SimpleNavbar";
 
 export default function SigninPage() {
   const router = useRouter();
+  const { fetchUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [redirectPath, setRedirectPath] = useState("/dashboard");
@@ -40,6 +42,7 @@ export default function SigninPage() {
       Cookies.set("token", data.access_token, { expires: 1 });
       Cookies.set("user_id", data.user_id, { expires: 1 });
       Cookies.set("plan_type", data.plan_type || "free", { expires: 1 });
+      await fetchUser(); // Fetch user data
       setRedirectPath(data.is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
       toast.success("Sign-in successful!");
       setIsSuccess(true);
@@ -65,6 +68,7 @@ export default function SigninPage() {
       Cookies.set("token", data.access_token, { expires: 1 });
       Cookies.set("user_id", data.user_id, { expires: 1 });
       Cookies.set("plan_type", data.plan_type || "free", { expires: 1 });
+      await fetchUser(); // Fetch user data
       setRedirectPath(data.is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
       toast.success("Sign-in successful!");
       setIsSuccess(true);

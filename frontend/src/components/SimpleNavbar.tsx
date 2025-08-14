@@ -88,33 +88,43 @@ export default function SimpleNavbar({ alwaysWhiteText = false }: { alwaysWhiteT
         </motion.div>
 
         <div className="flex items-center space-x-4">
-          <motion.button
-            layout
-            transition={{ type: "spring", stiffness: 400, damping: 40 }}
-            onClick={openModal}
-            className="submit-button-swipe px-6 py-2 font-semibold shadow relative overflow-hidden bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            style={{ width: 220, height: 40, textAlign: "center" }}
-          >
-            <AnimatePresence initial={false} custom={direction} mode="wait">
-              <motion.span
-                key={textIndex}
-                custom={direction}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{
-                  y: { type: "spring", stiffness: 300, damping: 30 },
-                  opacity: { duration: 0.2 },
-                }}
-                className="block"
-              >
-                {buttonTexts[textIndex]}
-              </motion.span>
-            </AnimatePresence>
-          </motion.button>
+          {isMobile ? (
+            <motion.button
+              onClick={openModal}
+              className="submit-button-swipe px-6 py-2 font-semibold shadow relative overflow-hidden bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full"
+              style={{ width: 220, height: 40, textAlign: "center" }}
+            >
+              <span>{buttonTexts[0]}</span>
+            </motion.button>
+          ) : (
+            <motion.button
+              layout
+              transition={{ type: "spring", stiffness: 400, damping: 40 }}
+              onClick={openModal}
+              className="submit-button-swipe px-6 py-2 font-semibold shadow relative overflow-hidden bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              style={{ width: 220, height: 40, textAlign: "center" }}
+            >
+              <AnimatePresence initial={false} custom={direction} mode="wait">
+                <motion.span
+                  key={textIndex}
+                  custom={direction}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{
+                    y: { type: "spring", stiffness: 300, damping: 30 },
+                    opacity: { duration: 0.2 },
+                  }}
+                  className="block"
+                >
+                  {buttonTexts[textIndex]}
+                </motion.span>
+              </AnimatePresence>
+            </motion.button>
+          )}
         </div>
       </motion.nav>
 
