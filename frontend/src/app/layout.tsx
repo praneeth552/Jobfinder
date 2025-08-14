@@ -7,7 +7,12 @@ import { AuthProvider } from "@/context/AuthContext";
 import AuthInitializer from "@/components/AuthInitializer";
 
 export const metadata = {
-  /* ... */ };
+  title: "Tackleit - AI Job Search",
+  description: "Tackleit is an AI-powered job search platform that helps you find the perfect job.",
+  icons: {
+    icon: "/icon.svg",
+  },
+};
 
 export const viewport = {
   width: 'device-width',

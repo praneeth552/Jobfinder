@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe, BrainCircuit, FileText, Bell } from "lucide-react";
+import { Globe, BrainCircuit, FileText, Bell, User, FileUp } from "lucide-react";
 import { motion } from "framer-motion";
 
 const features = [
@@ -13,6 +13,16 @@ const features = [
     icon: BrainCircuit,
     title: "AI Job Analysis",
     description: "Analyzes jobs to match your skills and preferences intelligently.",
+  },
+  {
+    icon: FileUp,
+    title: "Resume Parsing",
+    description: "Automatically extracts your skills and experience from your resume to save your time.",
+  },
+  {
+    icon: User,
+    title: "Personalized Dashboard",
+    description: "A dedicated dashboard to manage your job applications, preferences, and recommendations.",
   },
   {
     icon: FileText,
