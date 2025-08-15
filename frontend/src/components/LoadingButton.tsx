@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import './LoadingButton.css';
 
 interface LoadingButtonProps {
@@ -6,14 +6,14 @@ interface LoadingButtonProps {
   children: React.ReactNode;
 }
 
-const LoadingButton: React.FC<LoadingButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>> = ({
-  isLoading,
-  children,
-  ...props
-}) => {
+const LoadingButton = forwardRef<HTMLButtonElement, LoadingButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>>((
+  { isLoading, children, ...props },
+  ref
+) => {
   return (
     <button
       {...props}
+      ref={ref}
       disabled={isLoading || props.disabled}
       className={`button-loading-container ${props.className || ""} ${isLoading ? "button-loading" : ""}`}
     >
@@ -21,6 +21,8 @@ const LoadingButton: React.FC<LoadingButtonProps & React.ButtonHTMLAttributes<HT
       {isLoading && <div className="button-loading-spinner"></div>}
     </button>
   );
-};
+});
+
+LoadingButton.displayName = "LoadingButton";
 
 export default LoadingButton;

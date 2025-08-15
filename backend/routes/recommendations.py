@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 import os
 import json
 from services.google_sheets import write_to_sheet
-from utils import get_current_pro_user, get_current_user
+from utils import get_current_user, is_pro_user
 
 load_dotenv()
 
@@ -55,7 +55,7 @@ Do not include any text, explanations, or markdown formatting before or after th
     return prompt
 
 @router.post("/generate_recommendations")
-async def generate_recommendations(current_user: dict = Depends(get_current_pro_user)):
+async def generate_recommendations(current_user: dict = Depends(get_current_user)):
     user_id = current_user.get("_id")
     try:
         user_object_id = ObjectId(user_id)
@@ -66,16 +66,18 @@ async def generate_recommendations(current_user: dict = Depends(get_current_pro_
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Rate limiting logic (no changes here)
+    # --- Rate Limiting Logic ---
     last_recommendation = await recommendations_collection.find_one(
         {"user_id": user_id}, sort=[("generated_at", -1)]
     )
     if last_recommendation:
         time_since = datetime.utcnow() - last_recommendation["generated_at"]
-        if user.get("plan_type") == "free" and time_since.days < 30:
-            raise HTTPException(status_code=429, detail="Free users can generate recommendations once every 30 days.")
-        if user.get("plan_type") == "pro" and time_since.days < 7:
-            raise HTTPException(status_code=429, detail="Pro users can generate recommendations once every 7 days.")
+        user_is_pro = is_pro_user(user)
+
+        if user_is_pro and time_since.days < 7:
+            raise HTTPException(status_code=429, detail=f"Pro users can generate recommendations once every 7 days. Next generation is in {7 - time_since.days} days.")
+        if not user_is_pro and time_since.days < 30:
+            raise HTTPException(status_code=429, detail=f"Free users can generate recommendations once every 30 days. Next generation is in {30 - time_since.days} days.")
 
     # --- Build User Profile for Prompt ---
     user_profile_parts = []
@@ -139,7 +141,8 @@ async def generate_recommendations(current_user: dict = Depends(get_current_pro_
         {"user_id": user_id}, {"$set": recommendation_data}, upsert=True
     )
 
-    if user.get("sheets_enabled") and user.get("plan_type") == "pro":
+    # --- Pro Feature: Google Sheets Integration ---
+    if user.get("sheets_enabled") and is_pro_user(user):
         await write_to_sheet(user_id, [job.dict() for job in recommended_jobs])
 
     return recommendation_data

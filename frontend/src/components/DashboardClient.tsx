@@ -1,6 +1,5 @@
-"use client";
-
-import { useState, useEffect, useCallback } from "react";
+"use client"
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import Cookies from "js-cookie";
@@ -10,6 +9,7 @@ import UserProfile from "@/components/UserProfile";
 import LoadingButton from "@/components/LoadingButton";
 import SimpleNavbar from "./SimpleNavbar";
 import { toast } from "react-hot-toast";
+import BatSignal from "./BatSignal";
 
 interface Recommendation {
   title: string;
@@ -19,6 +19,15 @@ interface Recommendation {
   reason?: string;
   job_url?: string;
 }
+
+const Ripple = ({ x, y }: { x: number; y: number }) => (
+  <motion.div
+    className="absolute bg-white/70 rounded-full"
+    initial={{ x, y, scale: 0, opacity: 1 }}
+    animate={{ scale: 10, opacity: 0 }}
+    transition={{ duration: 0.5 }}
+  />
+);
 
 export default function DashboardClient() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -34,6 +43,10 @@ export default function DashboardClient() {
   );
   const [isGenerationAllowed, setIsGenerationAllowed] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<string>("");
+  const [batSignalTarget, setBatSignalTarget] = useState<any>(null);
+  const [ripple, setRipple] = useState<any>(null);
+
+  const getJobsButtonRef = useRef<HTMLButtonElement>(null);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -186,6 +199,11 @@ export default function DashboardClient() {
       return;
     }
 
+    if (getJobsButtonRef.current) {
+      const rect = getJobsButtonRef.current.getBoundingClientRect();
+      setBatSignalTarget({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+    }
+
     if (!userId || !token) {
       setError("User not authenticated. Please sign in again.");
       return;
@@ -208,9 +226,8 @@ export default function DashboardClient() {
     } catch (err: unknown) {
       console.error("Error generating recs", err);
       let errorMessage = "An unexpected error occurred.";
-      if (err && typeof err === "object" && "response" in err) {
-        const axiosError = err as { response?: { data?: { detail?: string }, status?: number }, message?: string };
-        errorMessage = axiosError.response?.data?.detail || axiosError.message || "An unexpected error occurred.";
+      if (axios.isAxiosError(err) && err.response && err.response.data && err.response.data.detail) {
+        errorMessage = err.response.data.detail;
       } else if (err instanceof Error) {
         errorMessage = err.message;
       }
@@ -229,8 +246,24 @@ export default function DashboardClient() {
     router.replace("/signin");
   };
 
+  const onBatSignalAnimationComplete = () => {
+    setBatSignalTarget(null);
+    if (getJobsButtonRef.current) {
+      const rect = getJobsButtonRef.current.getBoundingClientRect();
+      setRipple({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+      setTimeout(() => setRipple(null), 500);
+    }
+  };
+
   return (
     <>
+      {batSignalTarget && (
+        <BatSignal
+          target={batSignalTarget}
+          onAnimationComplete={onBatSignalAnimationComplete}
+        />
+      )}
+      {ripple && <Ripple x={ripple.x} y={ripple.y} />}
       <SimpleNavbar />
       <div className="h-20" /> {/* Spacer for the fixed navbar */}
       <motion.div
@@ -252,6 +285,7 @@ export default function DashboardClient() {
 
             <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 w-full md:w-auto">
               <LoadingButton
+                ref={getJobsButtonRef}
                 onClick={handleGenerateRecommendations}
                 isLoading={isLoading}
                 className={`submit-button-swipe px-6 py-2.5 rounded-full font-semibold transition duration-300 w-full sm:w-auto ${

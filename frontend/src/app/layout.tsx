@@ -6,6 +6,8 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from "@/context/AuthContext";
 import AuthInitializer from "@/components/AuthInitializer";
 import { ThemeProvider } from "@/context/ThemeContext";
+import InteractiveBackground from "@/components/InteractiveBackground";
+import Script from 'next/script';
 
 export const metadata = {
   metadataBase: new URL('https://tackleit.xyz'),
@@ -37,10 +39,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <AuthInitializer />
               {/* <ViewportHeightSetter /> */}
               <Toaster position="top-center" toastOptions={{ style: { zIndex: 9999 } }} />
+              <InteractiveBackground />
               {children}
             </AuthProvider>
           </ThemeProvider>
         </GoogleOAuthProvider>
+        <Script src="https://cdn.jsdelivr.net/npm/tsparticles-all@3/tsparticles.all.bundle.min.js" />
       </body>
     </html>
   );

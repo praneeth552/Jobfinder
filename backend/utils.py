@@ -55,28 +55,42 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 
 from datetime import datetime
 
-async def get_current_pro_user(current_user: dict = Depends(get_current_user)):
+def is_pro_user(user: dict) -> bool:
     """
-    Dependency to verify if the current user has an active pro subscription.
+    Checks if a user has an active pro subscription.
+    Handles both 'pro' plan_type and subscription-based status.
     """
-    email = current_user.get("email")
-    user = await db.users.find_one({"email": email})
-
     if not user:
-        raise HTTPException(status_code=403, detail="User not found.")
+        return False
+
+    # Legacy check for simple "pro" plan type
+    if user.get("plan_type") == "pro" and not user.get("subscription_valid_until"):
+        return True
 
     plan_status = user.get("plan_status")
     valid_until = user.get("subscription_valid_until")
 
-    is_pro = False
-    if valid_until and valid_until > datetime.utcnow():
-        if plan_status == "active" or plan_status == "cancelled":
-            is_pro = True
+    if valid_until and isinstance(valid_until, datetime) and valid_until > datetime.utcnow():
+        if plan_status in ["active", "cancelled"]:
+            return True
 
-    if not is_pro:
+    return False
+
+
+async def get_current_pro_user(current_user: dict = Depends(get_current_user)):
+    """
+    Dependency to verify if the current user has an active pro subscription.
+    """
+    # The user object from get_current_user is already what we need
+    # but we refetch to ensure we have the absolute latest data from the DB
+    # in case their plan changed since the token was issued.
+    user = await db.users.find_one({"email": current_user.get("email")})
+
+    if not is_pro_user(user):
         raise HTTPException(
             status_code=403,
             detail="This feature is available for Pro users only. Please upgrade your plan.",
         )
 
+    # Return the user object from get_current_user which has the stringified _id
     return current_user
