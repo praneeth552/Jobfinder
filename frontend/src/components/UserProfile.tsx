@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, LogOut, Star, Settings } from "lucide-react";
+import { User, LogOut, Star, Settings, Loader, CreditCard } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { CreditCard } from "lucide-react";
 
 interface UserProfileProps {
   userPlan: "free" | "pro";
@@ -20,7 +19,14 @@ const UserProfile = ({
   onBilling,
 }: UserProfileProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState<string | null>(null);
   const { userName } = useAuth();
+
+  const handleAction = (action: () => void, actionName: string) => {
+    setIsLoading(actionName);
+    action();
+    setIsOpen(false);
+  };
 
   return (
     <div className="relative">
@@ -52,38 +58,44 @@ const UserProfile = ({
             <ul className="py-1">
               <li>
                 <button
-                  onClick={() => {
-                    onEditPreferences();
-                    setIsOpen(false);
-                  }}
-                  className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                  onClick={() => handleAction(onEditPreferences, "preferences")}
+                  disabled={isLoading === "preferences"}
+                  className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
                 >
-                  <Settings size={16} />
-                  Edit Preferences
+                  {isLoading === "preferences" ? (
+                    <Loader size={16} className="animate-spin" />
+                  ) : (
+                    <Settings size={16} />
+                  )}
+                  {isLoading === "preferences" ? "Loading..." : "Edit Preferences"}
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => {
-                    onBilling();
-                    setIsOpen(false);
-                  }}
-                  className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                  onClick={() => handleAction(onBilling, "billing")}
+                  disabled={isLoading === "billing"}
+                  className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
                 >
-                  <CreditCard size={16} />
-                  Billing
+                  {isLoading === "billing" ? (
+                    <Loader size={16} className="animate-spin" />
+                  ) : (
+                    <CreditCard size={16} />
+                  )}
+                  {isLoading === "billing" ? "Loading..." : "Billing"}
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => {
-                    onLogout();
-                    setIsOpen(false);
-                  }}
-                  className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                  onClick={() => handleAction(onLogout, "logout")}
+                  disabled={isLoading === "logout"}
+                  className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
                 >
-                  <LogOut size={16} />
-                  Logout
+                  {isLoading === "logout" ? (
+                    <Loader size={16} className="animate-spin" />
+                  ) : (
+                    <LogOut size={16} />
+                  )}
+                  {isLoading === "logout" ? "Logging out..." : "Logout"}
                 </button>
               </li>
             </ul>

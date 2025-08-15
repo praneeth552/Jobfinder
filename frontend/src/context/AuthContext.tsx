@@ -56,6 +56,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsInitialized(true);
   }, []);
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchUser();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [fetchUser]);
+
   return (
     <AuthContext.Provider
       value={{ token, userId, userName, planType, isAuthenticated: !!token, setPlanType, fetchUser }}

@@ -5,20 +5,19 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --background-gradient-start: rgba(255, 245, 225, 0.6);
+  --background-gradient-mid1: rgba(253, 235, 208, 0.6);
+  --background-gradient-mid2: rgba(255, 218, 185, 0.6);
+  --background-gradient-end: rgba(255, 228, 181, 0.6);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #1a202c;
+  --foreground: #e2e8f0;
+  --background-gradient-start: rgba(13, 17, 23, 0.7);
+  --background-gradient-mid1: rgba(26, 32, 44, 0.7);
+  --background-gradient-mid2: rgba(45, 55, 72, 0.7);
+  --background-gradient-end: rgba(26, 32, 44, 0.7);
 }
 
 html {
@@ -29,6 +28,7 @@ body {
   height: 100%;
   overflow-x: hidden;
   color: var(--foreground);
+  background-color: var(--background);
   font-family: Arial, Helvetica, sans-serif;
   position: relative;
   padding-bottom: env(safe-area-inset-bottom);
@@ -56,7 +56,7 @@ body::after {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(270deg, rgba(255, 245, 225, 0.6), rgba(253, 235, 208, 0.6), rgba(255, 218, 185, 0.6), rgba(255, 228, 181, 0.6));
+  background: linear-gradient(270deg, var(--background-gradient-start), var(--background-gradient-mid1), var(--background-gradient-mid2), var(--background-gradient-end));
   background-size: 400% 400%;
   animation: gradientAnimation 15s ease infinite;
   z-index: -1; /* Place on top of the background image */
@@ -219,23 +219,17 @@ body::after {
 }
 
 .bottom-fade-effect {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 6rem; /* Increased height */
+  height: 6rem;
   pointer-events: none;
-  backdrop-filter: blur(12px); /* Increased blur intensity */
-  -webkit-backdrop-filter: blur(12px); /* Safari support */
+  backdrop-filter: blur(16px); /* Increased blur for a more glassy effect */
+  -webkit-backdrop-filter: blur(16px); /* Safari support */
   mask-image: linear-gradient(to top, black 20%, transparent 100%);
   -webkit-mask-image: linear-gradient(to top, black 20%, transparent 100%);
   z-index: 40;
-}
-
-@media (max-width: 768px) {
-  .bottom-fade-effect {
-    display: none;
-  }
 }
 
 @keyframes github-glow {

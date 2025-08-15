@@ -68,7 +68,10 @@ async def get_current_pro_user(current_user: dict = Depends(get_current_user)):
     plan_status = user.get("plan_status")
     valid_until = user.get("subscription_valid_until")
 
-    is_pro = plan_status == "active" and valid_until and valid_until > datetime.utcnow()
+    is_pro = False
+    if valid_until and valid_until > datetime.utcnow():
+        if plan_status == "active" or plan_status == "cancelled":
+            is_pro = True
 
     if not is_pro:
         raise HTTPException(

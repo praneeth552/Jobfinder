@@ -4,24 +4,24 @@ import NewFooter from '@/components/NewFooter';
 
 const PrivacyPolicy = () => {
   return (
-    <div className="bg-gray-50 text-gray-800 min-h-screen">
+    <div className="bg-gray-50 text-gray-800 min-h-screen dark:bg-gray-900 dark:text-gray-100">
       <SimpleNavbar />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6 max-w-4xl">
-          <div className="bg-white shadow-lg rounded-lg p-8 md:p-12">
-            <h1 className="text-4xl font-extrabold text-gray-900 text-center mb-6">Privacy Policy</h1>
-            <p className="text-sm text-gray-500 text-center mb-10">Last Updated: August 12, 2025</p>
+          <div className="bg-white shadow-lg rounded-lg p-8 md:p-12 dark:bg-gray-800">
+            <h1 className="text-4xl font-extrabold text-gray-900 text-center mb-6 dark:text-white">Privacy Policy</h1>
+            <p className="text-sm text-gray-500 text-center mb-10 dark:text-gray-400">Last Updated: August 12, 2025</p>
 
-            <div className="space-y-8 text-lg text-gray-700">
+            <div className="space-y-8 text-lg text-gray-700 dark:text-gray-300">
               <section>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">1. Introduction</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4 dark:text-white">1. Introduction</h2>
                 <p>
                   Welcome to Tackleit ("we", "our", "us"). We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website and services. By using our services, you agree to the collection and use of information in accordance with this policy.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">2. Information We Collect</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4 dark:text-white">2. Information We Collect</h2>
                 <p className="mb-3">We may collect information about you in a variety of ways. The information we may collect on the Site includes:</p>
                 <ul className="list-disc list-inside space-y-2 pl-4">
                   <li>
@@ -40,7 +40,7 @@ const PrivacyPolicy = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">3. How We Use Your Information</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4 dark:text-white">3. How We Use Your Information</h2>
                 <p className="mb-3">Having accurate information about you permits us to offer you a smooth, efficient, and customized experience. Specifically, we may use information collected about you via the Site to:</p>
                 <ul className="list-disc list-inside space-y-2 pl-4">
                   <li>Create and manage your account.</li>
@@ -54,7 +54,7 @@ const PrivacyPolicy = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">4. Disclosure of Your Information</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4 dark:text-white">4. Disclosure of Your Information</h2>
                 <p className="mb-3">We do not share your personal information with third parties except as described in this Privacy Policy. We may share information we have collected about you in certain situations:</p>
                 <ul className="list-disc list-inside space-y-2 pl-4">
                   <li>
@@ -70,14 +70,14 @@ const PrivacyPolicy = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">5. Security of Your Information</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4 dark:text-white">5. Security of Your Information</h2>
                 <p>
                   We use administrative, technical, and physical security measures to help protect your personal information. While we have taken reasonable steps to secure the personal information you provide to us, please be aware that despite our efforts, no security measures are perfect or impenetrable, and no method of data transmission can be guaranteed against any interception or other type of misuse.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">6. Your Rights and Choices</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4 dark:text-white">6. Your Rights and Choices</h2>
                 <p className="mb-3">You have certain rights regarding your personal information:</p>
                 <ul className="list-disc list-inside space-y-2 pl-4">
                   <li>
@@ -90,7 +90,7 @@ const PrivacyPolicy = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">7. Contact Us</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4 dark:text-white">7. Contact Us</h2>
                 <p>
                   If you have questions or comments about this Privacy Policy, please contact us at: <a href="mailto:saipraneeth2525@gmail.com" className="text-blue-600 hover:underline">saipraneeth2525@gmail.com</a>
                 </p>

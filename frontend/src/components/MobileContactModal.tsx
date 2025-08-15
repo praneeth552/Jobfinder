@@ -12,7 +12,7 @@ const MobileContactModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[10000] p-4"
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-[10000] p-4"
           onClick={onClose}
         >
           <motion.div

@@ -160,33 +160,12 @@ export default function SignupPage() {
 
   return (
     <>
-      <style>{`
-        .signup-page-bg {
-          background-image: url('/background.jpeg');
-          background-size: cover;
-          background-position: center;
-          position: relative;
-        }
-        .signup-page-bg::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(270deg, rgba(255, 245, 225, 0.6), rgba(253, 235, 208, 0.6), rgba(255, 218, 185, 0.6), rgba(255, 228, 181, 0.6));
-          background-size: 400% 400%;
-          animation: gradientAnimation 15s ease infinite;
-          z-index: 0;
-        }
-      `}</style>
-
       <SimpleNavbar />
-      <main className="absolute w-full h-full flex flex-col items-center justify-start pt-20 sm:pt-28 px-4 signup-page-bg py-8 sm:py-12 overflow-y-auto">
+      <main className="absolute w-full h-full flex flex-col items-center justify-start pt-28 sm:pt-32 px-4 py-8 sm:py-12 overflow-y-auto">
         <div className="relative z-20 w-full max-w-sm">
           <Curtain isLoading={isSuccess} onFinish={handleAnimationFinish} />
-          <div className="bg-white/10 backdrop-blur-xl p-6 sm:p-8 rounded-2xl flex flex-col items-center shadow-lg border border-white/20">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-black text-center">Create your account</h2>
+          <div className="bg-white/10 dark:bg-black/20 backdrop-blur-xl p-6 sm:p-8 rounded-2xl flex flex-col items-center shadow-lg border border-white/20 dark:border-gray-700">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-black dark:text-white text-center">Create your account</h2>
 
             <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit}>
               <input
@@ -195,7 +174,7 @@ export default function SignupPage() {
                 placeholder="Name"
                 value={form.name}
                 onChange={handleChange}
-                className="px-4 py-2.5 rounded-xl border border-white/30 bg-white/80 text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="px-4 py-2.5 rounded-xl border border-white/30 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 required
               />
               <input
@@ -204,7 +183,7 @@ export default function SignupPage() {
                 placeholder="Email"
                 value={form.email}
                 onChange={handleChange}
-                className="px-4 py-2.5 rounded-xl border border-white/30 bg-white/80 text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="px-4 py-2.5 rounded-xl border border-white/30 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 required
               />
               <div className="relative">
@@ -216,13 +195,13 @@ export default function SignupPage() {
                   onChange={handleChange}
                   onFocus={() => setIsPasswordFocused(true)}
                   onBlur={() => setIsPasswordFocused(false)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-white/30 bg-white/80 text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-4 py-2.5 rounded-xl border border-white/30 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 px-3 flex items-center text-black"
+                  className="absolute inset-y-0 right-0 px-3 flex items-center text-black dark:text-white"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -235,16 +214,16 @@ export default function SignupPage() {
                   placeholder="Confirm Password"
                   value={form.confirmPassword}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2.5 rounded-xl border bg-white/80 text-black placeholder-black focus:outline-none focus:ring-2 ${!passwordsMatch && form.confirmPassword.length > 0
+                  className={`w-full px-4 py-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 ${!passwordsMatch && form.confirmPassword.length > 0
                     ? "border-red-500 focus:ring-red-500"
-                    : "border-white/30 focus:ring-purple-500"
+                    : "border-white/30 dark:border-gray-700 focus:ring-purple-500"
                     }`}
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 px-3 flex items-center text-black"
+                  className="absolute inset-y-0 right-0 px-3 flex items-center text-black dark:text-white"
                 >
                   {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -277,17 +256,17 @@ export default function SignupPage() {
                   </LoadingButton>
             </form>
 
-            <div className="my-3 text-black text-sm flex items-center w-full">
-              <div className="flex-grow border-t border-white/30"></div>
+            <div className="my-3 text-black dark:text-white text-sm flex items-center w-full">
+              <div className="flex-grow border-t border-white/30 dark:border-gray-700"></div>
               <span className="px-2">OR</span>
-              <div className="flex-grow border-t border-white/30"></div>
+              <div className="flex-grow border-t border-white/30 dark:border-gray-700"></div>
             </div>
 
             <div className="flex justify-center">
               <GoogleLogin onSuccess={handleGoogleSignup} onError={() => toast.error("Google signup failed")} theme="outline" />
             </div>
 
-            <p className="mt-6 text-black text-center">
+            <p className="mt-6 text-black dark:text-white text-center">
               Already have an account?{" "}
               <button onClick={() => router.push("/signin")} className="text-purple-600 font-semibold hover:underline">
                 Sign in

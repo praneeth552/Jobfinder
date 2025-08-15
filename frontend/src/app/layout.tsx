@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 // import ViewportHeightSetter from '@/components/ViewportHeightSetter';
 import { AuthProvider } from "@/context/AuthContext";
 import AuthInitializer from "@/components/AuthInitializer";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 export const metadata = {
   metadataBase: new URL('https://tackleit.xyz'),
@@ -31,12 +32,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <body>
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ""}>
-          <AuthProvider>
-            <AuthInitializer />
-            {/* <ViewportHeightSetter /> */}
-            <Toaster position="top-center" toastOptions={{ style: { zIndex: 9999 } }} />
-            {children}
-          </AuthProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <AuthInitializer />
+              {/* <ViewportHeightSetter /> */}
+              <Toaster position="top-center" toastOptions={{ style: { zIndex: 9999 } }} />
+              {children}
+            </AuthProvider>
+          </ThemeProvider>
         </GoogleOAuthProvider>
       </body>
     </html>

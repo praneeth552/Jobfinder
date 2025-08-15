@@ -13,12 +13,12 @@ export default function GoogleSheetsToggle({
 }: GoogleSheetsToggleProps) {
   return (
     <div className="flex items-center space-x-4">
-      <span className="text-gray-600 font-medium">Google Sheets Sync</span>
+      <span className="text-gray-600 dark:text-gray-300 font-medium">Google Sheets Sync</span>
       <button
         onClick={onToggle}
         disabled={isLoading}
         className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-200 ease-in-out focus:outline-none ${
-          isEnabled ? "bg-green-500" : "bg-gray-300"
+          isEnabled ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"
         }`}
       >
         <span

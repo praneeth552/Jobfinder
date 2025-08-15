@@ -22,7 +22,7 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, ease: "easeOut" }}
-        className="text-6xl font-extrabold mb-6 text-center text-gray-900"
+        className="text-6xl font-extrabold mb-6 text-center text-gray-900 dark:text-white"
       >
         Jobs tailored for <span className="text-[#FFB100]">you</span>, powered by AI.
       </motion.h2>
@@ -31,7 +31,7 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
-        className="text-gray-800 max-w-2xl text-center mb-8 text-2xl"
+        className="text-gray-800 dark:text-gray-300 max-w-2xl text-center mb-8 text-2xl"
       >
         Discover curated job opportunities analyzed for your skills and goals, organized seamlessly into your Google Sheets.
       </motion.p>

@@ -14,9 +14,9 @@ const FaqItem: React.FC<FaqItemProps> = ({ question, answer }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="border-b border-gray-200 py-4">
+    <div className="border-b border-gray-200 py-4 dark:border-gray-700">
       <button
-        className="w-full flex justify-between items-center text-left text-lg font-semibold text-gray-800 focus:outline-none"
+        className="w-full flex justify-between items-center text-left text-lg font-semibold text-gray-800 focus:outline-none dark:text-white"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span>{question}</span>
@@ -35,7 +35,7 @@ const FaqItem: React.FC<FaqItemProps> = ({ question, answer }) => {
             transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
-            <p className="pt-2 pb-1 text-gray-600">
+            <p className="pt-2 pb-1 text-gray-600 dark:text-gray-300">
               {answer}
             </p>
           </motion.div>

@@ -66,7 +66,7 @@ export default function FeaturesSection() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.5 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="text-4xl font-bold mb-12 text-gray-900 text-center"
+        className="text-4xl font-bold mb-12 text-gray-900 dark:text-white text-center"
       >
         Key Features
       </motion.h3>
@@ -83,13 +83,13 @@ export default function FeaturesSection() {
             key={index}
             variants={itemVariants}
             whileHover={{ scale: 1.03 }}
-            className="bg-white rounded-lg p-8 shadow hover:shadow-md transition"
+            className="bg-white dark:bg-slate-800 rounded-lg p-8 shadow hover:shadow-md transition"
           >
             <feature.icon className="w-12 h-12 text-[#FFB100] mb-4 mx-auto" />
-            <h4 className="text-2xl font-semibold mb-2 text-center text-gray-900">
+            <h4 className="text-2xl font-semibold mb-2 text-center text-gray-900 dark:text-white">
               {feature.title}
             </h4>
-            <p className="text-gray-800 text-center">
+            <p className="text-gray-800 dark:text-gray-300 text-center">
               {feature.description}
             </p>
           </motion.div>

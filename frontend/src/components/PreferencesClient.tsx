@@ -259,10 +259,10 @@ const PreferenceCard = ({ title, description, children }: { title: string, descr
       hidden: { opacity: 0, y: 20 },
       visible: { opacity: 1, y: 0 }
     }}
-    className="bg-white/60 backdrop-blur-md p-6 rounded-2xl shadow-lg border border-white/20"
+    className="bg-white/60 dark:bg-slate-800/60 p-6 rounded-2xl shadow-lg border border-white/20 dark:border-slate-700"
   >
-    <h2 className="text-xl font-bold text-slate-800">{title}</h2>
-    <p className="text-sm text-slate-600 mb-4">{description}</p>
+    <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">{title}</h2>
+    <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">{description}</p>
     <div className="flex flex-wrap gap-2">{children}</div>
   </motion.div>
 );
@@ -275,7 +275,7 @@ const SelectionPill = ({ label, isSelected, onClick }: { label: string, isSelect
       "px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-200 transform hover:scale-105",
       isSelected
         ? "bg-indigo-600 text-white border-indigo-600 shadow-md"
-        : "bg-white/50 text-slate-700 border-slate-300 hover:bg-white hover:border-indigo-500"
+        : "bg-white/50 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600 hover:bg-white dark:hover:bg-slate-600 hover:border-indigo-500 dark:hover:border-indigo-400"
     )}
   >
     {label}
@@ -291,14 +291,14 @@ const TechStackSelector = ({ selected, onChange }: { selected: string[], onChang
   return (
     <Combobox value={selected} onChange={onChange} multiple>
       <div className="relative">
-        <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md">
+        <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white dark:bg-slate-800 text-left shadow-md">
           <Combobox.Input
-            className="w-full border-none py-3 pl-4 pr-10 text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500"
+            className="w-full border-none py-3 pl-4 pr-10 text-sm text-gray-900 dark:text-gray-100 bg-transparent focus:ring-2 focus:ring-indigo-500"
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search skills (e.g., React, Python)..."
           />
           <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-            <ChevronsUpDown className="h-5 w-5 text-gray-400" aria-hidden="true" />
+            <ChevronsUpDown className="h-5 w-5 text-gray-400 dark:text-gray-500" aria-hidden="true" />
           </Combobox.Button>
         </div>
         <Transition
@@ -307,14 +307,13 @@ const TechStackSelector = ({ selected, onChange }: { selected: string[], onChang
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 z-10">
+          <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-slate-800 py-1 text-base shadow-lg ring-1 ring-black/5 dark:ring-white/10 z-10">
             {filteredSkills.map(skill => (
               <Combobox.Option
                 key={skill}
                 value={skill}
                 className={({ active }) =>
-                  `relative cursor-default select-none py-2 pl-10 pr-4 ${active ? "bg-indigo-600 text-white" : "text-gray-900"
-                  }`
+                  `relative cursor-default select-none py-2 pl-10 pr-4 ${active ? "bg-indigo-600 text-white" : "text-gray-900 dark:text-gray-300"}`
                 }
               >
                 {({ selected, active }) => (
@@ -324,8 +323,7 @@ const TechStackSelector = ({ selected, onChange }: { selected: string[], onChang
                     </span>
                     {selected ? (
                       <span
-                        className={`absolute inset-y-0 left-0 flex items-center pl-3 ${active ? "text-white" : "text-indigo-600"
-                          }`}
+                        className={`absolute inset-y-0 left-0 flex items-center pl-3 ${active ? "text-white" : "text-indigo-600 dark:text-indigo-400"}`}
                       >
                         <Check size={20} />
                       </span>
@@ -340,7 +338,7 @@ const TechStackSelector = ({ selected, onChange }: { selected: string[], onChang
           {selected.map(skill => (
             <span
               key={skill}
-              className="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-1 rounded-full"
+              className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-full"
             >
               {skill}
             </span>
@@ -629,7 +627,37 @@ export default function PreferencesClient() {
 
   return (
     <>
-      <style>{`.pref-page-bg { background-image: url('/background.jpeg'); background-size: cover; background-position: center; position: relative; overflow: hidden; } .pref-page-bg::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(270deg, rgba(255, 245, 225, 0.6), rgba(253, 235, 208, 0.6), rgba(255, 218, 185, 0.6), rgba(255, 228, 181, 0.6)); background-size: 400% 400%; animation: gradientAnimation 15s ease infinite; z-index: 0; } @keyframes gradientAnimation { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } } .pill-glow { box-shadow: 0 0 15px rgba(255, 177, 0, 0.5), 0 0 30px rgba(255, 177, 0, 0.3); }`}</style>
+      <style>{`
+        .pref-page-bg {
+          background-image: url('/background.jpeg');
+          background-size: cover;
+          background-position: center;
+          position: relative;
+          overflow: hidden;
+        }
+        .pref-page-bg::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: linear-gradient(270deg, rgba(255, 245, 225, 0.6), rgba(253, 235, 208, 0.6), rgba(255, 218, 185, 0.6), rgba(255, 228, 181, 0.6));
+          background-size: 400% 400%;
+          animation: gradientAnimation 15s ease infinite;
+          z-index: 0;
+        }
+        .dark .pref-page-bg::before {
+            background: linear-gradient(270deg, rgba(0,0,0,0.7), rgba(10,10,10,0.7), rgba(20,20,20,0.7), rgba(10,10,10,0.7));
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+        }
+        @keyframes gradientAnimation {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .pill-glow {
+          box-shadow: 0 0 15px rgba(255, 177, 0, 0.5), 0 0 30px rgba(255, 177, 0, 0.3);
+        }
+      `}</style>
       <AnimatePresence>{showWelcome && <WelcomeCurtain show={showWelcome} onAnimationComplete={handleWelcomeAnimationComplete} />}</AnimatePresence>
       {isRedirecting && <LoadingSpinner />}
       <main className="flex flex-col items-center min-h-screen px-4 py-12 pref-page-bg">
@@ -643,15 +671,15 @@ export default function PreferencesClient() {
               <h1 className="text-2xl font-bold mx-4">TackleIt</h1>
             </motion.div>
           </div>
-          <h1 className="text-4xl font-bold mb-2 text-black text-center">Set Your Preferences</h1>
-          <p className="text-center text-black mb-4">Or, upload your resume to get started quickly. This will autofill your roles and skills.</p>
+          <h1 className="text-4xl font-bold mb-2 text-black dark:text-white text-center">Set Your Preferences</h1>
+          <p className="text-center text-black dark:text-gray-300 mb-4">Or, upload your resume to get started quickly. This will autofill your roles and skills.</p>
           <div className="mb-8 text-center">
             <label
               htmlFor="resume-upload"
-              className={clsx("bg-white/80 backdrop-blur-md text-indigo-600 font-bold px-6 py-3 rounded-lg shadow-md border border-white/30 cursor-pointer transition-all hover:bg-white hover:shadow-xl", { "opacity-50": isParsing })}>
+              className={clsx("bg-white/80 dark:bg-slate-800/80 text-indigo-600 dark:text-indigo-400 font-bold px-6 py-3 rounded-lg shadow-md border border-white/30 dark:border-slate-700 cursor-pointer transition-all hover:bg-white hover:shadow-xl", { "opacity-50": isParsing })}>
               {isParsing ? "Parsing..." : "Upload Resume"}
             </label>
-            <p className="text-xs text-gray-600 mt-2">Free users can upload monthly, Pro users can upload weekly.</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">Free users can upload monthly, Pro users can upload weekly.</p>
             <input
               id="resume-upload"
               type="file"
@@ -732,34 +760,34 @@ export default function PreferencesClient() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-2xl shadow-xl p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-              <h2 className="text-2xl font-bold text-slate-800 mb-2">Edit Your Resume Profile</h2>
-              <p className="text-slate-600 mb-6">We've parsed your resume. Please review and edit the details below.</p>
-              <div className="space-y-4 text-sm text-black">
+              className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2">Edit Your Resume Profile</h2>
+              <p className="text-slate-600 dark:text-slate-400 mb-6">We've parsed your resume. Please review and edit the details below.</p>
+              <div className="space-y-4 text-sm text-black dark:text-gray-300">
                 {/* Basic Info */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input type="text" value={editableData.name || ''} onChange={e => handleModalDataChange('name', e.target.value)} className="w-full p-2 border rounded" placeholder="Name" readOnly={!isEditing} />
-                  <input type="email" value={editableData.email || ''} onChange={e => handleModalDataChange('email', e.target.value)} className="w-full p-2 border rounded" placeholder="Email" readOnly={!isEditing} />
-                  <input type="tel" value={editableData.phone || ''} onChange={e => handleModalDataChange('phone', e.target.value)} className="w-full p-2 border rounded" placeholder="Phone" readOnly={!isEditing} />
+                  <input type="text" value={editableData.name || ''} onChange={e => handleModalDataChange('name', e.target.value)} className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700" placeholder="Name" readOnly={!isEditing} />
+                  <input type="email" value={editableData.email || ''} onChange={e => handleModalDataChange('email', e.target.value)} className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700" placeholder="Email" readOnly={!isEditing} />
+                  <input type="tel" value={editableData.phone || ''} onChange={e => handleModalDataChange('phone', e.target.value)} className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700" placeholder="Phone" readOnly={!isEditing} />
                 </div>
                 
                 {/* Skills */}
                 <div>
-                  <h3 className="font-bold mb-2 text-black">Skills</h3>
+                  <h3 className="font-bold mb-2 text-black dark:text-white">Skills</h3>
                   <TechStackSelector selected={editableData.skills} onChange={v => handleModalDataChange('skills', v)} />
                 </div>
 
                 {/* Roles */}
                 <div>
-                  <h3 className="font-bold mb-2 text-black">Roles</h3>
+                  <h3 className="font-bold mb-2 text-black dark:text-white">Roles</h3>
                   {editableData.roles.map((role, index) => (
                     <div key={index} className="flex items-center gap-2 mb-2">
-                      <input type="text" value={role} onChange={e => handleModalDataChange('roles', editableData.roles.map((r, i) => i === index ? e.target.value : r))} className="w-full p-2 border rounded" placeholder="Role" readOnly={!isEditing} />
+                      <input type="text" value={role} onChange={e => handleModalDataChange('roles', editableData.roles.map((r, i) => i === index ? e.target.value : r))} className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700" placeholder="Role" readOnly={!isEditing} />
                       {isEditing && <button onClick={() => removeRole(index)} className="text-red-500 hover:text-red-700"><Trash2 size={18} /></button>}
                     </div>
                   ))}
@@ -768,7 +796,7 @@ export default function PreferencesClient() {
 
                 {/* Education */}
                 <div>
-                  <h3 className="font-bold mb-2 text-black">Education</h3>
+                  <h3 className="font-bold mb-2 text-black dark:text-white">Education</h3>
                   {editableData.education.map((edu, index) => (
                     <div key={index} className="flex items-center gap-2 mb-2">
                       <input
@@ -782,7 +810,7 @@ export default function PreferencesClient() {
                             )
                           )
                         }
-                        className="w-full p-2 border rounded"
+                        className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700"
                         placeholder="Education"
                         readOnly={!isEditing}
                       />
@@ -808,13 +836,13 @@ export default function PreferencesClient() {
 
                 {/* Experience */}
                 <div>
-                  <h3 className="font-bold mb-2 text-black">Work Experience</h3>
+                  <h3 className="font-bold mb-2 text-black dark:text-white">Work Experience</h3>
                   {editableData.experience.map((exp, index) => (
-                    <div key={index} className="p-3 border rounded-lg mb-3 space-y-2 bg-slate-50">
-                      <input type="text" value={exp.title} onChange={e => handleExperienceChange(index, 'title', e.target.value)} className="w-full p-2 border rounded" placeholder="Job Title" readOnly={!isEditing} />
-                      <input type="text" value={exp.company} onChange={e => handleExperienceChange(index, 'company', e.target.value)} className="w-full p-2 border rounded" placeholder="Company" readOnly={!isEditing} />
-                      <input type="text" value={exp.dates} onChange={e => handleExperienceChange(index, 'dates', e.target.value)} className="w-full p-2 border rounded" placeholder="Dates (e.g., Jan 2020 - Present)" readOnly={!isEditing} />
-                      <textarea value={exp.description} onChange={e => handleExperienceChange(index, 'description', e.target.value)} className="w-full p-2 border rounded" placeholder="Description..." readOnly={!isEditing} />
+                    <div key={index} className="p-3 border rounded-lg mb-3 space-y-2 bg-slate-50 dark:bg-slate-800/50 dark:border-slate-700">
+                      <input type="text" value={exp.title} onChange={e => handleExperienceChange(index, 'title', e.target.value)} className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700" placeholder="Job Title" readOnly={!isEditing} />
+                      <input type="text" value={exp.company} onChange={e => handleExperienceChange(index, 'company', e.target.value)} className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700" placeholder="Company" readOnly={!isEditing} />
+                      <input type="text" value={exp.dates} onChange={e => handleExperienceChange(index, 'dates', e.target.value)} className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700" placeholder="Dates (e.g., Jan 2020 - Present)" readOnly={!isEditing} />
+                      <textarea value={exp.description} onChange={e => handleExperienceChange(index, 'description', e.target.value)} className="w-full p-2 border rounded dark:bg-slate-800 dark:border-slate-700" placeholder="Description..." readOnly={!isEditing} />
                       {isEditing && <button onClick={() => removeExperience(index)} className="text-red-500 hover:text-red-700"><Trash2 size={18} /></button>}
                     </div>
                   ))}
@@ -825,14 +853,14 @@ export default function PreferencesClient() {
               <div className="flex justify-end gap-4 mt-8">
                 <button
                   onClick={() => setEditableData(null)}
-                  className="px-4 py-2 rounded-lg text-slate-600 font-semibold hover:bg-slate-100 transition-colors"
+                  className="px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 >
                   Cancel
                 </button>
                 {!isEditing && (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="px-4 py-2 rounded-lg text-slate-600 font-semibold hover:bg-slate-100 transition-colors"
+                    className="px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                   >
                     Edit
                   </button>
@@ -857,18 +885,18 @@ export default function PreferencesClient() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-2xl shadow-xl p-8 max-w-lg w-full">
-              <h2 className="text-2xl font-bold text-slate-800 mb-4">Save for Better Recommendations?</h2>
-              <p className="text-slate-600 mb-6">Saving your resume profile will significantly improve your job recommendations. You can update it anytime by uploading a new resume.</p>
+              className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl p-8 max-w-lg w-full">
+              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-4">Save for Better Recommendations?</h2>
+              <p className="text-slate-600 dark:text-slate-400 mb-6">Saving your resume profile will significantly improve your job recommendations. You can update it anytime by uploading a new resume.</p>
               <div className="flex justify-end gap-4 mt-8">
                 <button
                   onClick={() => handleFinalSave(false)}
-                  className="px-4 py-2 rounded-lg text-slate-600 font-semibold hover:bg-slate-100 transition-colors"
+                  className="px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                   disabled={isSubmitting}>
                   Just Update My Preferences
                 </button>

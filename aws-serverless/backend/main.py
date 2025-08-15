@@ -43,6 +43,8 @@ async def normalize_path(request: Request, call_next):
 origins = [
     "http://localhost",
     "http://localhost:3000",
+    "http://127.0.0.1",
+    "http://127.0.0.1:3000",
     "https://jobfinder-frontend-pied.vercel.app",
     "https://main.d1yb9ogprne3f8.amplifyapp.com",
     "http://tackleit.xyz",

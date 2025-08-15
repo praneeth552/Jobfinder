@@ -76,30 +76,27 @@ async def create_pro_subscription(current_user: dict = Depends(get_current_user)
         print(f"Razorpay API Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/create-portal-session", status_code=status.HTTP_200_OK)
-async def create_portal_session(current_user: dict = Depends(get_current_user)):
+@router.post("/cancel-subscription", status_code=status.HTTP_200_OK)
+async def cancel_subscription(current_user: dict = Depends(get_current_user)):
     user_email = current_user.get("email")
     user = await users_collection.find_one({"email": user_email})
 
-    if not user or not user.get("razorpay_customer_id"):
+    if not user or not user.get("razorpay_subscription_id"):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User is not a Razorpay customer.",
-        )
-    
-    subscription_id = user.get("razorpay_subscription_id")
-    if not subscription_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Razorpay subscription ID not found for this user.",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Razorpay subscription not found for this user.",
         )
 
+    subscription_id = user.get("razorpay_subscription_id")
+
     try:
-        portal_session = razorpay_client.invoice.create({
-            "type": "link",
-            "subscription_id": subscription_id
-        })
-        return {"portal_url": portal_session["short_url"]}
+        # Cancel the subscription immediately
+        razorpay_client.subscription.cancel(subscription_id)
+        
+        # The webhook will handle updating the plan_status to 'cancelled'
+        # and preserving the subscription_valid_until date.
+        
+        return {"message": "Subscription cancellation initiated successfully. You will retain Pro access until the end of your current billing period."}
     except Exception as e:
-        print(f"Razorpay Portal Session Error: {e}")
-        raise HTTPException(status_code=500, detail="Could not create customer portal session.")
+        print(f"Razorpay API Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

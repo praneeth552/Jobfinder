@@ -61,7 +61,7 @@ export default function DashboardClient() {
       setError(null);
 
       const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/recommendations/${userId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/recommendations`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -120,6 +120,8 @@ export default function DashboardClient() {
   }, [userId, token, plan, router]);
 
   useEffect(() => {
+    if (isFirstLoad) return; // Don't run on initial load
+
     if (!lastGenerationDate) {
       setIsGenerationAllowed(true);
       return;
@@ -151,7 +153,7 @@ export default function DashboardClient() {
     }, 1000);
 
     return () => clearInterval(intervalId);
-  }, [lastGenerationDate, userPlan]);
+  }, [lastGenerationDate, userPlan, isFirstLoad]);
 
   const handleSheetToggle = async () => {
     if (!userId) return;
@@ -194,7 +196,7 @@ export default function DashboardClient() {
       setError(null);
 
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/generate_recommendations/${userId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/generate_recommendations`,
         null,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -243,7 +245,7 @@ export default function DashboardClient() {
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8 }}
-              className="text-2xl sm:text-3xl font-bold text-[#8B4513] text-center md:text-left"
+              className="text-2xl sm:text-3xl font-bold text-[#8B4513] dark:text-white text-center md:text-left"
             >
               Job Recommendations
             </motion.h1>
@@ -257,7 +259,7 @@ export default function DashboardClient() {
                     ? "bg-gray-400 cursor-not-allowed text-white"
                     : "bg-green-600 hover:bg-green-700 text-white"
                 }`}
-                disabled={isLoading || !isGenerationAllowed}
+                disabled={isFirstLoad || isLoading || !isGenerationAllowed}
               >
                 Get Personalized Jobs
               </LoadingButton>
@@ -288,8 +290,13 @@ export default function DashboardClient() {
             </div>
           </div>
 
-          {!isGenerationAllowed && timeRemaining && (
-            <p className="text-yellow-800 bg-yellow-100 border border-yellow-300 p-4 rounded-lg mb-6 text-center font-semibold text-sm sm:text-base">
+          {isFirstLoad && !isGenerationAllowed && (
+            <p className="text-yellow-800 bg-yellow-100 border border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700 p-4 rounded-lg mb-6 text-center font-semibold text-sm sm:text-base">
+              Checking your generation status...
+            </p>
+          )}
+          {!isFirstLoad && !isGenerationAllowed && timeRemaining && (
+            <p className="text-yellow-800 bg-yellow-100 border border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700 p-4 rounded-lg mb-6 text-center font-semibold text-sm sm:text-base">
               You can generate new recommendations in {timeRemaining}.
               {userPlan === "free" &&
                 ` Upgrade to Pro for more frequent recommendations.`}
@@ -297,13 +304,13 @@ export default function DashboardClient() {
           )}
 
           {isLoading && (
-            <p className="text-center text-gray-600 text-lg">
+            <p className="text-center text-gray-600 dark:text-gray-300 text-lg">
               Loading recommendations, this may take a moment...
             </p>
           )}
 
           {error && (
-            <p className="text-center text-red-500 bg-red-100 p-4 rounded-lg">
+            <p className="text-center text-red-500 bg-red-100 dark:bg-red-900/50 dark:text-red-400 p-4 rounded-lg">
               {error}
             </p>
           )}
@@ -312,7 +319,7 @@ export default function DashboardClient() {
             !error &&
             recommendations.length === 0 &&
             !isFirstLoad && (
-              <p className="text-center text-gray-600 text-lg">
+              <p className="text-center text-gray-600 dark:text-gray-300 text-lg">
                 No recommendations found. Try generating a new list!
               </p>
             )}
@@ -339,37 +346,37 @@ export default function DashboardClient() {
                     scale: 1.03,
                     boxShadow: "0 10px 20px rgba(139,69,19,0.2)",
                   }}
-                  className="bg-white rounded-xl shadow-md p-5 cursor-pointer transform transition-transform duration-300 flex flex-col h-full"
+                  className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-5 cursor-pointer transform transition-transform duration-300 flex flex-col h-full"
                   onClick={() =>
                     job.job_url && window.open(job.job_url, "_blank")
                   }
                 >
                   <div className="flex-grow">
-                    <h2 className="text-lg sm:text-xl font-bold mb-2 text-[#B8860B] break-words">
+                    <h2 className="text-lg sm:text-xl font-bold mb-2 text-[#B8860B] dark:text-amber-400 break-words">
                       {job.title}
                     </h2>
-                    <p className="text-sm sm:text-base text-gray-800 mb-1 break-words">
+                    <p className="text-sm sm:text-base text-gray-800 dark:text-gray-300 mb-1 break-words">
                       <span className="font-semibold">Company:</span>{" "}
                       {job.company}
                     </p>
-                    <p className="text-sm sm:text-base text-gray-800 mb-3 break-words">
+                    <p className="text-sm sm:text-base text-gray-800 dark:text-gray-300 mb-3 break-words">
                       <span className="font-semibold">Location:</span>{" "}
                       {job.location}
                     </p>
                     {job.match_score && (
-                      <div className="w-full bg-gray-200 rounded-full h-2.5 mb-3">
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-3">
                         <div
                           className="bg-blue-600 h-2.5 rounded-full"
                           style={{ width: `${job.match_score}%` }}
                         />
-                        <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
                           Match Score: {job.match_score}/100
                         </p>
                       </div>
                     )}
                   </div>
                   {job.reason && (
-                    <p className="text-gray-600 italic text-xs sm:text-sm mt-auto pt-4">
+                    <p className="text-gray-600 dark:text-gray-400 italic text-xs sm:text-sm mt-auto pt-4">
                       &quot;{job.reason}&quot;
                     </p>
                   )}

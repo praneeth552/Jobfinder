@@ -6,6 +6,8 @@ import { usePathname } from 'next/navigation'; // Import usePathname
 import { X } from "lucide-react";
 import ContactForm from "./ContactForm";
 import MobileContactModal from "./MobileContactModal";
+import ThemeToggle from "./ThemeToggle";
+import { useTheme } from "@/context/ThemeContext";
 
 const buttonTexts = ["Got Ideas?", "Want to Collaborate?"];
 
@@ -15,6 +17,7 @@ export default function SimpleNavbar({ alwaysWhiteText = false }: { alwaysWhiteT
   const [textIndex, setTextIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const [isMobile, setIsMobile] = useState(false);
+  const { theme } = useTheme();
   
   const pathname = usePathname(); // Get the current path
 
@@ -60,23 +63,29 @@ export default function SimpleNavbar({ alwaysWhiteText = false }: { alwaysWhiteT
   const alwaysWhiteTextPaths = ['/workflow', '/pricing'];
   const isAlwaysWhitePage = alwaysWhiteTextPaths.includes(pathname);
 
-  let textColor = 'text-gray-800'; // Default to black
-  let logoShadow = 'rgba(0,0,0,0.5)';
+  const getTextColor = () => {
+    if (theme === 'dark') return 'text-white';
+    if (isAlwaysWhitePage) return 'text-white';
+    if (!hasScrolled && alwaysWhiteText) return 'text-white';
+    return 'text-gray-800';
+  };
 
-  if (isAlwaysWhitePage) {
-    textColor = 'text-white';
-    logoShadow = 'rgb(255,255,255)';
-  } else if (!hasScrolled && alwaysWhiteText) {
-    textColor = 'text-white';
-    logoShadow = 'rgb(255,255,255)';
-  }
+  const getLogoShadow = () => {
+    if (theme === 'dark') return 'rgb(255,255,255)';
+    if (isAlwaysWhitePage) return 'rgb(255,255,255)';
+    if (!hasScrolled && alwaysWhiteText) return 'rgb(255,255,255)';
+    return 'rgba(0,0,0,0.5)';
+  };
+
+  const textColor = getTextColor();
+  const logoShadow = getLogoShadow();
 
   return (
     <>
       <motion.nav
         {...navVariants}
         className={`fixed top-0 left-0 w-full flex justify-between items-center px-4 sm:px-8 py-4 z-50 transition-all duration-300 ${
-          hasScrolled ? "bg-white/10 backdrop-blur-xl shadow-lg" : "bg-transparent"
+          hasScrolled ? "bg-white/10 dark:bg-slate-800/10 backdrop-blur-xl shadow-lg" : "bg-transparent"
         }`}
       >
         <motion.div
@@ -87,14 +96,14 @@ export default function SimpleNavbar({ alwaysWhiteText = false }: { alwaysWhiteT
           TackleIt
         </motion.div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+                    {pathname !== '/workflow' && pathname !== '/pricing' && <ThemeToggle />}
           {isMobile ? (
             <motion.button
               onClick={openModal}
-              className="submit-button-swipe px-6 py-2 font-semibold shadow relative overflow-hidden bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full"
-              style={{ width: 220, height: 40, textAlign: "center" }}
+              className="submit-button-swipe px-4 sm:px-6 py-2 font-semibold shadow relative overflow-hidden bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full text-sm sm:text-base"
             >
-              <span>{buttonTexts[0]}</span>
+              <span>Got Ideas?</span>
             </motion.button>
           ) : (
             <motion.button

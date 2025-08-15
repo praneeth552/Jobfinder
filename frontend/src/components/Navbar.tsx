@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import Link from "next/link";
+import ThemeToggle from "./ThemeToggle";
 
 interface NavbarProps {
   onGetStarted: (x: number, y: number) => void;
@@ -101,6 +102,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
 
       {/* Desktop Menu */}
       <div className="hidden md:flex items-center space-x-4">
+        <ThemeToggle />
         <motion.button
           onClick={() => router.push('/pricing')}
           className={`px-6 py-2 font-semibold rounded-full transition-colors duration-300 ${textColor}`}
@@ -156,6 +158,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
 
       {/* Mobile Menu Button */}
       <div className="md:hidden flex items-center space-x-4">
+        <ThemeToggle />
         <motion.button
           onClick={() => router.push('/pricing')}
           className={`px-4 py-2 font-semibold rounded-full transition-colors duration-300 ${textColor}`}
