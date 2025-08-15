@@ -124,8 +124,8 @@ export default function SigninPage() {
             className="w-full max-w-sm"
           >
             <motion.div animate={isSuccess ? "hidden" : "visible"} variants={formVariants}>
-              <div className="bg-white/10 backdrop-blur-xl text-black p-8 rounded-2xl flex flex-col items-center shadow-lg border border-white/20">
-                <h2 className="text-3xl font-bold mb-6 text-black text-center">
+              <div className="bg-white/10 dark:bg-black/20 backdrop-blur-xl p-6 sm:p-8 rounded-2xl flex flex-col items-center shadow-lg border border-white/20 dark:border-gray-700">
+                <h2 className="text-3xl font-bold mb-6 text-black dark:text-white text-center">
                   Sign in to your account
                 </h2>
                 <form
@@ -139,7 +139,7 @@ export default function SigninPage() {
                     name="email"
                     type="email"
                     placeholder="Email"
-                    className="px-4 py-3 rounded-xl border border-white/30 bg-white/80 text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="px-4 py-2.5 rounded-xl border border-white/30 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     required
                   />
                   <div className="relative">
@@ -147,13 +147,13 @@ export default function SigninPage() {
                       name="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Password"
-                      className="w-full px-4 py-3 rounded-xl border border-white/30 bg-white/80 text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-4 py-2.5 rounded-xl border border-white/30 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 px-3 flex items-center text-black"
+                      className="absolute inset-y-0 right-0 px-3 flex items-center text-black dark:text-white"
                     >
                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
@@ -173,10 +173,10 @@ export default function SigninPage() {
                   </LoadingButton>
                 </form>
 
-                <div className="my-4 text-black text-sm flex items-center w-full">
-                  <div className="flex-grow border-t border-white/30" />
+                <div className="my-4 text-black dark:text-white text-sm flex items-center w-full">
+                  <div className="flex-grow border-t border-white/30 dark:border-gray-700" />
                   <span className="px-2">OR</span>
-                  <div className="flex-grow border-t border-white/30" />
+                  <div className="flex-grow border-t border-white/30 dark:border-gray-700" />
                 </div>
 
                 <GoogleLogin
@@ -185,7 +185,7 @@ export default function SigninPage() {
                   onError={() => toast.error("Google Login Failed")}
                 />
 
-                <p className="mt-6 text-black">
+                <p className="mt-6 text-black dark:text-white">
                   Don&apos;t have an account?{" "}
                   <button
                     onClick={() => setIsNavigating(true)}

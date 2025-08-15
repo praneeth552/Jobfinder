@@ -182,9 +182,9 @@ export default function BillingPage() {
             {user.plan_type === "pro" ? (
               <>
                 <ul className={`${styles.featuresList} dark:text-gray-300`}>
-                  <motion.li whileHover={{ x: 5 }}>Weekly Job Recommendations</motion.li>
-                  <motion.li whileHover={{ x: 5 }}>Export Jobs to Google Sheets</motion.li>
-                  <motion.li whileHover={{ x: 5 }}>Full access to all new features</motion.li>
+                  <motion.li whileHover={{ x: 5 }} className="dark:text-white">Weekly Job Recommendations</motion.li>
+                  <motion.li whileHover={{ x: 5 }} className="dark:text-white">Export Jobs to Google Sheets</motion.li>
+                  <motion.li whileHover={{ x: 5 }} className="dark:text-white">Full access to all new features</motion.li>
                 </ul>
                 {user.plan_status === "cancelled" ? (
                   <div className="text-center">
@@ -215,8 +215,8 @@ export default function BillingPage() {
             ) : (
               <>
                 <ul className={`${styles.featuresList} dark:text-gray-300`}>
-                  <motion.li whileHover={{ x: 5 }}>Monthly Job Recommendations</motion.li>
-                  <motion.li whileHover={{ x: 5 }}>Standard Feature Access</motion.li>
+                  <motion.li whileHover={{ x: 5 }} className="dark:text-white">Monthly Job Recommendations</motion.li>
+                  <motion.li whileHover={{ x: 5 }} className="dark:text-white">Standard Feature Access</motion.li>
                 </ul>
                 <motion.button
                   whileHover={{ scale: 1.02 }}

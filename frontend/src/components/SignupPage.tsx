@@ -23,7 +23,7 @@ const PasswordCriteria = ({ criteria }: { criteria: { [key: string]: boolean } }
   };
 
   return (
-    <div className="p-4 bg-black/20 rounded-lg">
+    <div className="p-4 bg-white/80 dark:bg-black/20 rounded-lg">
       <style>{`.strike-through{position:relative;transition:all .5s ease-in-out}.strike-through::after{content:'';position:absolute;left:0;top:50%;height:1px;width:0;background:currentColor;transition:width .5s ease-in-out}.strike-through.active::after{width:100%}`}</style>
       <ul className="text-sm space-y-2">
         {Object.entries(criteria).map(([key, value]) => (
@@ -31,7 +31,7 @@ const PasswordCriteria = ({ criteria }: { criteria: { [key: string]: boolean } }
             <span className={`mr-2 ${value ? "text-green-500" : "text-red-500"}`}>
               {value ? "✓" : "✗"}
             </span>
-            <span className={`strike-through ${value ? "active text-gray-500" : "text-gray-300"}`}>
+            <span className={`strike-through ${value ? "active text-gray-500 dark:text-gray-400" : "text-gray-700 dark:text-gray-300"}`}>
               {criteriaText[key]}
             </span>
           </li>

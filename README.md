@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./frontend/src/app/icon.svg" alt="Tackleit Logo" width="120" />
+  <img src="./frontend/public/favicon.svg" alt="Tackleit Logo" width="120" />
   <h1 align="center">Tackleit</h1>
   <p align="center">
     <strong>Your Personal AI-Powered Job Search Assistant</strong>
