@@ -35,7 +35,7 @@ provider:
 functions:
   api:
     image: appimage
-    timeout: 30 # Increase timeout to 30 seconds
+    timeout: 90 # Increase timeout to 30 seconds
     events:
       - httpApi: '*'
 
