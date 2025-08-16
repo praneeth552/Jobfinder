@@ -34,7 +34,7 @@ export default function HomeClient() {
         const response = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}/warmup`
         );
-        console.log("Backend warm-up successful:", response.data.message);
+        
       } catch (error) {
         console.error("Backend warm-up failed:", error);
       }
@@ -91,7 +91,7 @@ export default function HomeClient() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "100vh" }}
             transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
-            className="fixed top-0 left-0 w-full h-full z-50"
+            className="fixed top-0 left-0 w-full h-full z-50 flex items-center justify-center"
           >
             <SignupPage />
           </motion.div>

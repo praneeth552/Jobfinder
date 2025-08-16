@@ -181,7 +181,7 @@ const WorkflowPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white font-sans">
-      <SimpleNavbar alwaysWhiteText={true}/>
+      <SimpleNavbar />
 
       <div className="p-4 pt-32 md:p-8 md:pt-32">
         <motion.div

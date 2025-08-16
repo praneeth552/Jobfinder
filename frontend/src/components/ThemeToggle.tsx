@@ -4,21 +4,20 @@
 import { useTheme } from "@/context/ThemeContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sun, Moon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import "./ThemeToggle.css";
+import RainDrops from "./RainDrops";
+import Sparkles from "./Sparkles";
 
 const ThemeToggle = () => {
-  const { theme, toggleTheme } = useTheme();
-  const [isMounted, setIsMounted] = useState(false);
+  const { theme, toggleTheme, setTheme } = useTheme();
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  if (!isMounted) {
-    // Avoid rendering mismatch on the server
-    return <div className="w-20 h-10" />;
-  }
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      setTheme(savedTheme as "light" | "dark");
+    }
+  }, [setTheme]);
 
   const isDark = theme === "dark";
 
@@ -41,19 +40,7 @@ const ThemeToggle = () => {
               exit={{ opacity: 0 }}
               className="absolute inset-0 overflow-hidden rounded-full"
             >
-              {[...Array(3)].map((_, i) => (
-                <div
-                  key={i}
-                  className="sparkle"
-                  style={{
-                    top: `${Math.random() * 100}%`,
-                    left: `${Math.random() * 100}%`,
-                    width: `${Math.random() * 2 + 1}px`,
-                    height: `${Math.random() * 2 + 1}px`,
-                    animationDelay: `${Math.random() * 1.5}s`,
-                  }}
-                />
-              ))}
+              <Sparkles />
               <div
                 className="shooting-star"
                 style={{ top: "20%", left: "-50%", animationDelay: "0s" }}
@@ -79,17 +66,7 @@ const ThemeToggle = () => {
               <div className="cloud cloud1" />
               <div className="cloud cloud2" />
               {/* Raindrops */}
-              {[...Array(10)].map((_, i) => (
-                <div
-                  key={i}
-                  className="rain-drop"
-                  style={{
-                    left: `${Math.random() * 100}%`,
-                    animationDelay: `${Math.random() * 2}s`,
-                    animationDuration: `${Math.random() * 0.5 + 0.5}s`,
-                  }}
-                />
-              ))}
+              <RainDrops />
             </motion.div>
           )}
         </AnimatePresence>

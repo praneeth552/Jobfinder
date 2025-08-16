@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { User, LogOut, Star, Settings, Loader, CreditCard } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import BatSignal from "./BatSignal";
+import Lightning from "./Lightning"; // Import the new component
 
 interface UserProfileProps {
   userPlan: "free" | "pro";
@@ -22,6 +23,7 @@ const UserProfile = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [isBatSignalActive, setIsBatSignalActive] = useState(false);
+  const [isLightningActive, setIsLightningActive] = useState(false); // New state for lightning effect
   const { userName } = useAuth();
 
   const handleAction = (action: () => void, actionName: string) => {
@@ -35,6 +37,11 @@ const UserProfile = ({
     setIsBatSignalActive(true);
   };
 
+  const handleEditPreferencesClick = () => {
+    setIsOpen(false);
+    setIsLightningActive(true);
+  };
+
   const handleAnimationComplete = () => {
     // Wait a bit so fade-out fully finishes before redirect
     setTimeout(() => {
@@ -43,12 +50,26 @@ const UserProfile = ({
     }, 500); // adjust based on your fade-out duration in BatSignal
   };
 
+  const handleLightningAnimationComplete = () => {
+    setTimeout(() => {
+      onEditPreferences();
+      setIsLightningActive(false);
+    }, 500);
+  };
+
   return (
     <div className="relative">
       {isBatSignalActive && (
         <BatSignal
           startAnimation={isBatSignalActive}
           onAnimationComplete={handleAnimationComplete}
+        />
+      )}
+
+      {isLightningActive && (
+        <Lightning
+          startAnimation={isLightningActive}
+          onAnimationComplete={handleLightningAnimationComplete}
         />
       )}
 
@@ -82,7 +103,7 @@ const UserProfile = ({
             <ul className="py-1">
               <li>
                 <button
-                  onClick={() => handleAction(onEditPreferences, "preferences")}
+                  onClick={handleEditPreferencesClick}
                   disabled={isLoading === "preferences"}
                   className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
                 >

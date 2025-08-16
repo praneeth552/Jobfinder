@@ -155,7 +155,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
             <motion.button onClick={() => router.push('/pricing')} className="font-semibold text-lg">Pricing</motion.button>
             <motion.button onClick={handleSignInClick} className="font-semibold text-lg">Sign In</motion.button>
             <motion.button onClick={handleCollaborateClick} className="font-semibold text-lg">Collaborate</motion.button>
-            <motion.button onClick={() => onGetStarted(0, 0)} className="submit-button-swipe font-semibold text-lg">Get Started</motion.button>
+            <motion.button onClick={() => onGetStarted(0, 0)} className="submit-button-swipe font-semibold text-lg w-full px-6 py-3">Get Started</motion.button>
           </motion.div>
         )}
       </AnimatePresence>
