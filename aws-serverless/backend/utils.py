@@ -51,26 +51,37 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     user["_id"] = str(user["_id"])
     return user
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def is_pro_user(user: dict) -> bool:
     """
     Checks if a user has an active pro subscription.
-    Handles both 'pro' plan_type and subscription-based status.
     """
-    if not user:
+    if not user or user.get("plan_type") != "pro":
         return False
 
-    # Legacy check for simple "pro" plan type
-    if user.get("plan_type") == "pro" and not user.get("subscription_valid_until"):
-        return True
-
-    plan_status = user.get("plan_status")
+    status = user.get("subscription_status")
     valid_until = user.get("subscription_valid_until")
 
-    if valid_until and isinstance(valid_until, datetime) and valid_until > datetime.utcnow():
-        if plan_status in ["active", "cancelled"]:
-            return True
+    # Ensure valid_until is a datetime object for comparison
+    if valid_until and not isinstance(valid_until, datetime):
+        # Attempt to parse if it's a string, otherwise default to a past time
+        try:
+            valid_until = datetime.fromisoformat(valid_until)
+        except (TypeError, ValueError):
+            valid_until = datetime.min
+
+    now = datetime.utcnow()
+
+    if status == "active" or status == "trialing":
+        return True
+
+    if status == "cancelled" and valid_until and valid_until > now:
+        return True
+
+    # Grace period for payments (e.g., 3 days)
+    if status == "past_due" and valid_until and valid_until + timedelta(days=3) > now:
+        return True
 
     return False
 

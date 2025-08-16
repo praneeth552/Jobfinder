@@ -35,6 +35,14 @@ class UserPreferences(BaseModel):
         return values
 
 
+class SubscriptionStatus(str, Enum):
+    active = "active"
+    cancelled = "cancelled"
+    past_due = "past_due"
+    unpaid = "unpaid"
+    trialing = "trialing"
+
+
 class User(BaseModel):
     name: str
     email: EmailStr
@@ -44,6 +52,7 @@ class User(BaseModel):
     plan_type: PlanType = PlanType.free  # 🔥 default to 'free'
     razorpay_subscription_id: Optional[str] = None
     plan_status: Optional[str] = None # e.g., 'active', 'cancelled', 'halted'
+    subscription_status: Optional[SubscriptionStatus] = None
     subscription_valid_until: Optional[datetime] = None
     last_resume_upload: Optional[datetime] = None
     created_at: datetime = datetime.utcnow()

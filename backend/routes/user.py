@@ -57,60 +57,13 @@ async def get_subscription_details(current_user: dict = Depends(get_current_user
 
 @router.get("/me", status_code=status.HTTP_200_OK)
 async def get_user_me(current_user: dict = Depends(get_current_user)):
-    user_email = current_user.get("email")
-    user = await users_collection.find_one({"email": user_email})
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
-        )
-
-    subscription_id = user.get("razorpay_subscription_id")
-    if subscription_id:
-        try:
-            subscription_details = razorpay_client.subscription.fetch(subscription_id)
-            
-            status = subscription_details.get("status")
-            valid_until_timestamp = subscription_details.get("current_end")
-            valid_until_dt = datetime.fromtimestamp(valid_until_timestamp) if valid_until_timestamp else None
-
-            # Determine plan_type based on status and expiry date
-            is_expired = not valid_until_dt or datetime.utcnow() > valid_until_dt
-
-            if is_expired:
-                current_plan_type = "free"
-                # If the subscription expired, we might want to clear the status or set it to 'expired'
-                # For now, we just downgrade the plan_type
-            elif status == "cancelled":
-                # If cancelled, they retain pro access until the period ends.
-                current_plan_type = "pro"
-            elif status in ["active", "pending", "halted"]:
-                current_plan_type = "pro"
-            else: # Covers 'expired', 'completed', or any other unforeseen statuses
-                current_plan_type = "free"
-
-            # Update our database with the latest info from Razorpay
-            await users_collection.update_one(
-                {"_id": user["_id"]},
-                {"$set": {
-                    "plan_status": status,
-                    "subscription_valid_until": valid_until_dt,
-                    "plan_type": current_plan_type
-                }}
-            )
-            # Re-fetch user data after update to ensure consistency
-            user = await users_collection.find_one({"email": user_email})
-
-        except Exception as e:
-            print(f"Could not fetch subscription from Razorpay: {e}")
-            await users_collection.update_one(
-                {"_id": user["_id"]},
-                {"$set": {"plan_type": "free", "plan_status": "error"}}
-            )
-            user = await users_collection.find_one({"email": user_email})
-
-    # Convert ObjectId to string for JSON serialization
-    user["_id"] = str(user["_id"])
-
-    return user
+    # The get_current_user dependency already fetches the user from the DB.
+    # We can trust our webhooks and daily cron job to keep the user's
+    # subscription status up-to-date in our database.
+    # This makes the API faster and avoids hitting Razorpay on every page load.
+    
+    # The user object from the dependency is already what we need.
+    # Just ensure the _id is a string for JSON serialization.
+    current_user["_id"] = str(current_user["_id"])
+    
+    return current_user

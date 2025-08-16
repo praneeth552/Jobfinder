@@ -100,3 +100,39 @@ async def cancel_subscription(current_user: dict = Depends(get_current_user)):
     except Exception as e:
         print(f"Razorpay API Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/manage-billing-portal", status_code=status.HTTP_200_OK)
+async def get_manage_billing_portal_link(current_user: dict = Depends(get_current_user)):
+    user_email = current_user.get("email")
+    user = await users_collection.find_one({"email": user_email})
+
+    if not user or not user.get("razorpay_subscription_id"):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No active subscription found for this user.",
+        )
+    
+    subscription_id = user.get("razorpay_subscription_id")
+
+    try:
+        # This is a placeholder for the actual method if Razorpay provides one.
+        # As of the current Razorpay API, there isn't a direct method to create a portal link
+        # for a subscription. The link is typically sent to the user's email by Razorpay.
+        # A common workaround is to construct the link manually if the structure is predictable.
+        # For now, we will return a generic link and a message.
+        
+        # A more robust solution would be to use a feature that Razorpay might release in the future
+        # or to guide the user to their email to find the management link.
+        
+        # Let's simulate generating a link for now.
+        # IMPORTANT: This is a mock URL structure.
+        base_url = "https://dashboard.razorpay.com/app/subscriptions"
+        
+        return {
+            "portal_url": base_url,
+            "message": "Please log in to your Razorpay dashboard to manage your subscription."
+        }
+
+    except Exception as e:
+        print(f"Error generating billing portal link: {e}")
+        raise HTTPException(status_code=500, detail="Could not generate billing management link.")
