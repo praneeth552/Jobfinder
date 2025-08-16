@@ -76,7 +76,7 @@ export default function Curtain({
             style={{ transformOrigin: transformOrigin }}
             className="text-4xl font-bold text-white"
           >
-            Ta<span ref={cRef}>c</span>kleIt
+            TackleIt
           </motion.div>
         </motion.div>
       )}

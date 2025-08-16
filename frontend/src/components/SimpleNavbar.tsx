@@ -2,24 +2,19 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { usePathname } from 'next/navigation'; // Import usePathname
 import { X } from "lucide-react";
+import Link from "next/link";
 import ContactForm from "./ContactForm";
 import MobileContactModal from "./MobileContactModal";
 import ThemeToggle from "./ThemeToggle";
-import { useTheme } from "@/context/ThemeContext";
 
-const buttonTexts = ["Got Ideas?", "Want to Collaborate?"];
+const buttonTexts = ["Got Ideas?", "Collaborate?"];
 
-export default function SimpleNavbar({ alwaysWhiteText = false }: { alwaysWhiteText?: boolean }) {
+export default function SimpleNavbar() {
   const [hasScrolled, setHasScrolled] = useState(false);
   const [isContactModalOpen, setContactModalOpen] = useState(false);
   const [textIndex, setTextIndex] = useState(0);
-  const [direction, setDirection] = useState(1);
   const [isMobile, setIsMobile] = useState(false);
-  const { theme } = useTheme();
-  
-  const pathname = usePathname(); // Get the current path
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -30,16 +25,13 @@ export default function SimpleNavbar({ alwaysWhiteText = false }: { alwaysWhiteT
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setDirection((prevDirection) => -prevDirection);
       setTextIndex((prevIndex) => (prevIndex + 1) % buttonTexts.length);
     }, 3000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setHasScrolled(window.scrollY > 10);
-    };
+    const handleScroll = () => setHasScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -50,90 +42,49 @@ export default function SimpleNavbar({ alwaysWhiteText = false }: { alwaysWhiteT
   const navVariants = {
     initial: { y: -100, opacity: 0 },
     animate: { y: 0, opacity: 1 },
-    transition: { duration: 0.8, ease: "easeOut" as const },
+    transition: { duration: 0.8, ease: [0.6, 0.05, -0.01, 0.9] },
   };
 
   const slideVariants = {
-    enter: (direction: number) => ({ y: direction > 0 ? 20 : -20, opacity: 0 }),
-    center: { y: 0, opacity: 1 },
-    exit: (direction: number) => ({ y: direction < 0 ? 20 : -20, opacity: 0 }),
+    enter: { opacity: 0, y: 10 },
+    center: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -10 },
   };
-
-  // Determine text color based on scroll, page, and props
-  const alwaysWhiteTextPaths = ['/workflow', '/pricing'];
-  const isAlwaysWhitePage = alwaysWhiteTextPaths.includes(pathname);
-
-  const getTextColor = () => {
-    if (theme === 'dark') return 'text-white';
-    if (isAlwaysWhitePage) return 'text-white';
-    if (!hasScrolled && alwaysWhiteText) return 'text-white';
-    return 'text-gray-800';
-  };
-
-  const getLogoShadow = () => {
-    if (theme === 'dark') return 'rgb(255,255,255)';
-    if (isAlwaysWhitePage) return 'rgb(255,255,255)';
-    if (!hasScrolled && alwaysWhiteText) return 'rgb(255,255,255)';
-    return 'rgba(0,0,0,0.5)';
-  };
-
-  const textColor = getTextColor();
-  const logoShadow = getLogoShadow();
 
   return (
     <>
       <motion.nav
-        {...navVariants}
-        className={`fixed top-0 left-0 w-full flex justify-between items-center px-4 sm:px-8 py-4 z-50 transition-all duration-300 ${
-          hasScrolled ? "bg-white/10 dark:bg-slate-800/10 backdrop-blur-xl shadow-lg" : "bg-transparent"
-        }`}
-      >
-        <motion.div
-          className={`text-2xl font-bold cursor-pointer transition-colors duration-300 ${textColor}`}
-          onClick={() => (window.location.href = "/")}
-          whileHover={{ scale: 1.05, textShadow: `0px 0px 8px ${logoShadow}` }}
-        >
+        variants={navVariants}
+        initial="initial"
+        animate="animate"
+        className={`fixed top-4 left-2 right-2 max-w-6xl mx-auto flex justify-between items-center px-4 sm:px-6 py-3 z-[1000] transition-all duration-300 rounded-2xl
+          ${hasScrolled ? "bg-[--card-background] border border-[--border] shadow-lg backdrop-blur-lg" : "bg-transparent"}`}>
+        <Link href="/" className="text-2xl font-bold cursor-pointer">
           TackleIt
-        </motion.div>
+        </Link>
 
-        <div className="flex items-center space-x-2 sm:space-x-4">
-                    {pathname !== '/workflow' && pathname !== '/pricing' && <ThemeToggle />}
-          {isMobile ? (
-            <motion.button
-              onClick={openModal}
-              className="submit-button-swipe px-4 sm:px-6 py-2 font-semibold shadow relative overflow-hidden bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full text-sm sm:text-base"
-            >
-              <span>Got Ideas?</span>
-            </motion.button>
-          ) : (
-            <motion.button
-              layout
-              transition={{ type: "spring", stiffness: 400, damping: 40 }}
-              onClick={openModal}
-              className="submit-button-swipe px-6 py-2 font-semibold shadow relative overflow-hidden bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              style={{ width: 220, height: 40, textAlign: "center" }}
-            >
-              <AnimatePresence initial={false} custom={direction} mode="wait">
-                <motion.span
-                  key={textIndex}
-                  custom={direction}
-                  variants={slideVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{
-                    y: { type: "spring", stiffness: 300, damping: 30 },
-                    opacity: { duration: 0.2 },
-                  }}
-                  className="block"
-                >
-                  {buttonTexts[textIndex]}
-                </motion.span>
-              </AnimatePresence>
-            </motion.button>
-          )}
+        <div className="flex items-center space-x-4">
+          <ThemeToggle />
+          <motion.button
+            onClick={openModal}
+            className="submit-button-swipe font-semibold h-10 w-32 md:w-40 flex items-center justify-center"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={textIndex}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3 }}
+                className="block" // Ensure span takes up space
+              >
+                {buttonTexts[textIndex]}
+              </motion.span>
+            </AnimatePresence>
+          </motion.button>
         </div>
       </motion.nav>
 
@@ -146,25 +97,19 @@ export default function SimpleNavbar({ alwaysWhiteText = false }: { alwaysWhiteT
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/70 flex items-center justify-center z-[10000] p-4"
+              className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100]"
               onClick={closeModal}
             >
               <motion.div
                 initial={{ scale: 0.9, y: -30 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9, y: -30 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-                className="relative w-full max-w-lg bg-gray-800 rounded-2xl shadow-xl"
+                className="relative w-full max-w-lg custom-card"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="absolute top-3 right-3 z-20">
-                  <button
-                    onClick={closeModal}
-                    className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                  >
-                    <X size={20} className="text-white" />
-                  </button>
-                </div>
+                <button onClick={closeModal} className="absolute top-3 right-3 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-10">
+                  <X size={20} />
+                </button>
                 <ContactForm />
               </motion.div>
             </motion.div>

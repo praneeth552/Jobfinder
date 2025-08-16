@@ -257,13 +257,7 @@ export default function DashboardClient() {
 
   return (
     <>
-      {batSignalTarget && (
-        <BatSignal
-          target={batSignalTarget}
-          onAnimationComplete={onBatSignalAnimationComplete}
-        />
-      )}
-      {ripple && <Ripple x={ripple.x} y={ripple.y} />}
+      {/* {ripple && <Ripple x={ripple.x} y={ripple.y} />} */}
       <SimpleNavbar />
       <div className="h-20" /> {/* Spacer for the fixed navbar */}
       <motion.div

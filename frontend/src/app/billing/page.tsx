@@ -117,7 +117,7 @@ export default function BillingPage() {
 
   return (
     <>
-      <SimpleNavbar alwaysWhiteText={true} />
+      <SimpleNavbar  />
       <ConfirmationModal
         isOpen={isConfirmationModalOpen}
         onClose={() => setIsConfirmationModalOpen(false)}

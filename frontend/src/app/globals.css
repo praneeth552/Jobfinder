@@ -3,25 +3,44 @@
 @tailwind utilities;
 
 :root {
+  /* Color Palette */
   --background: #ffffff;
-  --foreground: #171717;
-  --background-gradient-start: rgba(255, 245, 225, 0.6);
-  --background-gradient-mid1: rgba(253, 235, 208, 0.6);
-  --background-gradient-mid2: rgba(255, 218, 185, 0.6);
-  --background-gradient-end: rgba(255, 228, 181, 0.6);
+  --foreground: #111827;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --secondary: #f9fafb;
+  --border: #e5e7eb;
+  --card-background: rgba(255, 255, 255, 0.7);
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+
+  /* Design System */
+  --border-radius: 0.75rem;
+  --card-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  --card-shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* Background Gradient */
+  --background-gradient-start: rgba(245, 245, 255, 0.6);
+  --background-gradient-end: rgba(230, 230, 250, 0.6);
 }
 
 .dark {
-  --background: #1a202c;
-  --foreground: #e2e8f0;
-  --background-gradient-start: rgba(13, 17, 23, 0.7);
-  --background-gradient-mid1: rgba(26, 32, 44, 0.7);
-  --background-gradient-mid2: rgba(45, 55, 72, 0.7);
-  --background-gradient-end: rgba(26, 32, 44, 0.7);
+  --background: #111827;
+  --foreground: #f9fafb;
+  --primary: #6366f1;
+  --primary-hover: #818cf8;
+  --secondary: #1f2937;
+  --border: #374151;
+  --card-background: rgba(31, 41, 55, 0.5);
+
+  --background-gradient-start: rgba(17, 24, 39, 0.7);
+  --background-gradient-end: rgba(31, 41, 55, 0.7);
 }
 
 html {
   height: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -29,12 +48,10 @@ body {
   overflow-x: hidden;
   color: var(--foreground);
   background-color: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
   position: relative;
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Background image layer */
 body::before {
   content: '';
   position: fixed;
@@ -45,10 +62,10 @@ body::before {
   background-image: url('/background.jpeg');
   background-size: cover;
   background-position: center;
-  z-index: -2; /* Place behind the gradient */
+  opacity: 0.05;
+  z-index: -2;
 }
 
-/* Animated gradient overlay layer */
 body::after {
   content: '';
   position: fixed;
@@ -56,16 +73,10 @@ body::after {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(270deg, var(--background-gradient-start), var(--background-gradient-mid1), var(--background-gradient-mid2), var(--background-gradient-end));
+  background: linear-gradient(270deg, var(--background-gradient-start), var(--background-gradient-end));
   background-size: 400% 400%;
-  animation: gradientAnimation 15s ease infinite;
-  z-index: -1; /* Place on top of the background image */
-}
-
-/* Animated Gradient Background */
-.animated-gradient-bg {
-  /* This class can now be used to apply the overlay effect on specific containers if needed */
-  position: relative;
+  animation: gradientAnimation 20s ease infinite;
+  z-index: -1;
 }
 
 @keyframes gradientAnimation {
@@ -74,175 +85,70 @@ body::after {
   100% { background-position: 0% 50%; }
 }
 
-/* global.css or in Tailwind className via plugin */
-.glow-hover:hover {
-  box-shadow: 0 0 10px rgba(255, 177, 0, 0.6),
-              0 0 20px rgba(255, 177, 0, 0.4),
-              0 0 30px rgba(255, 177, 0, 0.2);
-  transition: box-shadow 0.5s ease-in-out;
-}
-@keyframes shine {
-  0% { left: -75%; }
-  100% { left: 125%; }
+/* Responsive Typography */
+h1, .h1 { font-size: clamp(2.5rem, 5vw, 4rem); }
+h2, .h2 { font-size: clamp(1.8rem, 4vw, 3rem); }
+p, a, span, div { font-size: clamp(0.9rem, 1.5vw, 1rem); }
+
+/* Global transition for interactive elements */
+a, button, input, textarea {
+  transition: all 0.2s ease-in-out;
 }
 
-.shine {
-  animation: shine 2s linear infinite;
+/* Input Field Polish */
+/* input[type="text"], input[type="email"], input[type="password"], input[type="tel"], textarea {
+  background-color: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  padding: 0.75rem 1rem;
+}
+input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="tel"]:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent);
+} */
+
+/* Custom Card Style */
+.custom-card {
+  background-color: var(--card-background);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.custom-card:hover {
+  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-4px);
 }
 
-@keyframes hero-shine {
-  0% {
-    transform: translateX(-100%) skewX(-30deg);
-  }
-  100% {
-    transform: translateX(200%) skewX(-30deg);
-  }
-}
-
-.animate-hero-shine {
-  animation: hero-shine 3s ease-in-out infinite;
-}
-
-@keyframes breathing-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(255, 255, 255, 0.6), 0 0 15px rgba(255, 255, 255, 0.4); }
-  50% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 25px rgba(255, 255, 255, 0.6); }
-}
-
-.pill-glow {
-  animation: breathing-glow 3s ease-in-out infinite;
-}
-
-@keyframes button-breathing-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(255, 255, 255, 0.6), 0 0 15px rgba(255, 255, 255, 0.4); }
-  50% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 25px rgba(255, 255, 255, 0.6); }
-}
-
-.button-glow {
-  animation: button-breathing-glow 3s ease-in-out infinite;
-}
-
-@keyframes borderAnimation {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.animate-border {
-  background: linear-gradient(270deg, #FFB100, #FFD700, #FF8C00, #FFB100);
-  background-size: 400% 400%;
-  animation: borderAnimation 6s ease infinite;
-}
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* This CSS creates the animated glowing border */
-.glow-form-wrapper {
-  position: relative;
-  /* This padding reveals the gradient background, creating the border effect */
-  padding: 4px; 
-  border-radius: 20px;
-  /* These are the colors for the moving border */
-  background: linear-gradient(270deg, #00ff00, #00ffff, #ff00ff, #00ff00);
-  background-size: 600% 600%;
-  /* This applies the looping animation defined below */
-  animation: borderGlow 8s ease infinite;
-}
-
-/* This is the animation that makes the colors move continuously */
-@keyframes borderGlow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* This creates the blurred "glow" effect behind the border */
-.glow-form-wrapper::before {
-  content: '';
-  position: absolute;
-  top: -8px;
-  left: -8px;
-  right: -8px;
-  bottom: -8px;
-  border-radius: 28px;
-  background: inherit;
-  /* This blur is what makes it "glow" */
-  filter: blur(20px);
-  z-index: -1;
-}
-
+/* Refined Submit Button */
 .submit-button-swipe {
   position: relative;
   overflow: hidden;
   z-index: 1;
+  background-color: var(--primary);
+  color: white;
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
 }
-
-/* This is the new color layer that wipes across on hover */
-.submit-button-swipe::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background-color: #51416c; /* A slightly brighter purple for the hover state */
-  transition: left 0.5s ease;
-  z-index: -1;
+.submit-button-swipe:hover {
+  background-color: var(--primary-hover);
 }
-
-.submit-button-swipe:hover::after {
-  left: 0;
-}
-
-/* This is the shimmer layer */
 .submit-button-swipe::before {
   content: '';
   position: absolute;
   top: 0;
   left: -100%;
-  width: 100%;
+  width: 50%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.4), transparent);
-  transition: left 0.5s ease;
-  z-index: 0; /* Sits above the color wipe but below the text */
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: skewX(-30deg);
+  transition: left 0.8s ease;
 }
-
 .submit-button-swipe:hover::before {
-  left: 100%;
-}
-
-.bottom-fade-effect {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 6rem;
-  pointer-events: none;
-  backdrop-filter: blur(16px); /* Increased blur for a more glassy effect */
-  -webkit-backdrop-filter: blur(16px); /* Safari support */
-  mask-image: linear-gradient(to top, black 20%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to top, black 20%, transparent 100%);
-  z-index: 40;
-}
-
-@keyframes github-glow {
-  0%, 100% {
-    border-color: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.2), 0 0 10px rgba(255, 255, 255, 0.1);
-  }
-  50% {
-    border-color: rgba(255, 255, 255, 1);
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4);
-  }
-}
-
-.github-glow-button {
-  animation: github-glow 4s ease-in-out infinite;
+  left: 150%;
 }

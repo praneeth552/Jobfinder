@@ -3,49 +3,70 @@
 import { motion } from "framer-motion";
 
 interface HeroSectionProps {
-  onGetStarted: (x: number, y: number) => void;
+  onGetStarted: () => void;
 }
 
 export default function HeroSection({ onGetStarted }: HeroSectionProps) {
-  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const rect = (e.target as HTMLButtonElement).getBoundingClientRect();
-    const x = rect.left + rect.width / 2;
-    const y = rect.top + rect.height / 2;
-    onGetStarted(x, y);
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.3 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" },
+    },
   };
 
   return (
-    <section
-      className="flex flex-col items-center justify-center min-h-[calc(var(--vh,1vh)*100)] px-4"
+    <motion.section
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="flex flex-col items-center justify-center min-h-[calc(var(--vh,1vh)*100)] px-4 text-center"
     >
+      {/* Heading */}
       <motion.h2
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, ease: "easeOut" }}
-        className="text-6xl font-extrabold mb-6 text-center text-gray-900 dark:text-white"
+        variants={itemVariants as any}
+        className="text-5xl md:text-7xl font-extrabold mb-6 text-[--foreground] leading-tight"
       >
-        Jobs tailored for <span className="text-[#FFB100]">you</span>, powered by AI.
+        Jobs tailored for{" "}
+        <span className="text-[--primary] text-5xl md:text-7xl font-extrabold inline-block align-baseline leading-tight">
+          you
+        </span>
+        , powered by AI.
       </motion.h2>
 
+      {/* Subtext */}
       <motion.p
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
-        className="text-gray-800 dark:text-gray-300 max-w-2xl text-center mb-8 text-2xl"
+        variants={itemVariants as any}
+        className="text-lg md:text-xl text-[--foreground]/80 max-w-2xl mb-10"
       >
-        Discover curated job opportunities analyzed for your skills and goals, organized seamlessly into your Google Sheets.
+        Discover curated job opportunities analyzed for your skills and goals,
+        organized seamlessly into your Google Sheets.
       </motion.p>
 
-      <div className="relative rounded-full p-1 animate-border glow-hover shadow-lg">
+      {/* Button */}
+      <motion.div variants={itemVariants as any}>
         <motion.button
-          onClick={handleButtonClick}
+          onClick={onGetStarted}
+          className="submit-button-swipe text-lg"
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="relative overflow-hidden bg-[#1f1f1f] text-white px-8 py-3 text-xl font-semibold rounded-full w-full"
+          animate={{
+            scale: [1, 1.02, 1],
+            transition: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+          }}
         >
-          <div className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-45 animate-hero-shine" />
           Get Started
         </motion.button>
-      </div>
-    </section>
+      </motion.div>
+    </motion.section>
   );
 }

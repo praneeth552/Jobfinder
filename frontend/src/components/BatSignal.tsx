@@ -1,51 +1,73 @@
-"use client";
+import React, { useEffect, useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-import { motion } from "framer-motion";
-import { useTheme } from "@/context/ThemeContext";
+const BatSignal = ({ startAnimation, onAnimationComplete }: { startAnimation: boolean, onAnimationComplete: () => void }) => {
+  const [show, setShow] = useState(false);
+  const [isZooming, setIsZooming] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
-const BatSignal = ({ target, onAnimationComplete }: { target: { x: number; y: number } | null; onAnimationComplete: () => void; }) => {
-  const { theme } = useTheme();
+  useEffect(() => {
+    let preZoomTimer: NodeJS.Timeout;
+    let zoomTimer: NodeJS.Timeout;
 
-  if (theme === 'light' || !target) {
-    return null;
-  }
+    if (startAnimation) {
+      setShow(true);
 
-  const initialX = window.innerWidth / 2 - 25;
-  const initialY = window.innerHeight + 100;
+      // Wait for fade-in (0.8s), then play audio + start zoom
+      preZoomTimer = setTimeout(() => {
+        if (audioRef.current) {
+          audioRef.current.play().catch((err) =>
+            console.error("Audio play failed:", err)
+          );
+        }
+
+        setIsZooming(true);
+
+        // After zoom duration, trigger exit
+        zoomTimer = setTimeout(() => {
+          setShow(false);
+        }, 1500); // match zoom duration
+      }, 800); // fade-in duration
+    }
+
+    return () => {
+      clearTimeout(preZoomTimer);
+      clearTimeout(zoomTimer);
+    };
+  }, [startAnimation]);
 
   return (
-    <motion.div
-      initial={{ 
-        x: initialX,
-        y: initialY,
-        scale: 0.2, 
-        opacity: 0.8
-      }}
-      animate={{
-        x: [initialX, target.x - 25],
-        y: [initialY, target.y - 25],
-        scale: [0.2, 1.5, 1],
-        opacity: [0.8, 1, 0],
-        rotate: [0, 720],
-        transition: {
-          duration: 1.2,
-          ease: "easeInOut",
-          times: [0, 0.8, 1]
-        },
-      }}
-      onAnimationComplete={onAnimationComplete}
-      style={{ position: "fixed", zIndex: 9999, width: 50, height: 50 }}
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFD700">
-        <path d="M4 4.5C4 4.5 5 2 12 2C19 2 20 4.5 20 4.5C20 4.5 18.5 8 12 8C5.5 8 4 4.5 4 4.5Z" />
-        <path d="M12 8C12 8 12.5 15.5 15.5 21.5" />
-        <path d="M12 8C12 8 11.5 15.5 8.5 21.5" />
-        <path d="M2 10.5C2 10.5 4.5 10 8.5 10" />
-        <path d="M22 10.5C22 10.5 19.5 10 15.5 10" />
-        <path d="M9 14C9 14 6 13.5 4.5 13" />
-        <path d="M15 14C15 14 18 13.5 19.5 13" />
-      </svg>
-    </motion.div>
+    <AnimatePresence onExitComplete={onAnimationComplete}>
+      {show && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
+          className="fixed top-0 left-0 w-full h-full bg-black z-[9999] flex justify-center items-center overflow-hidden"
+        >
+          {/* Hidden audio element */}
+          <audio ref={audioRef} src="/im-batman.mp3" preload="auto" />
+
+          <motion.div
+            variants={{
+              initial: { scale: 1, opacity: 1 },
+              zoom: { scale: 20, opacity: 0 },
+            }}
+            animate={isZooming ? "zoom" : "initial"}
+            transition={{ duration: 1.5, ease: "easeIn" }}
+            style={{ transformOrigin: "50% 50%" }}
+            className="w-full h-full"
+          >
+            <img
+              src="/batman-logo-wallpaper-2880x1800_8.png"
+              alt="Batman Logo"
+              className="w-full h-full object-cover"
+            />
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

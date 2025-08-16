@@ -4,60 +4,43 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
+import { useTheme } from "@/context/ThemeContext";
 
 interface NavbarProps {
   onGetStarted: (x: number, y: number) => void;
 }
 
-const buttonTexts = ["Got Ideas?", "Want to Collaborate?"];
+const buttonTexts = ["Got Ideas?", "Collaborate?"];
 
 export default function Navbar({ onGetStarted }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
-  const [isOverContactForm, setIsOverContactForm] = useState(false);
-  const router = useRouter();
-
   const [textIndex, setTextIndex] = useState(0);
-  const [direction, setDirection] = useState(1);
+  const router = useRouter();
+  const { theme } = useTheme();
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setDirection((prevDirection) => -prevDirection);
       setTextIndex((prevIndex) => (prevIndex + 1) % buttonTexts.length);
-    }, 3000); // Slowed down to 3 seconds
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
     const handleScroll = () => {
       setHasScrolled(window.scrollY > 10);
-
-      const contactSection = document.getElementById("contact-section");
-      if (contactSection) {
-        const { top, bottom } = contactSection.getBoundingClientRect();
-        const isOver = top < 50 && bottom > 50; // 50 is approx navbar height
-        setIsOverContactForm(isOver);
-      }
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleGetStartedClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const x = e.clientX;
-    const y = e.clientY;
-    onGetStarted(x, y);
-    setIsMenuOpen(false);
-  };
-
   const handleSignInClick = () => {
     router.push("/signin");
     setIsMenuOpen(false);
   };
-
+  
   const handleCollaborateClick = () => {
     const contactSection = document.getElementById("contact-section");
     if (contactSection) {
@@ -69,32 +52,34 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
   const navVariants = {
     initial: { y: -100, opacity: 0 },
     animate: { y: 0, opacity: 1 },
-    transition: { duration: 0.8, ease: "easeOut" as const },
+    transition: { duration: 0.8, ease: [0.6, 0.05, -0.01, 0.9] },
+  };
+
+  const navLinkVariants = {
+    hover: { y: -2 },
+    tap: { scale: 0.95 },
   };
 
   const slideVariants = {
-    enter: (direction: number) => ({ y: direction > 0 ? 20 : -20, opacity: 0 }),
-    center: { y: 0, opacity: 1 },
-    exit: (direction: number) => ({ y: direction < 0 ? 20 : -20, opacity: 0 }),
+    enter: { opacity: 0, y: 10 },
+    center: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -10 },
   };
 
-  const textColor = hasScrolled && !isOverContactForm ? "text-gray-800" : "text-white";
-  const mobileTextColor = hasScrolled ? "text-gray-800" : "text-white";
-  const mobileBgColor = hasScrolled
-    ? "bg-white/80 backdrop-blur-md"
-    : "bg-black/20 backdrop-blur-md";
+  const textColor = theme === 'dark' || !hasScrolled ? 'text-white' : 'text-[--foreground]';
 
   return (
     <motion.nav
-      {...navVariants}
-      className={`fixed top-0 left-0 w-full flex justify-between items-center px-4 sm:px-8 py-4 z-50 transition-all duration-300 ${
-        hasScrolled ? "bg-white/10 backdrop-blur-xl shadow-lg" : "bg-transparent"
-      }`}
+      variants={navVariants}
+      initial="initial"
+      animate="animate"
+      className={`fixed top-4 left-4 right-4 max-w-6xl mx-auto flex justify-between items-center px-4 sm:px-8 py-3 z-50 transition-all duration-300 rounded-2xl
+        ${hasScrolled ? "bg-[--card-background] border border-[--border] shadow-lg backdrop-blur-lg" : "bg-transparent"}`}
     >
       <Link href="/workflow">
         <motion.div
-          className={`text-2xl font-bold cursor-pointer transition-colors duration-300 ${textColor}`}
-          whileHover={{ scale: 1.05, textShadow: `0px 0px 8px ${hasScrolled ? 'rgba(0,0,0,0.5)' : 'rgb(255,255,255)'}` }}
+          className={`text-2xl font-bold cursor-pointer transition-colors ${textColor}`}
+          whileHover={{ scale: 1.05, color: 'var(--primary)' }}
         >
           TackleIt
         </motion.div>
@@ -105,69 +90,55 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
         <ThemeToggle />
         <motion.button
           onClick={() => router.push('/pricing')}
-          className={`px-6 py-2 font-semibold rounded-full transition-colors duration-300 ${textColor}`}
-          whileHover={{ scale: 1.05, backgroundColor: hasScrolled ? "rgba(0, 0, 0, 0.1)" : "rgba(255, 255, 255, 0.1)" }}
-          whileTap={{ scale: 0.95 }}
+          className={`font-semibold px-2 transition-colors ${textColor}`}
+          variants={navLinkVariants}
+          whileHover={{ color: 'var(--primary)' }}
+          whileTap="tap"
         >
           Pricing
         </motion.button>
         <motion.button
           onClick={handleSignInClick}
-          className={`px-6 py-2 font-semibold rounded-full transition-colors duration-300 ${textColor}`}
-          whileHover={{ scale: 1.05, backgroundColor: hasScrolled ? "rgba(0, 0, 0, 0.1)" : "rgba(255, 255, 255, 0.1)" }}
-          whileTap={{ scale: 0.95 }}
+          className={`font-semibold px-2 transition-colors ${textColor}`}
+          variants={navLinkVariants}
+          whileHover={{ color: 'var(--primary)' }}
+          whileTap="tap"
         >
           Sign In
         </motion.button>
         <motion.button
-          onClick={handleGetStartedClick}
-          className="px-6 py-2 font-semibold shadow-lg bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-full glow-hover"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Get Started
-        </motion.button>
-        <motion.button
-          layout
-          transition={{ type: "spring", stiffness: 400, damping: 40 }}
           onClick={handleCollaborateClick}
-          className="submit-button-swipe px-6 py-2 font-semibold shadow relative overflow-hidden bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full"
+          className="relative submit-button-swipe font-semibold h-10 w-40 flex items-center justify-center"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          style={{ width: 220, height: 40, textAlign: "center" }}
         >
-          <AnimatePresence initial={false} custom={direction} mode="wait">
+          <AnimatePresence mode="wait">
             <motion.span
               key={textIndex}
-              custom={direction}
               variants={slideVariants}
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{
-                y: { type: "spring", stiffness: 300, damping: 30 },
-                opacity: { duration: 0.2 },
-              }}
-              className="block"
+              transition={{ duration: 0.3 }}
             >
               {buttonTexts[textIndex]}
             </motion.span>
           </AnimatePresence>
+        </motion.button>
+        <motion.button
+          onClick={() => onGetStarted(0, 0)}
+          className="submit-button-swipe font-semibold"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Get Started
         </motion.button>
       </div>
 
       {/* Mobile Menu Button */}
       <div className="md:hidden flex items-center space-x-4">
         <ThemeToggle />
-        <motion.button
-          onClick={() => router.push('/pricing')}
-          className={`px-4 py-2 font-semibold rounded-full transition-colors duration-300 ${textColor}`}
-          whileHover={{ scale: 1.05, backgroundColor: hasScrolled ? "rgba(0, 0, 0, 0.1)" : "rgba(255, 255, 255, 0.1)" }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Pricing
-        </motion.button>
-        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className={`transition-colors duration-300 ${textColor}`}>
+        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className={textColor}>
           {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>
@@ -179,32 +150,12 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className={`absolute top-full left-0 w-full md:hidden flex flex-col items-center space-y-4 py-4 ${mobileBgColor}`}
+            className="absolute top-full left-0 w-full mt-2 md:hidden flex flex-col items-center space-y-4 py-4 bg-[--card-background] border-t border-[--border] shadow-lg"
           >
-            <motion.button
-              onClick={handleSignInClick}
-              className={`px-6 py-2 font-semibold rounded-full transition-colors duration-300 ${textColor}`}
-              whileHover={{ scale: 1.05, backgroundColor: hasScrolled ? "rgba(0, 0, 0, 0.1)" : "rgba(255, 255, 255, 0.1)" }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Sign In
-            </motion.button>
-            <motion.button
-              onClick={handleGetStartedClick}
-              className="px-6 py-2 font-semibold shadow-lg bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-full"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Get Started
-            </motion.button>
-            <motion.button
-              onClick={handleCollaborateClick}
-              className="submit-button-swipe px-6 py-2 font-semibold shadow-lg bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Collaborate
-            </motion.button>
+            <motion.button onClick={() => router.push('/pricing')} className="font-semibold text-lg">Pricing</motion.button>
+            <motion.button onClick={handleSignInClick} className="font-semibold text-lg">Sign In</motion.button>
+            <motion.button onClick={handleCollaborateClick} className="font-semibold text-lg">Collaborate</motion.button>
+            <motion.button onClick={() => onGetStarted(0, 0)} className="submit-button-swipe font-semibold text-lg">Get Started</motion.button>
           </motion.div>
         )}
       </AnimatePresence>

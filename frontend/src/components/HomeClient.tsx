@@ -4,14 +4,14 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
-import LoadingScreen from "@/components/LoadingScreen";
 import HeroSection from "@/components/HeroSection";
 import ProblemSolutionSection from "@/components/ProblemSolutionSection";
-import FeaturesSection from "@/components/FeaturesSection";
-import SignupPage from "@/components/SignupPage";
 import IntroductionSection from "@/components/IntroductionSection";
-import ContactForm from "@/components/ContactForm";
+import FeaturesSection from "@/components/FeaturesSection";
+import LoadingScreen from "@/components/LoadingScreen";
 import NewFooter from "@/components/NewFooter";
+import SignupPage from "@/components/SignupPage";
+import ContactForm from "@/components/ContactForm";
 import TechStack from "@/components/TechStack";
 import "@/components/TechStack.css";
 import axios from "axios";
@@ -19,8 +19,6 @@ import axios from "axios";
 export default function HomeClient() {
   const [loadingFinished, setLoadingFinished] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
-  const [revealPos, setRevealPos] = useState({ x: 0, y: 0 });
-  const [isRevealing, setIsRevealing] = useState(false);
 
   const searchParams = useSearchParams();
 
@@ -33,7 +31,9 @@ export default function HomeClient() {
     // Warm-up request to the backend
     const warmUpBackend = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/warmup`);
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/warmup`
+        );
         console.log("Backend warm-up successful:", response.data.message);
       } catch (error) {
         console.error("Backend warm-up failed:", error);
@@ -44,28 +44,18 @@ export default function HomeClient() {
   }, []);
 
   useEffect(() => {
-    if (searchParams.get("signup") === "true" && !isRevealing) {
-      const centerX = window.innerWidth / 2;
-      const centerY = window.innerHeight / 2;
-      setRevealPos({ x: centerX, y: centerY });
-      setIsRevealing(true);
+    if (searchParams.get("signup") === "true") {
       setShowSignup(true);
     }
-  }, [searchParams, isRevealing]);
+  }, [searchParams]);
 
   const handleFinishLoading = () => {
     setLoadingFinished(true);
     sessionStorage.setItem("loadingFinished", "true");
   };
 
-  const handleGetStarted = (x: number, y: number) => {
-    setRevealPos({ x, y });
-    setIsRevealing(true);
-    setShowSignup(true); // Show signup immediately for the transition
-  };
-
-  const handleRevealComplete = () => {
-    // We keep isRevealing true so the signup page stays visible inside the reveal wrapper
+  const handleGetStarted = () => {
+    setShowSignup(true);
   };
 
   return (
@@ -75,7 +65,7 @@ export default function HomeClient() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {loadingFinished && !showSignup && !isRevealing && (
+        {loadingFinished && !showSignup && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -85,9 +75,9 @@ export default function HomeClient() {
             <Navbar onGetStarted={handleGetStarted} />
             <HeroSection onGetStarted={handleGetStarted} />
             <IntroductionSection />
+            <FeaturesSection />
             <TechStack />
             <ProblemSolutionSection />
-            <FeaturesSection />
             <ContactForm />
             <NewFooter />
           </motion.div>
@@ -95,18 +85,19 @@ export default function HomeClient() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {isRevealing && (
+        {showSignup && (
           <motion.div
-            initial={{ clipPath: `circle(0% at ${revealPos.x}px ${revealPos.y}px)` }}
-            animate={{ clipPath: `circle(150% at ${revealPos.x}px ${revealPos.y}px)` }}
-            transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1] }}
-            onAnimationComplete={handleRevealComplete}
+            initial={{ opacity: 0, y: "100vh" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "100vh" }}
+            transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
             className="fixed top-0 left-0 w-full h-full z-50"
           >
             <SignupPage />
           </motion.div>
         )}
       </AnimatePresence>
+
       <div className="bottom-fade-effect" />
     </main>
   );
