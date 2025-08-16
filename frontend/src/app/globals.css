@@ -124,9 +124,10 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focu
 }
 
 /* Refined Submit Button */
+/* Refined Submit Button with Fixed Overflow */
 .submit-button-swipe {
   position: relative;
-  overflow: hidden;
+  overflow: hidden; /* This was already there, but ensuring it's present */
   z-index: 1;
   background-color: var(--primary);
   color: white;
@@ -134,10 +135,15 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focu
   padding: 0.75rem 1.5rem;
   font-weight: 600;
   transition: background-color 0.3s ease;
+  /* Add these properties to ensure proper clipping */
+  isolation: isolate; /* Creates a new stacking context */
+  border: none; /* Remove any default borders that might interfere */
 }
+
 .submit-button-swipe:hover {
   background-color: var(--primary-hover);
 }
+
 .submit-button-swipe::before {
   content: '';
   position: absolute;
@@ -148,7 +154,48 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focu
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   transform: skewX(-30deg);
   transition: left 0.8s ease;
+  z-index: -1; /* Ensure it's behind the button text */
+  /* Additional fixes */
+  border-radius: inherit; /* Match the button's border radius */
 }
+
 .submit-button-swipe:hover::before {
   left: 150%;
+}
+
+/* Alternative approach - if the above doesn't work, try this more contained version */
+.submit-button-swipe-alt {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  background-color: var(--primary);
+  color: white;
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  isolation: isolate;
+  border: none;
+}
+
+.submit-button-swipe-alt:hover {
+  background-color: var(--primary-hover);
+}
+
+.submit-button-swipe-alt::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%; /* Start less far to the left */
+  width: 30%; /* Smaller width */
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-25deg);
+  transition: left 0.6s ease;
+  z-index: -1;
+  border-radius: inherit;
+}
+
+.submit-button-swipe-alt:hover::before {
+  left: 120%; /* Don't go as far right */
 }

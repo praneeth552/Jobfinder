@@ -241,13 +241,69 @@ export default function PreferencesClient() {
             <h1 className="text-4xl font-bold mb-2">Set Your Preferences</h1>
             <p className="text-[--foreground]/70">Or, upload your resume to get started quickly. This will autofill your roles and skills.</p>
           </div>
-          
-          <div className="custom-card mb-8 p-6 text-center">
-            <label htmlFor="resume-upload" className={clsx("submit-button-swipe cursor-pointer", { "opacity-50": isParsing })}>
-              {isParsing ? "Parsing..." : "Upload Resume"}
+
+          <div className="relative border-2 border-dashed border-gray-300 hover:border-blue-400 rounded-xl p-8 mb-8 text-center transition-all duration-300 cursor-pointer group hover:bg-blue-50/50">
+            <label
+              htmlFor="resume-upload"
+              className={`flex flex-col items-center space-y-4 cursor-pointer ${isParsing ? "opacity-50 cursor-not-allowed" : ""}`}
+            >
+              {/* Upload Icon */}
+              <div className={`p-3 rounded-full transition-all duration-300 ${isParsing ? 'bg-gray-100' : 'bg-blue-100 group-hover:bg-blue-200'}`}>
+                {isParsing ? (
+                  <svg className="w-6 h-6 text-gray-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                )}
+              </div>
+
+              {/* Main Text */}
+              <div>
+                <h3 className="text-lg font-semibold text-[--foreground]/60 mb-2">
+                  {isParsing ? "Processing Resume..." : "Upload Resume"}
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  {isParsing ? "Please wait while we analyze your document" : "Drag and drop your file here, or click to browse"}
+                </p>
+              </div>
+
+              {/* File Types */}
+              <div className="flex items-center space-x-2 text-xs text-gray-500 mb-4">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>PDF, DOC, DOCX supported</span>
+              </div>
+
+              {/* Upload Button */}
+              <div className={`
+      inline-flex items-center px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 shadow-md
+      ${isParsing
+                  ? 'bg-gray-400 text-white cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 hover:shadow-lg transform hover:-translate-y-0.5'
+                }
+    `}>
+                {isParsing ? "Processing..." : "Choose File"}
+              </div>
             </label>
-            <p className="text-xs text-[--foreground]/60 mt-2">Free users can upload monthly, Pro users can upload weekly.</p>
-            <input id="resume-upload" type="file" className="hidden" onChange={handleResumeUpload} accept=".pdf,.doc,.docx" disabled={isParsing} />
+
+            {/* Usage Limit Text */}
+            <p className="text-xs text-gray-500 mt-6 px-4 py-2 bg-gray-50 rounded-lg">
+              Free users can upload monthly, Pro users can upload weekly.
+            </p>
+
+            <input
+              id="resume-upload"
+              type="file"
+              className="hidden"
+              onChange={handleResumeUpload}
+              accept=".pdf,.doc,.docx"
+              disabled={isParsing}
+            />
           </div>
 
           <motion.form
@@ -256,43 +312,43 @@ export default function PreferencesClient() {
             initial="hidden"
             animate="visible"
             variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
-            
+
             <PreferenceCard title="Select up to 3 Roles" description="Choose the roles that best match your skills.">
               {ROLES.map(r => <SelectionPill key={r} label={r} isSelected={preferences.role.includes(r)} onClick={() => handleMultiSelect('role', r, 3)} />)}
             </PreferenceCard>
-            
+
             <PreferenceCard title="Select up to 3 Locations" description="Where are you looking for opportunities?">
               {LOCATIONS.map(l => <SelectionPill key={l} label={l} isSelected={preferences.location.includes(l)} onClick={() => handleMultiSelect('location', l, 3)} />)}
             </PreferenceCard>
-            
+
             <div className="lg:col-span-2 relative z-20">
               <PreferenceCard title="Select up to 25 Tech Stack Items" description="Add the technologies you're proficient in.">
                 <TechStackSelector selected={preferences.tech_stack} onChange={(v) => setPreferences(p => ({ ...p, tech_stack: v }))} />
               </PreferenceCard>
             </div>
-            
+
             <PreferenceCard title="Select Experience Level" description="This helps us find jobs at your level.">
               {EXPERIENCE_LEVELS.map(exp => <SelectionPill key={exp} label={exp} isSelected={preferences.experience_level === exp} onClick={() => handleSingleSelect('experience_level', exp)} />)}
             </PreferenceCard>
-            
+
             <PreferenceCard title="Desired Salary (LPA)" description="Let us know your salary expectations.">
               {SALARY_RANGES.map(salary => <SelectionPill key={salary} label={salary} isSelected={preferences.desired_salary === salary} onClick={() => handleSingleSelect('desired_salary', salary)} />)}
             </PreferenceCard>
-            
+
             <PreferenceCard title="Select up to 2 Company Sizes" description="Do you prefer big companies or startups?">
               {COMPANY_SIZES.map(size => <SelectionPill key={size} label={size} isSelected={preferences.company_size.includes(size)} onClick={() => handleMultiSelect('company_size', size, 2)} />)}
             </PreferenceCard>
-            
+
             <PreferenceCard title="Select up to 2 Job Types" description="Are you looking for full-time, part-time, etc.?">
               {JOB_TYPES.map(type => <SelectionPill key={type} label={type} isSelected={preferences.job_type.includes(type)} onClick={() => handleMultiSelect('job_type', type, 2)} />)}
             </PreferenceCard>
-            
+
             <div className="lg:col-span-2">
               <PreferenceCard title="Select up to 2 Work Arrangements" description="Find jobs that fit your lifestyle.">
                 {WORK_ARRANGEMENTS.map(arr => <SelectionPill key={arr} label={arr} isSelected={preferences.work_arrangement.includes(arr)} onClick={() => handleMultiSelect('work_arrangement', arr, 2)} />)}
               </PreferenceCard>
             </div>
-            
+
             <div className="lg:col-span-2 flex justify-center mt-4 p-6">
               <LoadingButton type="submit" isLoading={isSubmitting} className="submit-button-swipe w-full max-w-xs" disabled={isSubmitting}>
                 Save Preferences
