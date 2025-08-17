@@ -1,73 +1,59 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 
-const BatSignal = ({ startAnimation, onAnimationComplete }: { startAnimation: boolean, onAnimationComplete: () => void }) => {
-  const [show, setShow] = useState(false);
-  const [isZooming, setIsZooming] = useState(false);
+const BatSignal = ({ onAnimationComplete }: { onAnimationComplete: () => void }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const onAnimationCompleteRef = useRef(onAnimationComplete);
 
   useEffect(() => {
-    let preZoomTimer: NodeJS.Timeout;
-    let zoomTimer: NodeJS.Timeout;
+    onAnimationCompleteRef.current = onAnimationComplete;
+  });
 
-    if (startAnimation) {
-      setShow(true);
+  useEffect(() => {
+    // This effect runs only once when the component mounts
+    const audio = audioRef.current;
+    const fadeInDuration = 800;
+    const zoomDuration = 1500;
 
-      // Wait for fade-in (0.8s), then play audio + start zoom
-      preZoomTimer = setTimeout(() => {
-        if (audioRef.current) {
-          audioRef.current.play().catch((err) =>
-            console.error("Audio play failed:", err)
-          );
-        }
+    // Play sound after the fade-in starts
+    const soundTimer = setTimeout(() => {
+      if (audio) {
+        audio.play().catch(console.error);
+      }
+    }, fadeInDuration);
 
-        setIsZooming(true);
-
-        // After zoom duration, trigger exit
-        zoomTimer = setTimeout(() => {
-          setShow(false);
-        }, 1500); // match zoom duration
-      }, 800); // fade-in duration
-    }
+    // Trigger navigation when the entire animation is over
+    const navigationTimer = setTimeout(() => {
+      onAnimationCompleteRef.current();
+    }, fadeInDuration + zoomDuration);
 
     return () => {
-      clearTimeout(preZoomTimer);
-      clearTimeout(zoomTimer);
+      clearTimeout(soundTimer);
+      clearTimeout(navigationTimer);
     };
-  }, [startAnimation]);
+  }, []); // Empty dependency array ensures this runs only once on mount
 
   return (
-    <AnimatePresence onExitComplete={onAnimationComplete}>
-      {show && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8, ease: "easeInOut" }}
-          className="fixed top-0 left-0 w-full h-full bg-black z-[9999] flex justify-center items-center overflow-hidden"
-        >
-          {/* Hidden audio element */}
-          <audio ref={audioRef} src="/im-batman.mp3" preload="auto" />
-
-          <motion.div
-            variants={{
-              initial: { scale: 1, opacity: 1 },
-              zoom: { scale: 20, opacity: 0 },
-            }}
-            animate={isZooming ? "zoom" : "initial"}
-            transition={{ duration: 1.5, ease: "easeIn" }}
-            style={{ transformOrigin: "50% 50%" }}
-            className="w-full h-full"
-          >
-            <img
-              src="/batman-logo-wallpaper-2880x1800_8.png"
-              alt="Batman Logo"
-              className="w-full h-full object-cover"
-            />
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8, ease: "easeInOut" }}
+      className="fixed top-0 left-0 w-full h-full bg-black z-[9999] flex justify-center items-center overflow-hidden"
+    >
+      <audio ref={audioRef} src="/im-batman.mp3" preload="auto" />
+      <motion.div
+        initial={{ scale: 1, opacity: 1 }}
+        animate={{ scale: 20, opacity: 0 }}
+        transition={{ delay: 0.8, duration: 1.5, ease: "easeIn" }}
+        className="w-full h-full"
+      >
+        <img
+          src="/batman-logo-wallpaper-2880x1800_8.png"
+          alt="Batman Logo"
+          className="w-full h-full object-cover"
+        />
+      </motion.div>
+    </motion.div>
   );
 };
 

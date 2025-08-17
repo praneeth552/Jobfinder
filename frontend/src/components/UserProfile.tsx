@@ -43,33 +43,24 @@ const UserProfile = ({
   };
 
   const handleAnimationComplete = () => {
-    // Wait a bit so fade-out fully finishes before redirect
-    setTimeout(() => {
-      onBilling();
-      setIsBatSignalActive(false);
-    }, 500); // adjust based on your fade-out duration in BatSignal
+    onBilling();
   };
 
   const handleLightningAnimationComplete = () => {
-    setTimeout(() => {
-      onEditPreferences();
-      setIsLightningActive(false);
-    }, 500);
+    onEditPreferences();
   };
 
   return (
     <div className="relative">
       {isBatSignalActive && (
         <BatSignal
-          startAnimation={isBatSignalActive}
-          onAnimationComplete={handleAnimationComplete}
+          onAnimationComplete={onBilling}
         />
       )}
 
       {isLightningActive && (
         <Lightning
-          startAnimation={isLightningActive}
-          onAnimationComplete={handleLightningAnimationComplete}
+          onAnimationComplete={onEditPreferences}
         />
       )}
 

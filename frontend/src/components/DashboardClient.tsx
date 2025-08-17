@@ -237,14 +237,22 @@ export default function DashboardClient() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     localStorage.removeItem("token");
     localStorage.removeItem("user_id");
     Cookies.remove("token");
     Cookies.remove("user_id");
     Cookies.remove("plan_type");
     router.replace("/signin");
-  };
+  }, [router]);
+
+  const handleEditPreferences = useCallback(() => {
+    router.push("/preferences");
+  }, [router]);
+
+  const handleBilling = useCallback(() => {
+    router.push("/billing");
+  }, [router]);
 
   const onBatSignalAnimationComplete = () => {
     setBatSignalTarget(null);
@@ -312,8 +320,8 @@ export default function DashboardClient() {
               <UserProfile
                 userPlan={userPlan}
                 onLogout={handleLogout}
-                onEditPreferences={() => router.push("/preferences")}
-                onBilling={() => router.push("/billing")}
+                onEditPreferences={handleEditPreferences}
+                onBilling={handleBilling}
               />
             </div>
           </div>
