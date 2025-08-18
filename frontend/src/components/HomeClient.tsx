@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
@@ -10,11 +10,13 @@ import IntroductionSection from "@/components/IntroductionSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import LoadingScreen from "@/components/LoadingScreen";
 import NewFooter from "@/components/NewFooter";
-import SignupPage from "@/components/SignupPage";
 import ContactForm from "@/components/ContactForm";
 import TechStack from "@/components/TechStack";
 import "@/components/TechStack.css";
 import axios from "axios";
+import LoadingSpinner from "./LoadingSpinner";
+
+const SignupPage = lazy(() => import("@/components/SignupPage"));
 
 export default function HomeClient() {
   const [loadingFinished, setLoadingFinished] = useState(false);
@@ -93,7 +95,9 @@ export default function HomeClient() {
             transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
             className="fixed top-0 left-0 w-full h-full z-50 flex items-center justify-center"
           >
-            <SignupPage />
+            <Suspense fallback={<LoadingSpinner />}>
+              <SignupPage />
+            </Suspense>
           </motion.div>
         )}
       </AnimatePresence>

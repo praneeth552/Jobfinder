@@ -18,6 +18,7 @@ const TechStack = () => {
     { name: 'GitHub Actions', logo: '/github-actions.svg' },
     { name: 'Framer Motion', logo: '/framer.svg' },
     { name: 'Razorpay', logo: '/razorpay.svg' },
+    { name: 'Docker', logo: '/docker.svg' },
   ];
 
   // Names to display next to logos
@@ -30,6 +31,7 @@ const TechStack = () => {
     'Framer Motion',
     'React',
     'Python',
+    'Docker',
   ];
 
   const renderTrack = (trackKey: string, isPriority: boolean) => (

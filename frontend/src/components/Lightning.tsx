@@ -49,7 +49,7 @@ const Lightning = ({ onAnimationComplete }: { onAnimationComplete: () => void; }
         className="flex justify-center items-center"
         style={{ willChange: "transform, opacity" }}
       >
-        <div className="text-yellow-400 text-[180px] font-extrabold select-none">
+        <div className="text-yellow-400 text-[100px] sm:text-[140px] md:text-[180px] font-extrabold select-none">
           ⚡
         </div>
       </motion.div>

@@ -50,7 +50,7 @@ const BatSignal = ({ onAnimationComplete }: { onAnimationComplete: () => void })
         <img
           src="/batman-logo-wallpaper-2880x1800_8.png"
           alt="Batman Logo"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain max-w-full max-h-full"
         />
       </motion.div>
     </motion.div>
