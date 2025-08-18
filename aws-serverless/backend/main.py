@@ -1,7 +1,5 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
-from starlette.responses import Response
 from routes import (
     auth,
     jobs,
@@ -15,7 +13,6 @@ from routes import (
 )
 from dotenv import load_dotenv
 from mangum import Mangum
-import re
 
 load_dotenv()
 
@@ -23,20 +20,6 @@ app = FastAPI()
 
 # This is the handler that AWS Lambda will invoke
 handler = Mangum(app)
-
-# Middleware to normalize URL paths
-@app.middleware("http")
-async def normalize_path(request: Request, call_next):
-    # Enforce a trailing slash on all paths except for the root.
-    path = request.scope["path"]
-    if len(path) > 1 and not path.endswith('/'):
-        # If the path is for a file (e.g., favicon.ico), don't add a slash
-        if '.' not in path.split('/')[-1]:
-            request.scope["path"] = f"{path}/"
-    
-    response = await call_next(request)
-    return response
-
 
 origins = [
     "http://localhost",
@@ -78,4 +61,4 @@ async def warmup():
 
 @app.get("/")
 async def root():
-    return RedirectResponse(url="/docs")
+    return {"message": "Welcome to the Tackleit API"}
