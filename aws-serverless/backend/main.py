@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from starlette.responses import Response
 from routes import (
     auth,
@@ -26,16 +27,13 @@ handler = Mangum(app)
 # Middleware to normalize URL paths
 @app.middleware("http")
 async def normalize_path(request: Request, call_next):
-    # Use regex to replace multiple slashes with a single slash
-    # and remove a trailing slash if it's not the root path
+    # Enforce a trailing slash on all paths except for the root.
     path = request.scope["path"]
-    normalized_path = re.sub(r'/+', '/', path)
-    if len(normalized_path) > 1 and normalized_path.endswith('/'):
-        normalized_path = normalized_path[:-1]
+    if len(path) > 1 and not path.endswith('/'):
+        # If the path is for a file (e.g., favicon.ico), don't add a slash
+        if '.' not in path.split('/')[-1]:
+            request.scope["path"] = f"{path}/"
     
-    if path != normalized_path:
-        request.scope["path"] = normalized_path
-
     response = await call_next(request)
     return response
 
@@ -80,4 +78,4 @@ async def warmup():
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to the Tackleit API"}
+    return RedirectResponse(url="/docs")

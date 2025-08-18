@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from routes import (
     auth,
     jobs,
@@ -57,4 +58,4 @@ async def warmup():
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to the Tackleit API"}
+    return RedirectResponse(url="/docs")
