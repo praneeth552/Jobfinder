@@ -19,10 +19,10 @@ def clear_jobs_collection():
         print("Successfully connected to MongoDB.")
 
         if "jobs" in db.list_collection_names():
-            db.drop_collection("jobs")
-            print("Successfully dropped the 'jobs' collection.")
+            db["jobs"].delete_many({})
+            print("Successfully cleared all documents from the 'jobs' collection.")
         else:
-            print("'jobs' collection not found, no action taken.")
+            print("'jobs' collection not found. It will be created on the first write.")
 
     except Exception as e:
         print(f"An error occurred: {e}")

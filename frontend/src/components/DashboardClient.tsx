@@ -10,6 +10,7 @@ import LoadingButton from "@/components/LoadingButton";
 import SimpleNavbar from "./SimpleNavbar";
 import { toast } from "react-hot-toast";
 import BatSignal from "./BatSignal";
+import JobCardSkeleton from "./JobCardSkeleton";
 
 interface Recommendation {
   title: string;
@@ -340,9 +341,11 @@ export default function DashboardClient() {
           )}
 
           {isLoading && (
-            <p className="text-center text-gray-600 dark:text-gray-300 text-lg">
-              Loading recommendations, this may take a moment...
-            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <JobCardSkeleton key={index} />
+              ))}
+            </div>
           )}
 
           {error && (
