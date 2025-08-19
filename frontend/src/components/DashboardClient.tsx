@@ -188,9 +188,14 @@ export default function DashboardClient() {
         console.error("Failed to disable sheet sync:", error);
       }
     } else {
-      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/sheets/auth?user_id=${encodeURIComponent(
-        userId
-      )}`;
+      if (token) {
+        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/sheets/auth?token=${encodeURIComponent(
+          token
+        )}`;
+      } else {
+        console.error("Authentication token not found.");
+        toast.error("Could not authenticate. Please try logging in again.");
+      }
     }
     setIsToggleLoading(false);
   };

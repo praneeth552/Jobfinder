@@ -11,7 +11,7 @@ from database import db
 import os
 from dotenv import load_dotenv
 from bson import ObjectId
-from utils import get_current_pro_user, get_current_user
+from utils import get_current_pro_user, get_current_user, get_user_from_token_query
 
 load_dotenv()
 router = APIRouter()
@@ -27,7 +27,7 @@ SCOPES = [
 REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
 
 @router.get("/auth")
-async def authorize_sheet_access(current_user: dict = Depends(get_current_pro_user)):
+async def authorize_sheet_access(current_user: dict = Depends(get_user_from_token_query)):
     """
     Starts the OAuth 2.0 flow for the user to grant access to their Google Sheets.
     """

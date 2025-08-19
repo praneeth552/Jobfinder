@@ -1,6 +1,6 @@
 from passlib.context import CryptContext
 from jose import jwt, JWTError
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer
 import time
 import os
@@ -32,6 +32,39 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("email")
+        if email is None:
+            raise credentials_exception
+    except JWTError as e:
+        raise HTTPException(
+            status_code=401,
+            detail=f"Invalid token: {e}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user = await db.users.find_one({"email": email})
+    if user is None:
+        raise credentials_exception
+    # Convert ObjectId to string for JSON serialization if needed elsewhere
+    user["_id"] = str(user["_id"])
+    return user
+
+
+async def get_user_from_token_query(request: Request):
+    token = request.query_params.get("token")
+    if not token:
+        raise HTTPException(
+            status_code=401,
+            detail="Missing authentication token in query",
+        )
+    
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials from token",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
