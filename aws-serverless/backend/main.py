@@ -25,17 +25,17 @@ app = FastAPI()
 handler = Mangum(app)
 
 # Middleware to normalize URL paths
-@app.middleware("http")
-async def normalize_path(request: Request, call_next):
-    # Enforce a trailing slash on all paths except for the root.
-    path = request.scope["path"]
-    if len(path) > 1 and not path.endswith('/'):
-        # If the path is for a file (e.g., favicon.ico), don't add a slash
-        if '.' not in path.split('/')[-1]:
-            request.scope["path"] = f"{path}/"
+# @app.middleware("http")
+# async def normalize_path(request: Request, call_next):
+#     # Enforce a trailing slash on all paths except for the root.
+#     path = request.scope["path"]
+#     if len(path) > 1 and not path.endswith('/'):
+#         # If the path is for a file (e.g., favicon.ico), don't add a slash
+#         if '.' not in path.split('/')[-1]:
+#             request.scope["path"] = f"{path}/"
     
-    response = await call_next(request)
-    return response
+#     response = await call_next(request)
+#     return response
 
 
 origins = [
