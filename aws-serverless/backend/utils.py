@@ -85,54 +85,59 @@ async def get_user_from_token_query(request: Request):
     return user
 
 from datetime import datetime, timedelta
+from models import PlanType, SubscriptionStatus
 
 def is_pro_user(user: dict) -> bool:
     """
-    Checks if a user has an active pro subscription.
+    Checks if a user has an active pro subscription, accounting for grace periods and cancellations.
     """
-    if not user or user.get("plan_type") != "pro":
+    if not user or user.get("plan_type") != PlanType.pro:
         return False
 
     status = user.get("subscription_status")
     valid_until = user.get("subscription_valid_until")
 
     # Ensure valid_until is a datetime object for comparison
-    if valid_until and not isinstance(valid_until, datetime):
-        # Attempt to parse if it's a string, otherwise default to a past time
+    if valid_until and isinstance(valid_until, str):
         try:
             valid_until = datetime.fromisoformat(valid_until)
         except (TypeError, ValueError):
             valid_until = datetime.min
+    elif not isinstance(valid_until, datetime):
+        valid_until = datetime.min
 
     now = datetime.utcnow()
 
-    if status == "active" or status == "trialing":
+    # 1. Active or trialing users are always Pro.
+    if status in [SubscriptionStatus.active, SubscriptionStatus.trialing]:
         return True
 
-    if status == "cancelled" and valid_until and valid_until > now:
+    # 2. Users who cancelled but are within their paid period are still Pro.
+    if status == SubscriptionStatus.cancelled and valid_until > now:
         return True
 
-    # Grace period for payments (e.g., 3 days)
-    if status == "past_due" and valid_until and valid_until + timedelta(days=3) > now:
+    # 3. Users with past_due status might be in a grace period.
+    #    (This logic can be adjusted based on business rules)
+    if status == SubscriptionStatus.past_due and valid_until + timedelta(days=3) > now:
+        print(f"User {user.get('email')} is in grace period.")
         return True
 
     return False
 
 
-async def get_current_pro_user(current_user: dict = Depends(get_current_user)):
+async def get_current_pro_user(current_user: dict = Depends(get_current_user)) -> dict:
     """
-    Dependency to verify if the current user has an active pro subscription.
+    Dependency that fetches the user's latest data and verifies they have Pro access.
+    Raises HTTPException if the user is not a Pro member.
     """
-    # The user object from get_current_user is already what we need
-    # but we refetch to ensure we have the absolute latest data from the DB
-    # in case their plan changed since the token was issued.
-    user = await db.users.find_one({"email": current_user.get("email")})
+    # Refetch the user from the database to ensure the subscription status is current.
+    user_from_db = await db.users.find_one({"email": current_user.get("email")})
 
-    if not is_pro_user(user):
+    if not user_from_db or not is_pro_user(user_from_db):
         raise HTTPException(
             status_code=403,
             detail="This feature is available for Pro users only. Please upgrade your plan.",
         )
-
-    # Return the user object from get_current_user which has the stringified _id
+    
+    # Return the original user object from get_current_user which has the stringified _id
     return current_user

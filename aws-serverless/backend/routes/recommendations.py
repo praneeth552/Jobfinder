@@ -132,6 +132,15 @@ async def generate_recommendations(current_user: dict = Depends(get_current_user
         raise HTTPException(status_code=500, detail="Failed to get or parse recommendations from AI.")
 
     # --- Save and Return Recommendations ---
+    job_applications = [
+        {
+            "job_details": job.dict(),
+            "status": "recommended",
+            "updated_at": datetime.utcnow()
+        }
+        for job in recommended_jobs
+    ]
+
     recommendation_data = {
         "user_id": user_id,
         "recommended_jobs": [job.dict() for job in recommended_jobs],
@@ -141,8 +150,13 @@ async def generate_recommendations(current_user: dict = Depends(get_current_user
         {"user_id": user_id}, {"$set": recommendation_data}, upsert=True
     )
 
+    await users_collection.update_one(
+        {"_id": user_object_id},
+        {"$set": {"job_applications": job_applications}}
+    )
+
     # --- Pro Feature: Google Sheets Integration ---
-    if user.get("sheets_enabled"):
+    if is_pro_user(user) and user.get("sheets_enabled"):
         try:
             print(f"--- Writing recommendations to Google Sheet for user {user_id} ---")
             await write_to_sheet(user_id, [job.dict() for job in recommended_jobs])

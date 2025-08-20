@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, field_validator, model_validator
+from pydantic import BaseModel, EmailStr, field_validator, model_validator, Field
 from typing import List, Optional, Union
 from datetime import datetime
 from enum import Enum
@@ -43,6 +43,11 @@ class SubscriptionStatus(str, Enum):
     trialing = "trialing"
 
 
+class JobApplication(BaseModel):
+    job_details: 'RecommendedJob'
+    status: 'JobApplicationStatus'
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
 class User(BaseModel):
     name: str
     email: EmailStr
@@ -55,8 +60,12 @@ class User(BaseModel):
     subscription_status: Optional[SubscriptionStatus] = None
     subscription_valid_until: Optional[datetime] = None
     last_resume_upload: Optional[datetime] = None
-    created_at: datetime = datetime.utcnow()
-    updated_at: datetime = datetime.utcnow()
+    job_applications: List[JobApplication] = []
+    google_tokens: Optional[str] = None
+    sheets_enabled: bool = False
+    spreadsheet_id: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class UserLogin(BaseModel):
@@ -76,10 +85,16 @@ class Job(BaseModel):
     location: str
     description: Optional[str] = None
     job_url: Optional[str] = None
-    date_scraped: datetime = datetime.utcnow()
+    date_scraped: datetime = Field(default_factory=datetime.utcnow)
 
 
 # 🔷 NEW MODELS FOR RECOMMENDATIONS
+
+# --- Models for Job Application Tracking ---
+class JobApplicationStatus(str, Enum):
+    recommended = "recommended"
+    saved = "saved"
+    applied = "applied"
 
 class RecommendedJob(BaseModel):
     title: str
@@ -88,8 +103,9 @@ class RecommendedJob(BaseModel):
     match_score: Optional[int] = None
     reason: Optional[str] = None
     job_url: Optional[str] = None
+    status: JobApplicationStatus
 
 class Recommendation(BaseModel):
     user_id: str
     recommended_jobs: List[RecommendedJob]
-    generated_at: datetime = datetime.utcnow()
+    generated_at: datetime = Field(default_factory=datetime.utcnow)

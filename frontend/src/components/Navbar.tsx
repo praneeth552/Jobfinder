@@ -33,6 +33,8 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
       setHasScrolled(window.scrollY > 10);
     };
     window.addEventListener("scroll", handleScroll);
+    // Set initial state
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -56,7 +58,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
   };
 
   const navLinkVariants = {
-    hover: { y: -2 },
+    hover: { y: -2, color: 'var(--primary)' },
     tap: { scale: 0.95 },
   };
 
@@ -66,7 +68,16 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
     exit: { opacity: 0, y: -10 },
   };
 
-  const textColor = theme === 'dark' || !hasScrolled ? 'text-white' : 'text-[--foreground]';
+  // Determine text color based on theme and scroll state
+  const getTextColor = () => {
+    if (theme === 'dark') return 'text-white';
+    // In light mode, start with dark text, change to dark on scroll
+    return hasScrolled ? 'text-[--foreground]' : 'text-black';
+  };
+
+  const getHoverColor = () => {
+    return 'hover:text-[--primary]';
+  };
 
   return (
     <motion.nav
@@ -78,8 +89,8 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
     >
       <Link href="/workflow">
         <motion.div
-          className={`text-2xl font-bold cursor-pointer transition-colors ${textColor}`}
-          whileHover={{ scale: 1.05, color: 'var(--primary)' }}
+          className={`text-2xl font-bold cursor-pointer transition-colors ${getTextColor()} ${getHoverColor()}`}
+          whileHover={{ scale: 1.05 }}
         >
           TackleIt
         </motion.div>
@@ -90,18 +101,16 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
         <ThemeToggle />
         <motion.button
           onClick={() => router.push('/pricing')}
-          className={`font-semibold px-2 transition-colors ${textColor}`}
+          className={`font-semibold px-2 transition-colors ${getTextColor()} ${getHoverColor()}`}
           variants={navLinkVariants}
-          whileHover={{ color: 'var(--primary)' }}
           whileTap="tap"
         >
           Pricing
         </motion.button>
         <motion.button
           onClick={handleSignInClick}
-          className={`font-semibold px-2 transition-colors ${textColor}`}
+          className={`font-semibold px-2 transition-colors ${getTextColor()} ${getHoverColor()}`}
           variants={navLinkVariants}
-          whileHover={{ color: 'var(--primary)' }}
           whileTap="tap"
         >
           Sign In
@@ -138,7 +147,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
       {/* Mobile Menu Button */}
       <div className="md:hidden flex items-center space-x-4">
         <ThemeToggle />
-        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className={textColor}>
+        <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
           {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>

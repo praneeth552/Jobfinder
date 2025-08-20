@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -11,8 +11,23 @@ import SimpleNavbar from "./SimpleNavbar";
 import { toast } from "react-hot-toast";
 import BatSignal from "./BatSignal";
 import JobCardSkeleton from "./JobCardSkeleton";
+import {
+  DndContext,
+  closestCenter,
+  useDroppable,
+  useDraggable,
+  useSensors,
+  useSensor,
+  PointerSensor,
+} from "@dnd-kit/core";
+import { SortableContext, arrayMove } from "@dnd-kit/sortable";
+import JobCard from "./JobCard";
+import DropZone from "./DropZone";
+import ConfirmationModal from "./ConfirmationModal";
 
-interface Recommendation {
+interface JobApplication {
+  id: string; // This will be job_url
+  status: "recommended" | "saved" | "applied";
   title: string;
   company: string;
   location: string;
@@ -21,17 +36,8 @@ interface Recommendation {
   job_url?: string;
 }
 
-const Ripple = ({ x, y }: { x: number; y: number }) => (
-  <motion.div
-    className="absolute bg-white/70 rounded-full"
-    initial={{ x, y, scale: 0, opacity: 1 }}
-    animate={{ scale: 10, opacity: 0 }}
-    transition={{ duration: 0.5 }}
-  />
-);
-
 export default function DashboardClient() {
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
@@ -45,7 +51,9 @@ export default function DashboardClient() {
   const [isGenerationAllowed, setIsGenerationAllowed] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<string>("");
   const [batSignalTarget, setBatSignalTarget] = useState<any>(null);
-  const [ripple, setRipple] = useState<any>(null);
+  const [savedJobsCount, setSavedJobsCount] = useState(0);
+  const [appliedJobsCount, setAppliedJobsCount] = useState(0);
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
 
   const getJobsButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -54,7 +62,8 @@ export default function DashboardClient() {
 
   const token = typeof window !== "undefined" ? Cookies.get("token") : null;
   const userId = typeof window !== "undefined" ? Cookies.get("user_id") : null;
-  const plan = typeof window !== "undefined" ? Cookies.get("plan_type") : "free";
+  const plan =
+    typeof window !== "undefined" ? Cookies.get("plan_type") : "free";
 
   useEffect(() => {
     setIsClient(true);
@@ -63,7 +72,6 @@ export default function DashboardClient() {
     const upgradeSuccess = searchParams.get("upgrade_success");
     if (upgradeSuccess === "true") {
       toast.success("Welcome to Pro! Enjoy your new features.");
-      // Remove the query parameter from the URL
       router.replace(window.location.pathname, undefined);
     }
   }, [plan, searchParams, router]);
@@ -73,22 +81,26 @@ export default function DashboardClient() {
     try {
       setIsLoading(true);
       setError(null);
-
       const res = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/recommendations`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       if (res.data?.recommended_jobs) {
-        setRecommendations(res.data.recommended_jobs);
+        const apps = res.data.recommended_jobs.map((job: any) => ({
+          ...job,
+          id: job.job_url,
+          status: job.status || "recommended",
+          job_url: job.job_url, // Explicitly set job_url
+        }));
+        setJobApplications(apps);
         if (res.data.generated_at) {
           setLastGenerationDate(new Date(res.data.generated_at));
         }
       }
     } catch (err: unknown) {
-        if (axios.isAxiosError(err) && err.response?.status !== 404) {
-            setError("Could not fetch existing recommendations.");
-        }
+      if (axios.isAxiosError(err) && err.response?.status !== 404) {
+        setError("Could not fetch existing recommendations.");
+      }
     } finally {
       setIsLoading(false);
       setIsFirstLoad(false);
@@ -99,15 +111,37 @@ export default function DashboardClient() {
     fetchExistingRecommendations();
   }, [fetchExistingRecommendations]);
 
+  // New useEffect to fetch saved and applied job counts
+  useEffect(() => {
+    const fetchJobCounts = async () => {
+      if (!userId || !token) return;
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/user/job_applications`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (res.data?.job_applications) {
+          const allJobApps = res.data.job_applications;
+          const saved = allJobApps.filter((app: any) => app.status === "saved").length;
+          const applied = allJobApps.filter((app: any) => app.status === "applied").length;
+          setSavedJobsCount(saved);
+          setAppliedJobsCount(applied);
+        }
+      } catch (err) {
+        console.error("Failed to fetch job counts:", err);
+      }
+    };
+    fetchJobCounts();
+  }, [userId, token]);
+
   useEffect(() => {
     const fetchSheetStatus = async () => {
-      if (!userId || !token || plan !== 'pro') return;
+      if (!userId || !token || plan !== "pro") return;
       setIsToggleLoading(true);
       try {
         const res = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}/sheets/status`,
           {
-            params: { user_id: userId },
             headers: { Authorization: `Bearer ${token}` },
           }
         );
@@ -120,21 +154,20 @@ export default function DashboardClient() {
     };
 
     const checkRedirectStatus = () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get("sheets_success") === "true") {
-            // Refetch status and remove query param
-            fetchSheetStatus();
-            const newUrl = window.location.pathname;
-            router.replace(newUrl);
-        }
-    }
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("sheets_success") === "true") {
+        fetchSheetStatus();
+        const newUrl = window.location.pathname;
+        router.replace(newUrl);
+      }
+    };
 
     fetchSheetStatus();
     checkRedirectStatus();
   }, [userId, token, plan, router]);
 
   useEffect(() => {
-    if (isFirstLoad) return; // Don't run on initial load
+    if (isFirstLoad) return;
 
     if (!lastGenerationDate) {
       setIsGenerationAllowed(true);
@@ -145,7 +178,9 @@ export default function DashboardClient() {
       const now = new Date();
       const requiredDays = userPlan === "pro" ? 7 : 30;
       const nextGenerationDate = new Date(lastGenerationDate.getTime());
-      nextGenerationDate.setDate(lastGenerationDate.getDate() + requiredDays);
+      nextGenerationDate.setDate(
+        lastGenerationDate.getDate() + requiredDays
+      );
 
       const diff = nextGenerationDate.getTime() - now.getTime();
 
@@ -161,7 +196,6 @@ export default function DashboardClient() {
         );
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
         setTimeRemaining(`${days}d ${hours}h ${minutes}m ${seconds}s`);
       }
     }, 1000);
@@ -171,17 +205,13 @@ export default function DashboardClient() {
 
   const handleSheetToggle = async () => {
     if (!userId) return;
-
     setIsToggleLoading(true);
     if (isSheetsEnabled) {
       try {
         await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}/sheets/disable`,
           {},
-          {
-            params: { user_id: userId },
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         setIsSheetsEnabled(false);
       } catch (error) {
@@ -189,9 +219,9 @@ export default function DashboardClient() {
       }
     } else {
       if (token) {
-        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/sheets/auth?token=${encodeURIComponent(
-          token
-        )}`;
+        window.location.href = `${
+          process.env.NEXT_PUBLIC_API_URL
+        }/sheets/auth?token=${encodeURIComponent(token)}`;
       } else {
         console.error("Authentication token not found.");
         toast.error("Could not authenticate. Please try logging in again.");
@@ -201,13 +231,19 @@ export default function DashboardClient() {
   };
 
   const handleGenerateRecommendations = async () => {
-    if (!isGenerationAllowed) {
-      return;
-    }
+    if (!isGenerationAllowed) return;
+    setIsConfirmationModalOpen(true);
+  };
+
+  const confirmGenerateRecommendations = async () => {
+    setIsConfirmationModalOpen(false);
 
     if (getJobsButtonRef.current) {
       const rect = getJobsButtonRef.current.getBoundingClientRect();
-      setBatSignalTarget({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+      setBatSignalTarget({
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      });
     }
 
     if (!userId || !token) {
@@ -218,21 +254,29 @@ export default function DashboardClient() {
     try {
       setIsLoading(true);
       setError(null);
-
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/generate_recommendations`,
         null,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      setRecommendations(res.data.recommended_jobs);
+      const apps = res.data.recommended_jobs.map((job: any) => ({
+        ...job,
+        id: job.job_url,
+        status: job.status || "recommended",
+      }));
+      setJobApplications(apps);
       if (res.data.generated_at) {
         setLastGenerationDate(new Date(res.data.generated_at));
       }
     } catch (err: unknown) {
       console.error("Error generating recs", err);
       let errorMessage = "An unexpected error occurred.";
-      if (axios.isAxiosError(err) && err.response && err.response.data && err.response.data.detail) {
+      if (
+        axios.isAxiosError(err) &&
+        err.response &&
+        err.response.data &&
+        err.response.data.detail
+      ) {
         errorMessage = err.response.data.detail;
       } else if (err instanceof Error) {
         errorMessage = err.message;
@@ -260,20 +304,57 @@ export default function DashboardClient() {
     router.push("/billing");
   }, [router]);
 
-  const onBatSignalAnimationComplete = () => {
-    setBatSignalTarget(null);
-    if (getJobsButtonRef.current) {
-      const rect = getJobsButtonRef.current.getBoundingClientRect();
-      setRipple({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
-      setTimeout(() => setRipple(null), 500);
+  const onDragEnd = async (event: any) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    if (activeId === overId) return;
+
+    if (over.id === "saved-zone" || over.id === "applied-zone") {
+      const newStatus: "saved" | "applied" = over.id === "saved-zone" ? "saved" : "applied";
+      const jobToUpdate = jobApplications.find((job) => job.id === activeId);
+
+      if (jobToUpdate) {
+        try {
+          await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL}/jobs/application/save_job`,
+            { ...jobToUpdate, status: newStatus },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+
+          // Remove the job from the list on successful API call
+          setJobApplications((prev) => prev.filter((job) => job.id !== activeId));
+          toast.success(`Job moved to ${newStatus}!`);
+        fetchExistingRecommendations();
+
+        } catch (error) {
+          console.error("Failed to update job status:", error);
+          toast.error("Failed to update job status.");
+        }
+      }
+    } else {
+      // Reordering logic
+      setJobApplications((items) => {
+        const oldIndex = items.findIndex((item) => item.id === activeId);
+        const newIndex = items.findIndex((item) => item.id === overId);
+        return arrayMove(items, oldIndex, newIndex);
+      });
     }
   };
 
+  const recommendedJobs = jobApplications.filter(
+    (j) => j.status === "recommended"
+  );
+  const savedJobs = jobApplications.filter((j) => j.status === "saved");
+  const appliedJobs = jobApplications.filter((j) => j.status === "applied");
+
   return (
     <>
-      {/* {ripple && <Ripple x={ripple.x} y={ripple.y} />} */}
       <SimpleNavbar />
-      <div className="h-20" /> {/* Spacer for the fixed navbar */}
+      <div className="h-20" />
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -290,7 +371,6 @@ export default function DashboardClient() {
             >
               Job Recommendations
             </motion.h1>
-
             <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 w-full md:w-auto">
               <LoadingButton
                 ref={getJobsButtonRef}
@@ -305,7 +385,6 @@ export default function DashboardClient() {
               >
                 Get Personalized Jobs
               </LoadingButton>
-
               {userPlan === "free" && (
                 <button
                   onClick={() => router.push("/upgrade")}
@@ -314,7 +393,6 @@ export default function DashboardClient() {
                   Upgrade to Pro
                 </button>
               )}
-
               {isClient && userPlan === "pro" && (
                 <GoogleSheetsToggle
                   isEnabled={isSheetsEnabled}
@@ -322,7 +400,6 @@ export default function DashboardClient() {
                   onToggle={handleSheetToggle}
                 />
               )}
-
               <UserProfile
                 userPlan={userPlan}
                 onLogout={handleLogout}
@@ -367,75 +444,60 @@ export default function DashboardClient() {
 
           {!isLoading &&
             !error &&
-            recommendations.length === 0 &&
+            jobApplications.length === 0 &&
             !isFirstLoad && (
               <p className="text-center text-gray-600 dark:text-gray-300 text-lg">
                 No recommendations found. Try generating a new list!
               </p>
             )}
 
-          {recommendations.length > 0 && (
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: {},
-                visible: { transition: { staggerChildren: 0.1 } },
-              }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            >
-              {recommendations.map((job, index) => (
-                <motion.div
-                  key={index}
-                  variants={{
-                    hidden: { opacity: 0, y: 20 },
-                    visible: { opacity: 1, y: 0 },
-                  }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                  whileHover={{
-                    scale: 1.03,
-                    boxShadow: "0 10px 20px rgba(139,69,19,0.2)",
-                  }}
-                  className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-5 cursor-pointer transform transition-transform duration-300 flex flex-col h-full"
-                  onClick={() =>
-                    job.job_url && window.open(job.job_url, "_blank")
-                  }
-                >
-                  <div className="flex-grow">
-                    <h2 className="text-lg sm:text-xl font-bold mb-2 text-[#B8860B] dark:text-amber-400 break-words">
-                      {job.title}
-                    </h2>
-                    <p className="text-sm sm:text-base text-gray-800 dark:text-gray-300 mb-1 break-words">
-                      <span className="font-semibold">Company:</span>{" "}
-                      {job.company}
-                    </p>
-                    <p className="text-sm sm:text-base text-gray-800 dark:text-gray-300 mb-3 break-words">
-                      <span className="font-semibold">Location:</span>{" "}
-                      {job.location}
-                    </p>
-                    {job.match_score && (
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-3">
-                        <div
-                          className="bg-blue-600 h-2.5 rounded-full"
-                          style={{ width: `${job.match_score}%` }}
-                        />
-                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
-                          Match Score: {job.match_score}/100
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  {job.reason && (
-                    <p className="text-gray-600 dark:text-gray-400 italic text-xs sm:text-sm mt-auto pt-4">
-                      &quot;{job.reason}&quot;
-                    </p>
-                  )}
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
+          <DndContext
+            sensors={useSensors(
+              useSensor(PointerSensor, {
+                activationConstraint: {
+                  distance: 5, // must move 5px before drag starts
+                },
+              })
+            )}
+            collisionDetection={closestCenter}
+            onDragEnd={onDragEnd}
+          >
+            <SortableContext items={recommendedJobs.map((j) => j.id)}>
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: {
+                    opacity: 1,
+                    transition: {
+                      staggerChildren: 0.1,
+                    },
+                  },
+                }}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              >
+                {recommendedJobs.map((job) => (
+                  <JobCard key={job.id} job={job} />
+                ))}
+              </motion.div>
+            </SortableContext>
+            {userPlan === "pro" && (
+            <DropZone
+              savedCount={savedJobsCount}
+              appliedCount={appliedJobsCount}
+            />
+            )}
+          </DndContext>
         </div>
       </motion.div>
+      <ConfirmationModal
+        isOpen={isConfirmationModalOpen}
+        onClose={() => setIsConfirmationModalOpen(false)}
+        onConfirm={confirmGenerateRecommendations}
+        title="Confirm Recommendation Generation"
+        message="This will delete your existing recommendations and generate a new list. Are you sure you want to continue?"
+      />
     </>
   );
 }

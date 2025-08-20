@@ -85,3 +85,27 @@ async def oauth_callback(request: Request):
     except Exception as e:
         print(f"Error during OAuth callback: {e}")
         return RedirectResponse(f"{FRONTEND_URL}/dashboard?sheets_error=token_exchange_failed")
+
+
+@router.get("/status")
+async def get_sheet_status(current_user: dict = Depends(get_current_user)):
+    """
+    Checks if a user has Google Sheets integration enabled.
+    """
+    return {"enabled": current_user.get("sheets_enabled", False)}
+
+
+@router.post("/disable")
+async def disable_sheet_sync(current_user: dict = Depends(get_current_user)):
+    """
+    Disables Google Sheets integration for the user.
+    """
+    user_id = current_user.get("_id")
+    try:
+        await db.users.update_one(
+            {"_id": user_id},
+            {"$set": {"sheets_enabled": False, "google_tokens": None, "spreadsheet_id": None}}
+        )
+        return {"message": "Google Sheets integration disabled successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to disable integration: {e}")

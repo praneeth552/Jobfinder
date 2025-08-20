@@ -3,7 +3,7 @@
 
 import { useTheme } from "@/context/ThemeContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sun, Moon } from "lucide-react";
+import { Sun } from "lucide-react"; // Removed Moon
 import { useEffect } from "react";
 import "./ThemeToggle.css";
 import RainDrops from "./RainDrops";
@@ -75,7 +75,7 @@ const ThemeToggle = () => {
           layout
           transition={{ type: "spring", stiffness: 700, damping: 30 }}
           className={`relative w-8 h-8 rounded-full shadow-md flex items-center justify-center z-10 ${
-            isDark ? "bg-gray-600" : "bg-white"
+            isDark ? "bg-gray-900" : "bg-white" // Darker background for the icon
           }`}
         >
           <motion.div
@@ -87,7 +87,7 @@ const ThemeToggle = () => {
             className="flex items-center justify-center"
           >
             {isDark ? (
-              <Moon size={16} className="text-white" />
+              <img src="/batman-icon.svg" alt="Dark Mode" className="w-6 h-6" />
             ) : (
               <Sun size={16} className="text-yellow-500" />
             )}

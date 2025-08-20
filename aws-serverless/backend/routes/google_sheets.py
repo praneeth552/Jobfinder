@@ -92,18 +92,23 @@ async def oauth_callback(request: Request):
 
 @router.get("/status")
 async def get_sheet_status(current_user: dict = Depends(get_current_user)):
-    user_id = current_user.get("_id")
-    user = await db.users.find_one({"_id": ObjectId(user_id)})
-    if user and user.get("sheets_enabled"):
-        return {"enabled": True}
-    return {"enabled": False}
+    """
+    Checks if a user has Google Sheets integration enabled.
+    """
+    return {"enabled": current_user.get("sheets_enabled", False)}
 
 
 @router.post("/disable")
 async def disable_sheet_sync(current_user: dict = Depends(get_current_user)):
+    """
+    Disables Google Sheets integration for the user.
+    """
     user_id = current_user.get("_id")
-    await db.users.update_one(
-        {"_id": ObjectId(user_id)},
-        {"$set": {"sheets_enabled": False, "spreadsheet_id": None, "google_tokens": None}}
-    )
-    return {"message": "Google Sheets sync disabled."}
+    try:
+        await db.users.update_one(
+            {"_id": user_id},
+            {"$set": {"sheets_enabled": False, "google_tokens": None, "spreadsheet_id": None}}
+        )
+        return {"message": "Google Sheets integration disabled successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to disable integration: {e}")
