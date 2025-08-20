@@ -69,8 +69,38 @@ async def save_job_application(
         {"$set": {"job_applications": current_user["job_applications"]}}
     )
 
+    # Remove the job from the recommendations list
+    await db.recommendations.delete_one(
+        {"user_id": ObjectId(user_id), "job_url": job_to_save.job_url}
+    )
+
     return {"message": "Job application saved successfully"}
 
+@router.post("/application/move_to_recommendations")
+async def move_to_recommendations(
+    job_to_move: RecommendedJob,
+    current_user: User = Depends(get_current_user)
+):
+    user_id = current_user["_id"]
+
+    # Remove from job_applications
+    await db.users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$pull": {"job_applications": {"job_details.job_url": job_to_move.job_url}}}
+    )
+
+    # Add to recommendations collection
+    job_dict = job_to_move.dict()
+    if 'status' in job_dict:
+        del job_dict['status']
+
+    await db.recommendations.update_one(
+        {"user_id": user_id},
+        {"$addToSet": {"recommended_jobs": job_dict}},
+        upsert=True
+    )
+
+    return {"message": "Job moved to recommendations successfully"}
 
 
 @router.delete("/applications/{status}")

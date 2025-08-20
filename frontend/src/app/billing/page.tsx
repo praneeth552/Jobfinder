@@ -182,9 +182,12 @@ export default function BillingPage() {
             {user.plan_type === "pro" ? (
               <>
                 <ul className={`${styles.featuresList} dark:text-gray-300`}>
-                  <motion.li whileHover={{ x: 5 }} className="dark:text-white">Weekly Job Recommendations</motion.li>
-                  <motion.li whileHover={{ x: 5 }} className="dark:text-white">Export Jobs to Google Sheets</motion.li>
-                  <motion.li whileHover={{ x: 5 }} className="dark:text-white">Full access to all new features</motion.li>
+                  <motion.li whileHover={{ x: 5 }} className="dark:text-white">Generate recommendations once a week</motion.li>
+                  <motion.li whileHover={{ x: 5 }} className="dark:text-white">Weekly resume uploads</motion.li>
+                  <motion.li whileHover={{ x: 5 }} className="dark:text-white">Advanced Job Tracking</motion.li>
+                  <motion.li whileHover={{ x: 5 }} className="dark:text-white">Google Sheets Integration</motion.li>
+                  <motion.li whileHover={{ x: 5 }} className="dark:text-white">Email updates for new jobs</motion.li>
+                  <motion.li whileHover={{ x: 5 }} className="dark:text-white">Early access to beta features</motion.li>
                 </ul>
                 {user.plan_status === "cancelled" ? (
                   <div className="text-center">
@@ -215,7 +218,8 @@ export default function BillingPage() {
             ) : (
               <>
                 <ul className={`${styles.featuresList} dark:text-gray-300`}>
-                  <motion.li whileHover={{ x: 5 }} className="dark:text-white">Monthly Job Recommendations</motion.li>
+                  <motion.li whileHover={{ x: 5 }} className="dark:text-white">Generate recommendations once a month</motion.li>
+                  <motion.li whileHover={{ x: 5 }} className="dark:text-white">Monthly resume uploads</motion.li>
                   <motion.li whileHover={{ x: 5 }} className="dark:text-white">Standard Feature Access</motion.li>
                 </ul>
                 <motion.button

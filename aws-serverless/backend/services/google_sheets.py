@@ -86,19 +86,28 @@ async def get_user_tokens(user_id):
 
 
 async def write_to_sheet(user_id: str, data: list):
+    print(f"--- Attempting to write to sheet for user {user_id} ---")
     user = await db.users.find_one({"_id": ObjectId(user_id)})
     
-    if not user or not user.get("sheets_enabled") or not user.get("spreadsheet_id"):
-        print("User has not enabled Google Sheets integration or spreadsheet is not created.")
+    if not user:
+        print("--- User not found in database. ---")
+        return
+    if not user.get("sheets_enabled"):
+        print("--- User has not enabled Google Sheets integration. ---")
+        return
+    if not user.get("spreadsheet_id"):
+        print("--- Spreadsheet ID not found for user. ---")
         return
 
     try:
+        print("--- Getting Google service... ---")
         service = await get_google_service(user_id)
         if not service:
-            print("Failed to create Google service for writing.")
+            print("--- Failed to create Google service for writing. ---")
             return
 
         spreadsheet_id = user.get("spreadsheet_id")
+        print(f"--- Writing to spreadsheet ID: {spreadsheet_id} ---")
         
         header = ["Title", "Company", "Location", "Match Score", "Reason", "Job URL"]
         rows = [header] + [[job.get(key, "") for key in ["title", "company", "location", "match_score", "reason", "job_url"]] for job in data]
@@ -107,13 +116,13 @@ async def write_to_sheet(user_id: str, data: list):
             'values': rows
         }
         
-        # Clear the existing sheet content
+        print("--- Clearing existing sheet content... ---")
         service.spreadsheets().values().clear(
             spreadsheetId=spreadsheet_id,
             range='Sheet1'
         ).execute()
 
-        # Update the sheet with new data
+        print("--- Updating sheet with new data... ---")
         result = service.spreadsheets().values().update(
             spreadsheetId=spreadsheet_id,
             range='Sheet1',
@@ -121,7 +130,7 @@ async def write_to_sheet(user_id: str, data: list):
             body=body
         ).execute()
         
-        print(f"{result.get('updatedCells')} cells updated in sheet.")
+        print(f"--- {result.get('updatedCells')} cells updated in sheet. ---")
 
     except Exception as e:
-        print(f"An error occurred writing to the sheet: {e}")
+        print(f"--- An error occurred writing to the sheet: {e} ---")

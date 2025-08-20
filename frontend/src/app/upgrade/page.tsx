@@ -164,6 +164,7 @@ const UpgradePage = () => {
             <ul className="space-y-4 text-gray-700">
               <Feature text="Generate recommendations once a week" included={true} />
               <Feature text="Weekly resume uploads" included={true} />
+              <Feature text="Advanced Job Tracking" included={true} />
               <Feature text="Google Sheets Integration" included={true} />
               <Feature text="Email updates for new jobs" included={true} />
               <Feature text="Early access to beta features" included={true} />

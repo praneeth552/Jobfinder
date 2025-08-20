@@ -103,7 +103,7 @@ class RecommendedJob(BaseModel):
     match_score: Optional[int] = None
     reason: Optional[str] = None
     job_url: Optional[str] = None
-    status: JobApplicationStatus
+    status: Optional[JobApplicationStatus] = None
 
 class Recommendation(BaseModel):
     user_id: str

@@ -27,6 +27,7 @@ const JobStatusClient = ({ status }: { status: 'saved' | 'applied' }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [movingJobId, setMovingJobId] = useState<string | null>(null);
 
   const router = useRouter();
   const token = Cookies.get('token');
@@ -62,6 +63,33 @@ const JobStatusClient = ({ status }: { status: 'saved' | 'applied' }) => {
   useEffect(() => {
     fetchJobs();
   }, [fetchJobs]);
+
+  const handleMoveToRecommendations = async (jobToMove: JobApplication) => {
+    if (!token) {
+      toast.error('Authentication token not found. Please login again.');
+      return;
+    }
+
+    setMovingJobId(jobToMove.id);
+    try {
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/jobs/application/move_to_recommendations`,
+        jobToMove,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setJobApplications((prevJobs) =>
+        prevJobs.filter((job) => job.id !== jobToMove.id)
+      );
+      toast.success('Job moved back to recommendations!');
+    } catch (err) {
+      toast.error('Failed to move job. Please try again.');
+      console.error(err);
+    } finally {
+      setMovingJobId(null);
+    }
+  };
 
   const handleDeleteAll = async () => {
     setIsConfirmationModalOpen(false);
@@ -139,7 +167,13 @@ const JobStatusClient = ({ status }: { status: 'saved' | 'applied' }) => {
                 className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
               >
                 {jobApplications.map((job) => (
-                  <JobCard key={job.id} job={job} />
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    showMoveButton={true}
+                    onMove={handleMoveToRecommendations}
+                    isMoving={movingJobId === job.id}
+                  />
                 ))}
               </motion.div>
             </SortableContext>

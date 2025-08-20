@@ -76,30 +76,58 @@ export default function DashboardClient() {
     }
   }, [plan, searchParams, router]);
 
-  const fetchExistingRecommendations = useCallback(async () => {
+  const fetchAllJobs = useCallback(async () => {
     if (!userId || !token) return;
+    setIsLoading(true);
+    setError(null);
+
     try {
-      setIsLoading(true);
-      setError(null);
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/recommendations`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (res.data?.recommended_jobs) {
-        const apps = res.data.recommended_jobs.map((job: any) => ({
+      const [recsResponse, appsResponse] = await Promise.all([
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/recommendations`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/job_applications`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      let allJobs: JobApplication[] = [];
+
+      if (recsResponse.data?.recommended_jobs) {
+        const recommended = recsResponse.data.recommended_jobs.map((job: any) => ({
           ...job,
           id: job.job_url,
-          status: job.status || "recommended",
-          job_url: job.job_url, // Explicitly set job_url
+          status: "recommended",
+          job_url: job.job_url,
         }));
-        setJobApplications(apps);
-        if (res.data.generated_at) {
-          setLastGenerationDate(new Date(res.data.generated_at));
+        allJobs = [...allJobs, ...recommended];
+        if (recsResponse.data.generated_at) {
+          setLastGenerationDate(new Date(recsResponse.data.generated_at));
         }
       }
+
+      if (appsResponse.data?.job_applications) {
+        const jobApplications = appsResponse.data.job_applications.map((app: any) => ({
+          ...(app.job_details || {}),
+          id: app.job_details?.job_url,
+          status: app.status,
+        }));
+        allJobs = [...allJobs, ...jobApplications];
+      }
+
+      // Remove duplicates, preferring non-recommended status
+      const uniqueJobs = Array.from(new Map(allJobs.map(job => [job.id, job])).values());
+      
+      setJobApplications(uniqueJobs);
+
+      const saved = uniqueJobs.filter((app) => app.status === "saved").length;
+      const applied = uniqueJobs.filter((app) => app.status === "applied").length;
+      setSavedJobsCount(saved);
+      setAppliedJobsCount(applied);
+
     } catch (err: unknown) {
       if (axios.isAxiosError(err) && err.response?.status !== 404) {
-        setError("Could not fetch existing recommendations.");
+        setError("Could not fetch job data.");
       }
     } finally {
       setIsLoading(false);
@@ -108,31 +136,8 @@ export default function DashboardClient() {
   }, [token, userId]);
 
   useEffect(() => {
-    fetchExistingRecommendations();
-  }, [fetchExistingRecommendations]);
-
-  // New useEffect to fetch saved and applied job counts
-  useEffect(() => {
-    const fetchJobCounts = async () => {
-      if (!userId || !token) return;
-      try {
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/user/job_applications`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (res.data?.job_applications) {
-          const allJobApps = res.data.job_applications;
-          const saved = allJobApps.filter((app: any) => app.status === "saved").length;
-          const applied = allJobApps.filter((app: any) => app.status === "applied").length;
-          setSavedJobsCount(saved);
-          setAppliedJobsCount(applied);
-        }
-      } catch (err) {
-        console.error("Failed to fetch job counts:", err);
-      }
-    };
-    fetchJobCounts();
-  }, [userId, token]);
+    fetchAllJobs();
+  }, [fetchAllJobs]);
 
   useEffect(() => {
     const fetchSheetStatus = async () => {
@@ -259,15 +264,13 @@ export default function DashboardClient() {
         null,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      const apps = res.data.recommended_jobs.map((job: any) => ({
-        ...job,
-        id: job.job_url,
-        status: job.status || "recommended",
-      }));
-      setJobApplications(apps);
-      if (res.data.generated_at) {
-        setLastGenerationDate(new Date(res.data.generated_at));
+      if (res.data.recommendation_data.generated_at) {
+        setLastGenerationDate(new Date(res.data.recommendation_data.generated_at));
       }
+      if (res.data.sheets_error) {
+        toast.error(`Google Sheets Sync Failed: ${res.data.sheets_error}`);
+      }
+      fetchAllJobs(); // Refresh all jobs
     } catch (err: unknown) {
       console.error("Error generating recs", err);
       let errorMessage = "An unexpected error occurred.";
@@ -313,35 +316,58 @@ export default function DashboardClient() {
 
     if (activeId === overId) return;
 
+    const jobToMove = jobApplications.find((job) => job.id === activeId);
+    if (!jobToMove) return;
+
+    // Optimistic UI update
+    const oldJobs = [...jobApplications];
+
     if (over.id === "saved-zone" || over.id === "applied-zone") {
       const newStatus: "saved" | "applied" = over.id === "saved-zone" ? "saved" : "applied";
-      const jobToUpdate = jobApplications.find((job) => job.id === activeId);
+      // Optimistically update the UI
+      setJobApplications(prev => prev.map(j => j.id === activeId ? { ...j, status: newStatus } : j));
 
-      if (jobToUpdate) {
-        try {
-          await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/jobs/application/save_job`,
-            { ...jobToUpdate, status: newStatus },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-
-          // Remove the job from the list on successful API call
-          setJobApplications((prev) => prev.filter((job) => job.id !== activeId));
-          toast.success(`Job moved to ${newStatus}!`);
-        fetchExistingRecommendations();
-
-        } catch (error) {
-          console.error("Failed to update job status:", error);
-          toast.error("Failed to update job status.");
-        }
+      try {
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/jobs/application/save_job`,
+          { ...jobToMove, status: newStatus },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        toast.success(`Job moved to ${newStatus}!`);
+        await fetchAllJobs();
+      } catch (error) {
+        // Revert on error
+        setJobApplications(oldJobs);
+        console.error("Failed to update job status:", error);
+        toast.error("Failed to update job status.");
       }
+    } else if (over.data?.current?.droppableId === 'recommendations-zone') { // Moving back to recommended
+        // Optimistically update the UI
+        setJobApplications(prev => prev.map(j => j.id === activeId ? { ...j, status: 'recommended' } : j));
+
+        try {
+            await axios.post(
+                `${process.env.NEXT_PUBLIC_API_URL}/jobs/application/move_to_recommendations`,
+                jobToMove,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            toast.success("Job moved back to recommendations!");
+            await fetchAllJobs();
+        } catch (error) {
+            // Revert on error
+            setJobApplications(oldJobs);
+            console.error("Failed to move job back:", error);
+            toast.error("Failed to move job back.");
+        }
+    
     } else {
-      // Reordering logic
-      setJobApplications((items) => {
-        const oldIndex = items.findIndex((item) => item.id === activeId);
-        const newIndex = items.findIndex((item) => item.id === overId);
-        return arrayMove(items, oldIndex, newIndex);
-      });
+      // This handles reordering within the recommended list
+      const activeIndex = jobApplications.findIndex((j) => j.id === activeId);
+      const overIndex = jobApplications.findIndex((j) => j.id === overId);
+
+      if (activeIndex !== -1 && overIndex !== -1) {
+        setJobApplications(arrayMove(jobApplications, activeIndex, overIndex));
+      }
     }
   };
 

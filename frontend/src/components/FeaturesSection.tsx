@@ -1,23 +1,13 @@
 "use client";
 
-import { Globe, BrainCircuit, FileText, Bell, User, FileUp } from "lucide-react";
+import { Globe, BrainCircuit, FileText, Bell, User, FileUp, Star } from "lucide-react";
 import { motion } from "framer-motion";
 
 const features = [
   {
-    icon: Globe,
-    title: "Direct Company Scraping",
-    description: "Gets fresh jobs directly from company websites for authentic and updated listings.",
-  },
-  {
     icon: BrainCircuit,
-    title: "AI Job Analysis",
-    description: "Analyzes jobs to match your skills and preferences intelligently.",
-  },
-  {
-    icon: FileUp,
-    title: "Resume Parsing",
-    description: "Automatically extracts your skills and experience from your resume to save your time.",
+    title: "AI-Powered Recommendations",
+    description: "Leverage our advanced AI to get job recommendations that truly match your skills and career goals.",
   },
   {
     icon: User,
@@ -25,14 +15,24 @@ const features = [
     description: "A dedicated dashboard to manage your job applications, preferences, and recommendations.",
   },
   {
+    icon: FileUp,
+    title: "Intelligent Resume Parsing",
+    description: "Automatically extracts your skills and experience from your resume to save you time.",
+  },
+  {
+    icon: Star,
+    title: "Advanced Job Tracking (Pro)",
+    description: "Save, apply, and manage your job applications with our advanced tracking tools.",
+  },
+  {
     icon: FileText,
-    title: "Google Sheets Integration",
-    description: "Saves all curated job listings directly into your Google Sheets.",
+    title: "Google Sheets Integration (Pro)",
+    description: "Automatically export all your curated job listings directly into your personal Google Sheets.",
   },
   {
     icon: Bell,
-    title: "Smart Notifications",
-    description: "Notifies you whenever new relevant jobs are found.",
+    title: "Smart Notifications (Pro)",
+    description: "Get instant notifications whenever new relevant jobs that match your profile are found.",
   },
 ];
 

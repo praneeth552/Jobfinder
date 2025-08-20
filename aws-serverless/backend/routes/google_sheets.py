@@ -106,7 +106,7 @@ async def disable_sheet_sync(current_user: dict = Depends(get_current_user)):
     user_id = current_user.get("_id")
     try:
         await db.users.update_one(
-            {"_id": user_id},
+            {"_id": ObjectId(user_id)},
             {"$set": {"sheets_enabled": False, "google_tokens": None, "spreadsheet_id": None}}
         )
         return {"message": "Google Sheets integration disabled successfully."}
