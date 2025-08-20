@@ -50,3 +50,4 @@ jobs:
           MAIL_FROM_NAME: ${{ secrets.MAIL_FROM_NAME }}
           MAIL_TLS: ${{ secrets.MAIL_TLS }}
           MAIL_SSL: ${{ secrets.MAIL_SSL }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}

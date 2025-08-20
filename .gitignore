@@ -54,3 +54,8 @@ build/
 # Temporary files
 *.tmp
 *.temp
+
+# Secret files
+client_secret.json
+/backend/client_secret.json
+/aws-serverless/backend/client_secret.json
