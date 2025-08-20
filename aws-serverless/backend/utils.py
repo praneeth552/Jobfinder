@@ -94,7 +94,11 @@ def is_pro_user(user: dict) -> bool:
     if not user or user.get("plan_type") != PlanType.pro:
         return False
 
-    status = user.get("subscription_status")
+    # For backward compatibility for users who upgraded before subscription status was added.
+    if "plan_status" not in user:
+        return True
+
+    status = user.get("plan_status")
     valid_until = user.get("subscription_valid_until")
 
     # Ensure valid_until is a datetime object for comparison

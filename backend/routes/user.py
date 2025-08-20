@@ -24,16 +24,29 @@ async def upgrade_to_pro(current_user: dict = Depends(get_current_user)):
             detail="User not authenticated",
         )
 
-    result = await users_collection.update_one(
-        {"email": user_email},
-        {"$set": {"plan_type": "pro"}}
-    )
+    user = await users_collection.find_one({"email": user_email})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
 
-    if result.modified_count == 0:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found or already a pro member."
-        )
+    subscription_id = user.get("razorpay_subscription_id")
+    if not subscription_id:
+        raise HTTPException(status_code=400, detail="Subscription not found")
+
+    try:
+        subscription = razorpay_client.subscription.fetch(subscription_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch subscription from Razorpay: {e}")
+
+    await users_collection.update_one(
+        {"email": user_email},
+        {
+            "$set": {
+                "plan_type": "pro",
+                "plan_status": "active",
+                "subscription_valid_until": datetime.fromtimestamp(subscription["end_at"]),
+            }
+        },
+    )
 
     await send_pro_welcome_email(user_email, user_name)
 
