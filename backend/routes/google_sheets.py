@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Request, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from google_auth_oauthlib.flow import Flow
-from services.google_sheets import create_sheet_if_not_exists
+from services.google_sheets import handle_oauth_callback
 from database import db
 import os
 import json
+import httpx
 from dotenv import load_dotenv
 from bson import ObjectId
 from utils import get_current_user, get_user_from_token_query
@@ -79,7 +80,7 @@ async def oauth_callback(request: Request):
         
         # The user_id is passed in the 'state' parameter
         user_id = state
-        await create_sheet_if_not_exists(user_id, credentials.to_json())
+        await handle_oauth_callback(user_id, credentials.to_json())
         
         return RedirectResponse(f"{FRONTEND_URL}/dashboard?sheets_success=true")
 
@@ -99,9 +100,34 @@ async def get_sheet_status(current_user: dict = Depends(get_current_user)):
 @router.post("/disable")
 async def disable_sheet_sync(current_user: dict = Depends(get_current_user)):
     """
-    Disables Google Sheets integration for the user.
+    Disables Google Sheets integration for the user by revoking the token
+    and clearing the data from the database.
     """
     user_id = current_user.get("_id")
+    user = await db.users.find_one({"_id": ObjectId(user_id)})
+    
+    if user and user.get("google_tokens"):
+        try:
+            tokens = json.loads(user["google_tokens"])
+            token_to_revoke = tokens.get("token") # This is usually the access_token
+
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "https://oauth2.googleapis.com/revoke",
+                    params={"token": token_to_revoke},
+                    headers={"Content-Type": "application/x-www-form-urlencoded"}
+                )
+            
+            if response.status_code == 200:
+                print(f"--- Successfully revoked token for user {user_id} ---")
+            else:
+                # Log error but proceed with cleanup
+                print(f"--- Failed to revoke token for user {user_id}. Status: {response.status_code}, Body: {response.text} ---")
+
+        except Exception as e:
+            print(f"--- An error occurred during token revocation: {e} ---")
+
+    # Always clear user data regardless of revocation success
     try:
         await db.users.update_one(
             {"_id": ObjectId(user_id)},

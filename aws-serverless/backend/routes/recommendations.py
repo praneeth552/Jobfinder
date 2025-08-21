@@ -158,14 +158,13 @@ async def generate_recommendations(current_user: dict = Depends(get_current_user
     # --- Pro Feature: Google Sheets Integration ---
     sheets_error = None
     if is_pro_user(user) and user.get("sheets_enabled"):
-        try:
-            print(f"--- Writing recommendations to Google Sheet for user {user_id} ---")
-            await write_to_sheet(user_id, [job.dict() for job in recommended_jobs])
+        print(f"--- Attempting to write recommendations to Google Sheet for user {user_id} ---")
+        success = await write_to_sheet(user_id, [job.dict() for job in recommended_jobs])
+        if success:
             print(f"--- Successfully wrote recommendations to Google Sheet for user {user_id} ---")
-        except Exception as e:
-            sheets_error = f"Failed to write to Google Sheet: {e}"
+        else:
+            sheets_error = f"Failed to write to Google Sheet for user {user_id}. Check backend logs for details."
             print(f"--- {sheets_error} ---")
-            # We don't re-raise the exception, so the user still gets recommendations on the dashboard
 
     return {
         "recommendation_data": recommendation_data,
