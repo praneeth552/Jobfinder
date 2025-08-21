@@ -1,5 +1,5 @@
 "use client";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useDroppable } from "@dnd-kit/core";
 import { Bookmark, CheckCheck } from 'lucide-react';
@@ -37,19 +37,12 @@ const DropZone = ({ savedCount, appliedCount }: { savedCount: number, appliedCou
         {icon}
         <span className="ml-2">{label}</span>
       </div>
-      <AnimatePresence>
-        {count > 0 && (
-          <motion.span
-            key={count} // Animate when count changes
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            className={`absolute -top-2 -right-2 bg-white text-black rounded-full h-6 w-6 flex items-center justify-center text-xs font-bold shadow-md border-2 ${isOver ? `border-${colorClass}` : 'border-transparent'}`}>
-            {count}
-          </motion.span>
-        )}
-      </AnimatePresence>
+      {count > 0 && (
+        <span
+          className={`absolute -top-2 -right-2 bg-white text-black rounded-full h-6 w-6 flex items-center justify-center text-xs font-bold shadow-md border-2 ${isOver ? `border-${colorClass}` : 'border-transparent'}`}>
+          {count}
+        </span>
+      )}
     </motion.div>
   );
 

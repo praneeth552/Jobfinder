@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, LogOut, Star, Settings, Loader, CreditCard } from "lucide-react";
+import { User, LogOut, Settings, Loader, CreditCard, Bookmark, Check, Star } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import BatSignal from "./BatSignal";
 import Lightning from "./Lightning"; // Import the new component
@@ -12,6 +12,8 @@ interface UserProfileProps {
   onLogout: () => void;
   onEditPreferences: () => void;
   onBilling: () => void;
+  onNavigateToSaved: () => void;
+  onNavigateToApplied: () => void;
 }
 
 const UserProfile = ({
@@ -19,6 +21,8 @@ const UserProfile = ({
   onLogout,
   onEditPreferences,
   onBilling,
+  onNavigateToSaved,
+  onNavigateToApplied,
 }: UserProfileProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState<string | null>(null);
@@ -92,6 +96,34 @@ const UserProfile = ({
             className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50"
           >
             <ul className="py-1">
+              <li>
+                <button
+                  onClick={() => handleAction(onNavigateToSaved, "saved")}
+                  disabled={isLoading === "saved"}
+                  className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                >
+                  {isLoading === "saved" ? (
+                    <Loader size={16} className="animate-spin" />
+                  ) : (
+                    <Bookmark size={16} />
+                  )}
+                  {isLoading === "saved" ? "Loading..." : "Saved Jobs"}
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleAction(onNavigateToApplied, "applied")}
+                  disabled={isLoading === "applied"}
+                  className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                >
+                  {isLoading === "applied" ? (
+                    <Loader size={16} className="animate-spin" />
+                  ) : (
+                    <Check size={16} />
+                  )}
+                  {isLoading === "applied" ? "Loading..." : "Applied Jobs"}
+                </button>
+              </li>
               <li>
                 <button
                   onClick={handleEditPreferencesClick}

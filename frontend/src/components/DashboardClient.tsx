@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import Cookies from "js-cookie";
 import axios from "axios";
@@ -54,6 +54,7 @@ export default function DashboardClient() {
   const [savedJobsCount, setSavedJobsCount] = useState(0);
   const [appliedJobsCount, setAppliedJobsCount] = useState(0);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [cardActionLoading, setCardActionLoading] = useState<{[key: string]: boolean}>({});
 
   const getJobsButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -82,7 +83,7 @@ export default function DashboardClient() {
     setError(null);
 
     try {
-      const [recsResponse, appsResponse] = await Promise.all([
+      const [recsResponse, appsResponse] = await Promise.allSettled([
         axios.get(`${process.env.NEXT_PUBLIC_API_URL}/recommendations`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
@@ -93,21 +94,21 @@ export default function DashboardClient() {
 
       let allJobs: JobApplication[] = [];
 
-      if (recsResponse.data?.recommended_jobs) {
-        const recommended = recsResponse.data.recommended_jobs.map((job: any) => ({
+      if (recsResponse.status === "fulfilled" && recsResponse.value.data?.recommended_jobs) {
+        const recommended = recsResponse.value.data.recommended_jobs.map((job: any) => ({
           ...job,
           id: job.job_url,
           status: "recommended",
           job_url: job.job_url,
         }));
         allJobs = [...allJobs, ...recommended];
-        if (recsResponse.data.generated_at) {
-          setLastGenerationDate(new Date(recsResponse.data.generated_at));
+        if (recsResponse.value.data.generated_at) {
+          setLastGenerationDate(new Date(recsResponse.value.data.generated_at));
         }
       }
 
-      if (appsResponse.data?.job_applications) {
-        const jobApplications = appsResponse.data.job_applications.map((app: any) => ({
+      if (appsResponse.status === "fulfilled" && appsResponse.value.data?.job_applications) {
+        const jobApplications = appsResponse.value.data.job_applications.map((app: any) => ({
           ...(app.job_details || {}),
           id: app.job_details?.job_url,
           status: app.status,
@@ -170,6 +171,43 @@ export default function DashboardClient() {
     fetchSheetStatus();
     checkRedirectStatus();
   }, [userId, token, plan, router]);
+
+  useEffect(() => {
+    if (isFirstLoad) return;
+
+    if (!lastGenerationDate) {
+      setIsGenerationAllowed(true);
+      return;
+    }
+
+    const intervalId = setInterval(() => {
+      const now = new Date();
+      const requiredDays = userPlan === "pro" ? 7 : 30;
+      const nextGenerationDate = new Date(lastGenerationDate.getTime());
+      nextGenerationDate.setDate(
+        lastGenerationDate.getDate() + requiredDays
+      );
+
+      const diff = nextGenerationDate.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        setIsGenerationAllowed(true);
+        setTimeRemaining("");
+        clearInterval(intervalId);
+      } else {
+        setIsGenerationAllowed(false);
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor(
+          (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        setTimeRemaining(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+      }
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [lastGenerationDate, userPlan, isFirstLoad]);
 
   useEffect(() => {
     if (isFirstLoad) return;
@@ -307,6 +345,39 @@ export default function DashboardClient() {
     router.push("/billing");
   }, [router]);
 
+  const handleNavigateToSaved = useCallback(() => {
+    router.push("/saved");
+  }, [router]);
+
+  const handleNavigateToApplied = useCallback(() => {
+    router.push("/applied");
+  }, [router]);
+
+  const handleCardAction = async (job: JobApplication, status: 'saved' | 'applied') => {
+    setCardActionLoading(prev => ({ ...prev, [job.id]: true }));
+    
+    const oldJobs = [...jobApplications];
+    
+    // Optimistic UI update
+    setJobApplications(prev => prev.map(j => j.id === job.id ? { ...j, status: status } : j));
+
+    try {
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/jobs/application/save_job`,
+        { ...job, status: status },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(`Job moved to ${status}!`);
+      await fetchAllJobs(); // This will sync the state with the backend
+    } catch (error) {
+      setJobApplications(oldJobs); // Revert on error
+      console.error("Failed to update job status:", error);
+      toast.error("Failed to update job status.");
+    } finally {
+      setCardActionLoading(prev => ({ ...prev, [job.id]: false }));
+    }
+  };
+
   const onDragEnd = async (event: any) => {
     const { active, over } = event;
     if (!over) return;
@@ -431,22 +502,43 @@ export default function DashboardClient() {
                 onLogout={handleLogout}
                 onEditPreferences={handleEditPreferences}
                 onBilling={handleBilling}
+                onNavigateToSaved={handleNavigateToSaved}
+                onNavigateToApplied={handleNavigateToApplied}
               />
             </div>
           </div>
 
-          {isFirstLoad && !isGenerationAllowed && (
-            <p className="text-yellow-800 bg-yellow-100 border border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700 p-4 rounded-lg mb-6 text-center font-semibold text-sm sm:text-base">
-              Checking your generation status...
-            </p>
-          )}
-          {!isFirstLoad && !isGenerationAllowed && timeRemaining && (
-            <p className="text-yellow-800 bg-yellow-100 border border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700 p-4 rounded-lg mb-6 text-center font-semibold text-sm sm:text-base">
-              You can generate new recommendations in {timeRemaining}.
-              {userPlan === "free" &&
-                ` Upgrade to Pro for more frequent recommendations.`}
-            </p>
-          )}
+          <div className="h-24 flex items-start justify-center mx-1">
+            <AnimatePresence mode="wait">
+              {isFirstLoad && !isGenerationAllowed && (
+                <motion.p
+                  key="checking"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.3 }}
+                  className="text-yellow-800 bg-yellow-100 border border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700 p-4 rounded-lg text-center font-semibold text-sm sm:text-base"
+                >
+                  Checking your generation status...
+                </motion.p>
+              )}
+
+              {!isFirstLoad && !isGenerationAllowed && timeRemaining && (
+                <motion.p
+                  key="countdown"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.3 }}
+                  className="text-yellow-800 bg-yellow-100 border border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700 p-4 rounded-lg text-center font-semibold text-sm sm:text-base"
+                >
+                  You can generate new recommendations in {timeRemaining}.
+                  {userPlan === "free" &&
+                    ` Upgrade to Pro for more frequent recommendations.`}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
 
           {isLoading && (
             <>
@@ -504,15 +596,24 @@ export default function DashboardClient() {
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               >
                 {recommendedJobs.map((job) => (
-                  <JobCard key={job.id} job={job} />
+                  <JobCard 
+                    key={job.id} 
+                    job={job} 
+                    onSave={() => handleCardAction(job, 'saved')}
+                    onApply={() => handleCardAction(job, 'applied')}
+                    isSaving={cardActionLoading[job.id]}
+                    isApplying={cardActionLoading[job.id]}
+                  />
                 ))}
               </motion.div>
             </SortableContext>
             {userPlan === "pro" && (
-            <DropZone
-              savedCount={savedJobsCount}
-              appliedCount={appliedJobsCount}
-            />
+              <div className="hidden lg:flex">
+                <DropZone
+                  savedCount={savedJobsCount}
+                  appliedCount={appliedJobsCount}
+                />
+              </div>
             )}
           </DndContext>
         </div>

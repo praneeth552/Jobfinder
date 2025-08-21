@@ -83,22 +83,21 @@ async def move_to_recommendations(
 ):
     user_id = current_user["_id"]
 
-    # Remove from job_applications
-    await db.users.update_one(
-        {"_id": ObjectId(user_id)},
-        {"$pull": {"job_applications": {"job_details.job_url": job_to_move.job_url}}}
+    # Correctly update the status of the job within the user's job_applications array
+    result = await db.users.update_one(
+        {
+            "_id": ObjectId(user_id),
+            "job_applications.job_details.job_url": job_to_move.job_url
+        },
+        {
+            "$set": { "job_applications.$.status": "recommended" }
+        }
     )
 
-    # Add to recommendations collection
-    job_dict = job_to_move.dict()
-    if 'status' in job_dict:
-        del job_dict['status']
-
-    await db.recommendations.update_one(
-        {"user_id": user_id},
-        {"$addToSet": {"recommended_jobs": job_dict}},
-        upsert=True
-    )
+    if result.modified_count == 0:
+        # This might happen if the job is not found, which would be unexpected
+        # but we can handle it gracefully.
+        raise HTTPException(status_code=404, detail="Job application not found in user profile.")
 
     return {"message": "Job moved to recommendations successfully"}
 
