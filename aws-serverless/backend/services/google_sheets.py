@@ -6,6 +6,7 @@ import json
 from bson import ObjectId
 import os
 import asyncio
+from typing import Optional, List
 
 # Define the scopes required for the application
 SCOPES = [
@@ -32,7 +33,7 @@ async def get_google_service(user_id, service_name, version):
 
     return build(service_name, version, credentials=creds)
 
-async def _find_or_create_spreadsheet_id(user_id: str) -> str | None:
+async def _find_or_create_spreadsheet_id(user_id: str) -> Optional[str]:
     try:
         drive_service = await get_google_service(user_id, 'drive', 'v3')
         if not drive_service:
@@ -80,7 +81,7 @@ async def handle_oauth_callback(user_id: str, tokens: str):
     )
     print(f"--- Successfully enabled sheets for user {user_id} and stored tokens. ---")
 
-async def write_to_sheet(user_id: str, data: list) -> bool:
+async def write_to_sheet(user_id: str, data: List) -> bool:
     print(f"--- Attempting to write to sheet for user {user_id} ---")
     user = await db.users.find_one({"_id": ObjectId(user_id)})
     
