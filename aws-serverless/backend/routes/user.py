@@ -80,3 +80,22 @@ async def get_user_me(current_user: dict = Depends(get_current_user)):
     current_user["_id"] = str(current_user["_id"])
     
     return current_user
+
+@router.get("/job_applications", status_code=status.HTTP_200_OK)
+async def get_user_job_applications(current_user: dict = Depends(get_current_user)):
+    user_id = current_user.get("_id")
+    user = await users_collection.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Ensure job_applications field exists and is a list
+    job_applications = user.get("job_applications", [])
+    
+    # Convert ObjectId to string for serialization
+    for app in job_applications:
+        if "_id" in app:
+            app["_id"] = str(app["_id"])
+        if "job_details" in app and "_id" in app["job_details"]:
+            app["job_details"]["_id"] = str(app["job_details"]["_id"])
+
+    return {"job_applications": job_applications}

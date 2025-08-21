@@ -43,7 +43,7 @@ export default function LoadingScreen({ onFinish }: { onFinish?: () => void }) {
           className="text-white text-4xl font-bold"
           aria-label="TackleIt brand name"
         >
-          TackleIt
+          Tackleit
         </motion.h1>
 
         {/* Tagline sliding animation */}
