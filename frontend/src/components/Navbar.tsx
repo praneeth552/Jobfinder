@@ -17,6 +17,7 @@ const buttonTexts = ["Got Ideas?", "Collaborate?"];
 export default function Navbar({ onGetStarted }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
+  const [isOverDarkSection, setIsOverDarkSection] = useState(false);
   const [textIndex, setTextIndex] = useState(0);
   const router = useRouter();
   const { theme } = useTheme();
@@ -33,9 +34,27 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
       setHasScrolled(window.scrollY > 10);
     };
     window.addEventListener("scroll", handleScroll);
-    // Set initial state
     handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const isIntersecting = entries.some(entry => entry.isIntersecting);
+        setIsOverDarkSection(isIntersecting);
+      },
+      { rootMargin: "-50% 0px -50% 0px" }
+    );
+
+    const contactSection = document.getElementById("contact-section");
+    const footerSection = document.querySelector("footer");
+
+    if (contactSection) observer.observe(contactSection);
+    if (footerSection) observer.observe(footerSection);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (contactSection) observer.unobserve(contactSection);
+      if (footerSection) observer.unobserve(footerSection);
+    };
   }, []);
 
   const handleSignInClick = () => {
@@ -68,11 +87,10 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
     exit: { opacity: 0, y: -10 },
   };
 
-  // Determine text color based on theme and scroll state
   const getTextColor = () => {
     if (theme === 'dark') return 'text-white';
-    // In light mode, start with dark text, change to dark on scroll
-    return hasScrolled ? 'text-[--foreground]' : 'text-black';
+    if (isOverDarkSection) return 'text-white';
+    return 'text-black';
   };
 
   const getHoverColor = () => {
@@ -84,8 +102,8 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
       variants={navVariants}
       initial="initial"
       animate="animate"
-      className={`fixed top-4 left-4 right-4 max-w-6xl mx-auto flex justify-between items-center px-4 sm:px-8 py-3 z-50 transition-all duration-300 rounded-2xl
-        ${hasScrolled ? "bg-[--card-background] border border-[--border] shadow-lg backdrop-blur-lg" : "bg-transparent"}`}
+      className={`fixed top-4 left-4 right-4 max-w-6xl mx-auto flex justify-between items-center px-4 sm:px-8 py-3 z-50 transition-all duration-300 rounded-2xl bg-[--card-background]/70 backdrop-blur-lg
+        ${hasScrolled ? "border border-[--border] shadow-lg" : "border border-transparent"}`}
     >
       <Link href="/workflow">
         <motion.div
@@ -148,7 +166,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
       <div className="md:hidden flex items-center space-x-4">
         <ThemeToggle />
         <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
+          {isMenuOpen ? <X size={28} className={`${getTextColor()}`} /> : <Menu size={28} className={`${getTextColor()}`} />}
         </button>
       </div>
 
@@ -161,9 +179,9 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
             exit={{ opacity: 0, y: -20 }}
             className="absolute top-full left-0 w-full mt-2 md:hidden flex flex-col items-center space-y-4 py-4 bg-[--card-background] border-t border-[--border] shadow-lg"
           >
-            <motion.button onClick={() => router.push('/pricing')} className="font-semibold text-lg">Pricing</motion.button>
-            <motion.button onClick={handleSignInClick} className="font-semibold text-lg">Sign In</motion.button>
-            <motion.button onClick={handleCollaborateClick} className="font-semibold text-lg">Collaborate</motion.button>
+            <motion.button onClick={() => router.push('/pricing')} className={`font-semibold text-lg ${getTextColor()}`}>Pricing</motion.button>
+            <motion.button onClick={handleSignInClick} className={`font-semibold text-lg ${getTextColor()}`}>Sign In</motion.button>
+            <motion.button onClick={handleCollaborateClick} className={`font-semibold text-lg ${getTextColor()}`}>Collaborate</motion.button>
             <motion.button onClick={() => onGetStarted(0, 0)} className="submit-button-swipe font-semibold text-lg w-full px-6 py-3">Get Started</motion.button>
           </motion.div>
         )}
