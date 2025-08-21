@@ -7,8 +7,8 @@ import AuthInitializer from "@/components/AuthInitializer";
 import { ThemeProvider } from "@/context/ThemeContext";
 import ThemedLayout from "@/components/ThemedLayout";
 import Script from "next/script";
+import Head from "next/head";
 
-// ✅ SEO + Social metadata
 export const metadata = {
   metadataBase: new URL("https://tackleit.xyz"),
   title: {
@@ -17,16 +17,6 @@ export const metadata = {
   },
   description:
     "Tackleit is your AI-powered automated job finder that scrapes job postings directly from company websites, matches them to your skills, and organizes everything in one place.",
-  keywords: [
-    "AI job finder",
-    "job search platform",
-    "career matcher",
-    "Tackleit",
-    "automated job search",
-  ],
-  authors: [{ name: "Tackleit Team" }],
-  creator: "Tackleit",
-  publisher: "Tackleit",
   openGraph: {
     title: "Tackleit – AI-Powered Job Finder",
     description:
@@ -49,28 +39,16 @@ export const metadata = {
     title: "Tackleit – AI-Powered Job Finder",
     description:
       "Find your next job effortlessly with Tackleit. AI-powered platform scraping jobs directly from company sites.",
-    creator: "@tackleit", // optional if you create a Twitter handle later
+    creator: "@tackleit",
     images: ["https://tackleit.xyz/og-image.png"],
   },
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
-    apple: "/apple-touch-icon.png",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
+    icon: "https://tackleit.xyz/favicon.svg",
+    shortcut: "https://tackleit.xyz/favicon.svg",
+    apple: "https://tackleit.xyz/apple-touch-icon.png",
   },
 };
 
-// ✅ Viewport settings
 export const viewport = {
   width: "device-width",
   initialScale: 1,
@@ -82,6 +60,17 @@ export const viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
+      <Head>
+        {/* Explicit meta tags for Google */}
+        <title>Tackleit – AI-Powered Job Finder</title>
+        <meta
+          name="description"
+          content="Tackleit is your AI-powered automated job finder that scrapes job postings directly from company websites, matches them to your skills, and organizes everything in one place."
+        />
+        <link rel="canonical" href="https://tackleit.xyz" />
+        <link rel="icon" href="https://tackleit.xyz/favicon.svg" />
+        <link rel="apple-touch-icon" href="https://tackleit.xyz/apple-touch-icon.png" />
+      </Head>
       <body>
         <GoogleOAuthProvider
           clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ""}
