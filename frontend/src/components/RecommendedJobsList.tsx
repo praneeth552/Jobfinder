@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { SortableContext } from '@dnd-kit/sortable';
 import JobCard from './JobCard';
+import Cookies from 'js-cookie';
 
 interface JobApplication {
   id: string; // This will be the MongoDB _id
@@ -19,6 +20,8 @@ interface RecommendedJobsListProps {
 }
 
 const RecommendedJobsList: React.FC<RecommendedJobsListProps> = ({ recommendedJobs }) => {
+  const userPlan = (Cookies.get("plan_type") as "free" | "pro") || "free";
+
   return (
     <SortableContext items={recommendedJobs.map((j) => j.id)}>
       <motion.div
@@ -36,7 +39,7 @@ const RecommendedJobsList: React.FC<RecommendedJobsListProps> = ({ recommendedJo
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
       >
         {recommendedJobs.map((job) => (
-          <JobCard key={job.id} job={job} />
+          <JobCard key={job.id} job={job} userPlan={userPlan} />
         ))}
       </motion.div>
     </SortableContext>

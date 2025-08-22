@@ -31,6 +31,7 @@ const JobStatusClient = ({ status }: { status: 'saved' | 'applied' }) => {
 
   const router = useRouter();
   const token = Cookies.get('token');
+  const userPlan = (Cookies.get("plan_type") as "free" | "pro") || "free";
 
   const fetchJobs = useCallback(async () => {
     if (!token) {
@@ -170,6 +171,7 @@ const JobStatusClient = ({ status }: { status: 'saved' | 'applied' }) => {
                   <JobCard
                     key={job.id}
                     job={job}
+                    userPlan={userPlan}
                     showMoveButton={true}
                     onMove={handleMoveToRecommendations}
                     isMoving={movingJobId === job.id}
