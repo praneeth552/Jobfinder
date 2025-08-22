@@ -47,3 +47,20 @@ async def send_pro_welcome_email(email: str, name: str):
     </html>
     """
     await send_email(subject, [email], body)
+
+async def send_account_deletion_email(email: str, name: str):
+    subject = "Account Deletion Request Received"
+    body = f"""
+    <html>
+        <body>
+            <h2>Hi {name},</h2>
+            <p>We have received your request to delete your Tackleit account.</p>
+            <p>Your account is now in a <strong>30-day cooling-off period</strong>. After this period, your account and all associated data will be permanently deleted.</p>
+            <p>If you did not request this, or if you change your mind, you can reactivate your account by simply logging in within the next 30 days.</p>
+            <p>We're sorry to see you go.</p>
+            <p>Best,</p>
+            <p>The Tackleit Team</p>
+        </body>
+    </html>
+    """
+    await send_email(subject, [email], body)

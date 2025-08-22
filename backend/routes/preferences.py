@@ -159,12 +159,25 @@ async def parse_resume(file: UploadFile = File(...), current_user: dict = Depend
     now = datetime.utcnow()
 
     if last_upload:
-        if plan_type == "free":
-            if now - last_upload < FREE_PLAN_UPLOAD_INTERVAL:
-                raise HTTPException(status_code=429, detail=f"Free users can upload a new resume once every {FREE_PLAN_UPLOAD_INTERVAL.days} days.")
-        elif plan_type == "pro":
-            if now - last_upload < PRO_PLAN_UPLOAD_INTERVAL:
-                raise HTTPException(status_code=429, detail=f"Pro users can upload a new resume once every {PRO_PLAN_UPLOAD_INTERVAL.days} days.")
+        interval = FREE_PLAN_UPLOAD_INTERVAL if plan_type == "free" else PRO_PLAN_UPLOAD_INTERVAL
+        time_since_upload = now - last_upload
+        
+        if time_since_upload < interval:
+            time_remaining = interval - time_since_upload
+            days = time_remaining.days
+            hours, remainder = divmod(time_remaining.seconds, 3600)
+            minutes, seconds = divmod(remainder, 60)
+            
+            error_detail = {
+                "message": f"You can upload a new resume in {days}d {hours}h {minutes}m.",
+                "time_remaining": {
+                    "days": days,
+                    "hours": hours,
+                    "minutes": minutes,
+                    "seconds": int(seconds)
+                }
+            }
+            raise HTTPException(status_code=429, detail=error_detail)
 
     # (rest of the function remains the same)
     suffix = os.path.splitext(file.filename)[1]

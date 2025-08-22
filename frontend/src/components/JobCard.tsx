@@ -18,6 +18,7 @@ interface JobApplication {
 
 interface JobCardProps {
   job: JobApplication;
+  userPlan: "free" | "pro";
   showMoveButton?: boolean;
   onMove?: (job: JobApplication) => void;
   isMoving?: boolean;
@@ -29,6 +30,7 @@ interface JobCardProps {
 
 const JobCard = ({ 
   job, 
+  userPlan,
   showMoveButton = false, 
   onMove, 
   isMoving = false, 
@@ -125,7 +127,7 @@ const JobCard = ({
           )}
 
           {/* Mobile-only buttons */}
-          {(onSave && onApply && !showMoveButton) && (
+          {(userPlan === "pro" && onSave && onApply && !showMoveButton) && (
             <div className="lg:hidden flex items-center gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
               <LoadingButton
                 onClick={handleSaveClick}

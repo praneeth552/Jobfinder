@@ -1,14 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from database import db
-from utils import get_current_user
-from email_utils import send_pro_welcome_email
+from utils import get_current_user, create_access_token
+from email_utils import send_pro_welcome_email, send_account_deletion_email
+from models import UserDataResponse, UserProfileResponse, DeleteAccountResponse, ResumeDataResponse
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timedelta
 import razorpay
 import os
 
 router = APIRouter()
 users_collection = db["users"]
+recommendations_collection = db["recommendations"]
 
 razorpay_client = razorpay.Client(
     auth=(os.getenv("RAZORPAY_KEY_ID"), os.getenv("RAZORPAY_KEY_SECRET"))
@@ -68,17 +70,28 @@ async def get_subscription_details(current_user: dict = Depends(get_current_user
         "subscription_valid_until": user.get("subscription_valid_until"),
     }
 
-@router.get("/me", status_code=status.HTTP_200_OK)
+@router.get("/me", response_model=UserProfileResponse, status_code=status.HTTP_200_OK)
 async def get_user_me(current_user: dict = Depends(get_current_user)):
-    # The get_current_user dependency already fetches the user from the DB.
-    # We can trust our webhooks and daily cron job to keep the user's
-    # subscription status up-to-date in our database.
-    # This makes the API faster and avoids hitting Razorpay on every page load.
-    
-    # The user object from the dependency is already what we need.
-    # Just ensure the _id is a string for JSON serialization.
-    current_user["_id"] = str(current_user["_id"])
-    
+    user_id_str = str(current_user["_id"])
+
+    # --- Calculate Next Allowed Generation Time ---
+    last_recommendation = await recommendations_collection.find_one(
+        {"user_id": user_id_str}, sort=[("generated_at", -1)]
+    )
+    if last_recommendation and last_recommendation.get("generated_at"):
+        gen_interval = timedelta(days=7) if current_user.get("plan_type") == "pro" else timedelta(days=30)
+        current_user["next_generation_allowed_at"] = last_recommendation["generated_at"] + gen_interval
+    else:
+        current_user["next_generation_allowed_at"] = datetime.utcnow()
+
+    # --- Calculate Next Allowed Resume Upload Time ---
+    if current_user.get("last_resume_upload"):
+        upload_interval = timedelta(days=7) if current_user.get("plan_type") == "pro" else timedelta(days=30)
+        current_user["next_resume_upload_allowed_at"] = current_user["last_resume_upload"] + upload_interval
+    else:
+        current_user["next_resume_upload_allowed_at"] = datetime.utcnow()
+
+    current_user["_id"] = user_id_str
     return current_user
 
 @router.get("/job_applications", status_code=status.HTTP_200_OK)
@@ -88,10 +101,8 @@ async def get_user_job_applications(current_user: dict = Depends(get_current_use
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Ensure job_applications field exists and is a list
     job_applications = user.get("job_applications", [])
     
-    # Convert ObjectId to string for serialization
     for app in job_applications:
         if "_id" in app:
             app["_id"] = str(app["_id"])
@@ -99,3 +110,71 @@ async def get_user_job_applications(current_user: dict = Depends(get_current_use
             app["job_details"]["_id"] = str(app["job_details"]["_id"])
 
     return {"job_applications": job_applications}
+
+@router.get("/me/data", response_model=UserDataResponse, status_code=status.HTTP_200_OK)
+async def get_user_data(current_user: dict = Depends(get_current_user)):
+    user_id = current_user.get("_id")
+    user = await users_collection.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    resume_data = await db.resumes.find_one({"user_id": ObjectId(user_id)})
+
+    user["_id"] = str(user["_id"])
+    if resume_data:
+        resume_data["_id"] = str(resume_data["_id"])
+        resume_data["user_id"] = str(resume_data["user_id"])
+
+    return {
+        "user_profile": user,
+        "resume_data": resume_data,
+    }
+
+@router.delete("/me/delete", response_model=DeleteAccountResponse, status_code=status.HTTP_200_OK)
+async def delete_user_account(current_user: dict = Depends(get_current_user)):
+    user_id = current_user.get("_id")
+    user_email = current_user.get("email")
+    user_name = current_user.get("name")
+    
+    await users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {
+            "$set": {
+                "plan_status": "pending_deletion",
+                "deletion_requested_at": datetime.utcnow(),
+            }
+        },
+    )
+    
+    await send_account_deletion_email(user_email, user_name)
+    
+    return {"message": "Your account has been scheduled for deletion."}
+
+@router.post("/me/restore", status_code=status.HTTP_200_OK)
+async def restore_user_account(current_user: dict = Depends(get_current_user)):
+    user_id = current_user.get("_id")
+    
+    await users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {
+            "$set": {
+                "plan_status": "active",
+            },
+            "$unset": {
+                "deletion_requested_at": ""
+            }
+        },
+    )
+    
+    db_user = await users_collection.find_one({"_id": ObjectId(user_id)})
+
+    token = create_access_token({"email": db_user["email"]})
+    
+    return {
+        "message": "Your account has been successfully restored.",
+        "access_token": token,
+        "token_type": "bearer",
+        "is_first_time_user": db_user.get("is_first_time_user", False),
+        "user_id": str(db_user["_id"]),
+        "plan_type": db_user.get("plan_type", "free")
+    }

@@ -1,28 +1,43 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import axios from "axios";
-import toast from "react-hot-toast";
-import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
-import Cookies from "js-cookie";
-import Curtain from "@/components/Curtain";
-import LoadingButton from "@/components/LoadingButton";
-import TurnstileWidget from "@/components/TurnstileWidget";
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
+import Cookies from 'js-cookie';
+import Curtain from '@/components/Curtain';
+import LoadingButton from '@/components/LoadingButton';
+import TurnstileWidget from '@/components/TurnstileWidget';
 import { Eye, EyeOff } from 'lucide-react';
-import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/context/AuthContext";
-import SimpleNavbar from "@/components/SimpleNavbar";
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '@/context/AuthContext';
+import SimpleNavbar from '@/components/SimpleNavbar';
+import ConfirmationModal from '@/components/ConfirmationModal';
 
 export default function SigninPage() {
   const router = useRouter();
   const { fetchUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [redirectPath, setRedirectPath] = useState("/dashboard");
+  const [redirectPath, setRedirectPath] = useState('/dashboard');
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [recoveryToken, setRecoveryToken] = useState<string | null>(null);
+
+  const handleSuccessfulLogin = async (data: any) => {
+    localStorage.setItem("token", data.access_token);
+    localStorage.setItem("user_id", data.user_id);
+    Cookies.set("token", data.access_token, { expires: 1 });
+    Cookies.set("user_id", data.user_id, { expires: 1 });
+    Cookies.set("plan_type", data.plan_type || "free", { expires: 1 });
+    await fetchUser();
+    setRedirectPath(data.is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
+    toast.success("Sign-in successful!");
+    setIsSuccess(true);
+  };
 
   const handleSignIn = async (email: string, password: string) => {
     if (!turnstileToken) {
@@ -37,15 +52,14 @@ export default function SigninPage() {
         turnstile_token: turnstileToken,
       });
       const data = res.data;
-      localStorage.setItem("token", data.access_token);
-      localStorage.setItem("user_id", data.user_id);
-      Cookies.set("token", data.access_token, { expires: 1 });
-      Cookies.set("user_id", data.user_id, { expires: 1 });
-      Cookies.set("plan_type", data.plan_type || "free", { expires: 1 });
-      await fetchUser(); // Fetch user data
-      setRedirectPath(data.is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
-      toast.success("Sign-in successful!");
-      setIsSuccess(true);
+
+      if (data.account_status === 'pending_deletion') {
+        setRecoveryToken(data.recovery_token);
+        setShowRestoreModal(true);
+        setLoading(false);
+      } else {
+        await handleSuccessfulLogin(data);
+      }
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data?.detail || "Sign-in failed. Please check your credentials.");
@@ -63,15 +77,14 @@ export default function SigninPage() {
         token: credentialResponse.credential,
       });
       const data = res.data;
-      localStorage.setItem("token", data.access_token);
-      localStorage.setItem("user_id", data.user_id);
-      Cookies.set("token", data.access_token, { expires: 1 });
-      Cookies.set("user_id", data.user_id, { expires: 1 });
-      Cookies.set("plan_type", data.plan_type || "free", { expires: 1 });
-      await fetchUser(); // Fetch user data
-      setRedirectPath(data.is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
-      toast.success("Sign-in successful!");
-      setIsSuccess(true);
+
+      if (data.account_status === 'pending_deletion') {
+        setRecoveryToken(data.recovery_token);
+        setShowRestoreModal(true);
+        setLoading(false);
+      } else {
+        await handleSuccessfulLogin(data);
+      }
     } catch (error: unknown) {
       let errorMessage = "An unexpected error occurred.";
       if (error && typeof error === "object" && "response" in error) {
@@ -81,6 +94,22 @@ export default function SigninPage() {
         errorMessage = error.message;
       }
       toast.error(errorMessage);
+      setLoading(false);
+    }
+  };
+
+  const handleRestoreAccount = async () => {
+    if (!recoveryToken) return;
+    setLoading(true);
+    setShowRestoreModal(false);
+    try {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user/me/restore`, {}, {
+        headers: { Authorization: `Bearer ${recoveryToken}` },
+      });
+      toast.success("Your account has been restored!");
+      await handleSuccessfulLogin(res.data);
+    } catch (error) {
+      toast.error("Failed to restore account. Please try again.");
       setLoading(false);
     }
   };
@@ -199,6 +228,13 @@ export default function SigninPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      <ConfirmationModal
+        isOpen={showRestoreModal}
+        onClose={() => setShowRestoreModal(false)}
+        onConfirm={handleRestoreAccount}
+        title="Restore Your Account?"
+        message="Your account is scheduled for deletion. Would you like to restore it and continue?"
+      />
     </main>
   );
 }

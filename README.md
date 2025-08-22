@@ -10,7 +10,7 @@
 
 Tackleit is a full-stack, AI-powered job discovery platform meticulously engineered to automate and personalize the complex process of finding the perfect career opportunity. It directly addresses the overwhelming and manual nature of job hunting by providing users with a highly curated list of roles that precisely match their skills and ambitions.
 
-Most users give a new product **30–90 seconds** to prove its value. Tackleit is designed to hook you within that window by delivering immediate, tangible results, keeping you engaged for the crucial first 3–5 minutes of exploration.
+It's a well-known principle in product design that most users give you **~30–90 seconds** to prove value. If they're hooked, they’ll stay for **3–5 minutes** in their first session. Beyond that, you’ve achieved a sticky product. Tackleit is built around this philosophy, designed to deliver immediate, tangible results to capture your attention and demonstrate its worth from the very first interaction.
 
 ---
 
@@ -44,12 +44,36 @@ We've added some unique touches to enhance the user experience:
 
 ## 🛡️ A Privacy-First Approach
 
-We understand that your career data is sensitive. In an era where data privacy is paramount, some users might feel apprehensive about a platform handling their resumes, preferences, and personal information, especially with integrations like Google Drive. Here’s our commitment to you:
+We understand that your career data is sensitive, and we take your privacy seriously. In an era where data privacy is paramount, some users might feel apprehensive about a platform handling their resumes, preferences, and personal information, especially with integrations like Google Drive. Here’s our commitment to you:
+
+### Your Data & What We Store
+
+When you use our service, we store the following information to provide you with a personalized experience:
+
+-   **Profile Information:** Your name, email address, and subscription plan details.
+-   **Preferences:** The job roles, locations, and technical skills you specify to personalize your recommendations.
+-   **Resume Data:** If you upload a resume, we parse and store its contents (skills, roles, education, experience) to enhance your profile.
+-   **Job Applications:** We keep track of the jobs you've saved and applied to through our platform.
+-   **Google Sheets Integration:** If you enable it, we store an authentication token to securely sync your job recommendations to your Google Drive.
+
+You can view a summary of your stored data at any time on the **"Manage Your Data"** page, accessible from your user profile dropdown.
+
+### Our Commitment to Your Privacy
 
 -   **User-Controlled Data & Opt-Out**: You are in complete control. The Google Sheets integration is entirely opt-in and requires your explicit consent. If you choose to disable the sync, the application immediately **revokes its access token** via the Google API and **deletes the stored credentials** from your user profile. The application only ever requests the minimum necessary permission: to create a single file (`Tackleit Job Recommendations`) in your Google Drive. It cannot read, modify, or delete any other files.
 -   **Data Encryption**: Sensitive information, particularly your account password, is not stored in plaintext. We use industry-standard hashing algorithms to ensure your credentials are secure.
 -   **Transparent Operations**: We believe in transparency. Our code is open-source, and we encourage you to review it. We are committed to being upfront about what data we collect and how we use it to power the platform's features.
 -   **No Unnecessary Data Storage**: Your resume is parsed on the server to extract relevant information but is not stored long-term without your consent. You decide whether to save the parsed data to your profile.
+
+### Account Deletion Process
+
+You have the right to delete your account and all associated data at any time. Here is our process, designed to give you full control while preventing accidental deletion:
+
+1.  **Deletion Request:** You can request to delete your account from the "Manage Your Data" page.
+2.  **Email Confirmation:** An email will be sent to your registered address confirming that your deletion request has been received.
+3.  **30-Day Grace Period:** Your account will be immediately "soft-deleted." We enter a 30-day grace period during which your data is preserved but not actively used.
+4.  **Undo Option:** If you change your mind during this 30-day period, you can simply log in to your account again. You will be prompted to restore your account, which will immediately cancel the deletion process.
+5.  **Permanent Deletion:** If you do not restore your account within the 30-day grace period, it will be **permanently and irreversibly deleted** from our systems. This includes your profile, preferences, resume data, and all application history.
 
 Our goal is to provide powerful, time-saving features while respecting your privacy and giving you full control over your data.
 

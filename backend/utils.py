@@ -49,6 +49,13 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     user = await db.users.find_one({"email": email})
     if user is None:
         raise credentials_exception
+
+    if user.get("plan_status") == "pending_deletion":
+        raise HTTPException(
+            status_code=403,
+            detail="This account is pending deletion and cannot be accessed.",
+        )
+
     # Convert ObjectId to string for JSON serialization if needed elsewhere
     user["_id"] = str(user["_id"])
     return user

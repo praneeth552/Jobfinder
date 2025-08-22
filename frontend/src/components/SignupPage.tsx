@@ -116,6 +116,7 @@ export default function SignupPage() {
 
       if (res.status === 200) {
         toast.success("OTP sent to your email!");
+        sessionStorage.setItem('otp_verification_pending', form.email);
         router.push(`/otp?email=${form.email}`);
       } else {
         toast.error(res.data.detail || "Signup failed");

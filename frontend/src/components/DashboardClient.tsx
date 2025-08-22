@@ -9,7 +9,6 @@ import UserProfile from "@/components/UserProfile";
 import LoadingButton from "@/components/LoadingButton";
 import SimpleNavbar from "./SimpleNavbar";
 import { toast } from "react-hot-toast";
-import BatSignal from "./BatSignal";
 import JobCardSkeleton from "./JobCardSkeleton";
 import {
   DndContext,
@@ -40,15 +39,12 @@ export default function DashboardClient() {
   const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [isClient, setIsClient] = useState(false);
   const [isSheetsEnabled, setIsSheetsEnabled] = useState(false);
   const [isToggleLoading, setIsToggleLoading] = useState(false);
   const [userPlan, setUserPlan] = useState<"free" | "pro">("free");
-  const [lastGenerationDate, setLastGenerationDate] = useState<Date | null>(
-    null
-  );
-  const [isGenerationAllowed, setIsGenerationAllowed] = useState(false);
+  const [nextGenerationAllowedAt, setNextGenerationAllowedAt] = useState<number | null>(null);
+  const [isGenerationAllowed, setIsGenerationAllowed] = useState(true);
   const [timeRemaining, setTimeRemaining] = useState<string>("");
   const [batSignalTarget, setBatSignalTarget] = useState<any>(null);
   const [savedJobsCount, setSavedJobsCount] = useState(0);
@@ -75,6 +71,22 @@ export default function DashboardClient() {
       toast.success("Welcome to Pro! Enjoy your new features.");
       router.replace(window.location.pathname, undefined);
     }
+
+    const fetchUser = async () => {
+        const token = Cookies.get("token");
+        if (token) {
+            try {
+                const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/me`, { headers: { Authorization: `Bearer ${token}` } });
+                if (data.next_generation_allowed_at) {
+                    setNextGenerationAllowedAt(new Date(data.next_generation_allowed_at).getTime());
+                }
+                setUserPlan(data.plan_type || "free");
+            } catch (error) {
+                console.error("Failed to fetch user data", error);
+            }
+        }
+    };
+    fetchUser();
   }, [plan, searchParams, router]);
 
   const fetchAllJobs = useCallback(async () => {
@@ -83,58 +95,31 @@ export default function DashboardClient() {
     setError(null);
 
     try {
-      const [recsResponse, appsResponse] = await Promise.allSettled([
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/recommendations`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/job_applications`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/job_applications`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
 
-      let allJobs: JobApplication[] = [];
-
-      if (recsResponse.status === "fulfilled" && recsResponse.value.data?.recommended_jobs) {
-        const recommended = recsResponse.value.data.recommended_jobs.map((job: any) => ({
-          ...job,
-          id: job.job_url,
-          status: "recommended",
-          job_url: job.job_url,
-        }));
-        allJobs = [...allJobs, ...recommended];
-        if (recsResponse.value.data.generated_at) {
-          setLastGenerationDate(new Date(recsResponse.value.data.generated_at));
+        if (res.data?.job_applications) {
+            const jobApplications = res.data.job_applications.map((app: any) => ({
+                ...(app.job_details || {}),
+                id: app.job_details?.job_url,
+                status: app.status,
+            }));
+            setJobApplications(jobApplications);
+            const saved = jobApplications.filter((app: { status: string }) => app.status === "saved").length;
+            const applied = jobApplications.filter((app: { status: string }) => app.status === "applied").length;
+            setSavedJobsCount(saved);
+            setAppliedJobsCount(applied);
         }
-      }
-
-      if (appsResponse.status === "fulfilled" && appsResponse.value.data?.job_applications) {
-        const jobApplications = appsResponse.value.data.job_applications.map((app: any) => ({
-          ...(app.job_details || {}),
-          id: app.job_details?.job_url,
-          status: app.status,
-        }));
-        allJobs = [...allJobs, ...jobApplications];
-      }
-
-      // Remove duplicates, preferring non-recommended status
-      const uniqueJobs = Array.from(new Map(allJobs.map(job => [job.id, job])).values());
-      
-      setJobApplications(uniqueJobs);
-
-      const saved = uniqueJobs.filter((app) => app.status === "saved").length;
-      const applied = uniqueJobs.filter((app) => app.status === "applied").length;
-      setSavedJobsCount(saved);
-      setAppliedJobsCount(applied);
-
     } catch (err: unknown) {
-      if (axios.isAxiosError(err) && err.response?.status !== 404) {
-        setError("Could not fetch job data.");
-      }
+        if (axios.isAxiosError(err) && err.response?.status !== 404) {
+            setError("Could not fetch job data.");
+        }
     } finally {
-      setIsLoading(false);
-      setIsFirstLoad(false);
+        setIsLoading(false);
     }
   }, [token, userId]);
+
 
   useEffect(() => {
     fetchAllJobs();
@@ -173,78 +158,20 @@ export default function DashboardClient() {
   }, [userId, token, plan, router]);
 
   useEffect(() => {
-    if (isFirstLoad) return;
-
-    if (!lastGenerationDate) {
-      setIsGenerationAllowed(true);
-      return;
-    }
-
-    const intervalId = setInterval(() => {
-      const now = new Date();
-      const requiredDays = userPlan === "pro" ? 7 : 30;
-      const nextGenerationDate = new Date(lastGenerationDate.getTime());
-      nextGenerationDate.setDate(
-        lastGenerationDate.getDate() + requiredDays
-      );
-
-      const diff = nextGenerationDate.getTime() - now.getTime();
-
-      if (diff <= 0) {
+    if (nextGenerationAllowedAt) {
+      const now = Date.now();
+      if (now < nextGenerationAllowedAt) {
+        setIsGenerationAllowed(false);
+        const nextDate = new Date(nextGenerationAllowedAt);
+        setTimeRemaining(`Next recommendations available on ${nextDate.toLocaleDateString()}.`);
+      } else {
         setIsGenerationAllowed(true);
         setTimeRemaining("");
-        clearInterval(intervalId);
-      } else {
-        setIsGenerationAllowed(false);
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor(
-          (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-        );
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        setTimeRemaining(`${days}d ${hours}h ${minutes}m ${seconds}s`);
       }
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [lastGenerationDate, userPlan, isFirstLoad]);
-
-  useEffect(() => {
-    if (isFirstLoad) return;
-
-    if (!lastGenerationDate) {
-      setIsGenerationAllowed(true);
-      return;
-    }
-
-    const intervalId = setInterval(() => {
-      const now = new Date();
-      const requiredDays = userPlan === "pro" ? 7 : 30;
-      const nextGenerationDate = new Date(lastGenerationDate.getTime());
-      nextGenerationDate.setDate(
-        lastGenerationDate.getDate() + requiredDays
-      );
-
-      const diff = nextGenerationDate.getTime() - now.getTime();
-
-      if (diff <= 0) {
+    } else {
         setIsGenerationAllowed(true);
-        setTimeRemaining("");
-        clearInterval(intervalId);
-      } else {
-        setIsGenerationAllowed(false);
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor(
-          (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-        );
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        setTimeRemaining(`${days}d ${hours}h ${minutes}m ${seconds}s`);
-      }
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [lastGenerationDate, userPlan, isFirstLoad]);
+    }
+  }, [nextGenerationAllowedAt]);
 
   const handleSheetToggle = async () => {
     if (!userId) return;
@@ -302,11 +229,13 @@ export default function DashboardClient() {
         null,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      if (res.data.recommendation_data.generated_at) {
-        setLastGenerationDate(new Date(res.data.recommendation_data.generated_at));
-      }
       if (res.data.sheets_error) {
         toast.error(`Google Sheets Sync Failed: ${res.data.sheets_error}`);
+      }
+      // Refetch user to get new next_generation_allowed_at
+      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/me`, { headers: { Authorization: `Bearer ${token}` } });
+      if (data.next_generation_allowed_at) {
+          setNextGenerationAllowedAt(new Date(data.next_generation_allowed_at).getTime());
       }
       fetchAllJobs(); // Refresh all jobs
     } catch (err: unknown) {
@@ -478,7 +407,7 @@ export default function DashboardClient() {
                     ? "bg-gray-400 cursor-not-allowed text-white"
                     : "bg-green-600 hover:bg-green-700 text-white"
                 }`}
-                disabled={isFirstLoad || isLoading || !isGenerationAllowed}
+                disabled={isLoading || !isGenerationAllowed}
               >
                 Get Personalized Jobs
               </LoadingButton>
@@ -508,34 +437,27 @@ export default function DashboardClient() {
             </div>
           </div>
 
-          <div className="h-24 flex items-start justify-center mx-1">
-            <AnimatePresence mode="wait">
-              {isFirstLoad && !isGenerationAllowed && (
-                <motion.p
-                  key="checking"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.3 }}
-                  className="text-yellow-800 bg-yellow-100 border border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700 p-4 rounded-lg text-center font-semibold text-sm sm:text-base"
+          <div className="flex items-center justify-center my-4 md:my-6">
+            <AnimatePresence>
+              {!isGenerationAllowed && timeRemaining && (
+                <motion.div
+                  key="rate-limit-message"
+                  initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 px-6 py-3 rounded-full shadow-md text-base font-medium"
                 >
-                  Checking your generation status...
-                </motion.p>
-              )}
-
-              {!isFirstLoad && !isGenerationAllowed && timeRemaining && (
-                <motion.p
-                  key="countdown"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.3 }}
-                  className="text-yellow-800 bg-yellow-100 border border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700 p-4 rounded-lg text-center font-semibold text-sm sm:text-base"
-                >
-                  You can generate new recommendations in {timeRemaining}.
-                  {userPlan === "free" &&
-                    ` Upgrade to Pro for more frequent recommendations.`}
-                </motion.p>
+                  <span>{timeRemaining}</span>
+                  {userPlan === 'free' && (
+                    <a
+                      onClick={() => router.push('/upgrade')}
+                      className="ml-4 font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                    >
+                      Upgrade Now
+                    </a>
+                  )}
+                </motion.div>
               )}
             </AnimatePresence>
           </div>
@@ -562,8 +484,7 @@ export default function DashboardClient() {
 
           {!isLoading &&
             !error &&
-            jobApplications.length === 0 &&
-            !isFirstLoad && (
+            jobApplications.length === 0 && (
               <p className="text-center text-gray-600 dark:text-gray-300 text-lg">
                 No recommendations found. Try generating a new list!
               </p>
@@ -596,9 +517,10 @@ export default function DashboardClient() {
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               >
                 {recommendedJobs.map((job) => (
-                  <JobCard 
-                    key={job.id} 
-                    job={job} 
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    userPlan={userPlan}
                     onSave={() => handleCardAction(job, 'saved')}
                     onApply={() => handleCardAction(job, 'applied')}
                     isSaving={cardActionLoading[job.id]}

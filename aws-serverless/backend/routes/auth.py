@@ -68,9 +68,21 @@ def generate_otp(length=6):
 @router.post("/signup-otp")
 async def signup_otp(user: UserSignup):
     await verify_turnstile(user.turnstile_token)
+    
     existing_user = await users_collection.find_one({"email": user.email})
     if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        if existing_user.get("plan_status") == "pending_deletion":
+            deletion_date = existing_user.get("deletion_requested_at")
+            if deletion_date and datetime.utcnow() - deletion_date < timedelta(days=30):
+                raise HTTPException(
+                    status_code=403,
+                    detail="This email address is associated with an account that is pending deletion. Please wait 30 days to create a new account."
+                )
+            else:
+                # If the cooldown has passed, allow re-registration by deleting the old record first
+                await users_collection.delete_one({"email": user.email})
+        else:
+            raise HTTPException(status_code=400, detail="Email already registered")
 
     if not is_password_strong(user.password):
         raise HTTPException(status_code=400, detail="Password does not meet the required criteria.")
@@ -158,6 +170,20 @@ async def login(user: UserLoginWithTurnstile):
     if not db_user or not verify_password(user.password, db_user["password"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
+    if db_user.get("plan_status") == "pending_deletion":
+        deletion_date = db_user.get("deletion_requested_at")
+        if deletion_date and datetime.utcnow() - deletion_date < timedelta(days=30):
+            # Account is pending deletion, give user option to restore
+            token = create_access_token({"email": db_user["email"], "scope": "restore"})
+            return {
+                "account_status": "pending_deletion",
+                "message": "This account is scheduled for deletion. Would you like to restore it?",
+                "recovery_token": token,
+            }
+        else:
+            # Deletion grace period has passed
+            raise HTTPException(status_code=401, detail="This account has been permanently deleted.")
+
     token = create_access_token({"email": db_user["email"]})
     return {
         "access_token": token,
@@ -184,6 +210,23 @@ async def google_login(data: GoogleToken):
         google_id_value = idinfo["sub"]
 
         db_user = await users_collection.find_one({"email": email})
+
+        if db_user and db_user.get("plan_status") == "pending_deletion":
+            deletion_date = db_user.get("deletion_requested_at")
+            if deletion_date and datetime.utcnow() - deletion_date < timedelta(days=30):
+                # Account is pending deletion, give user option to restore
+                token = create_access_token({"email": db_user["email"], "scope": "restore"})
+                return {
+                    "account_status": "pending_deletion",
+                    "message": "This account is scheduled for deletion. Would you like to restore it?",
+                    "recovery_token": token,
+                    "email": email,
+                    "name": name,
+                }
+            else:
+                # Deletion grace period has passed, allow re-registration
+                await users_collection.delete_one({"email": email})
+                db_user = None
 
         if not db_user:
             new_user_data = {

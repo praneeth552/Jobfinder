@@ -42,10 +42,23 @@ class SubscriptionStatus(str, Enum):
     unpaid = "unpaid"
     trialing = "trialing"
 
+class JobApplicationStatus(str, Enum):
+    recommended = "recommended"
+    saved = "saved"
+    applied = "applied"
+
+class RecommendedJob(BaseModel):
+    title: str
+    company: str
+    location: str
+    match_score: Optional[int] = None
+    reason: Optional[str] = None
+    job_url: Optional[str] = None
+    status: Optional[JobApplicationStatus] = None
 
 class JobApplication(BaseModel):
-    job_details: 'RecommendedJob'
-    status: 'JobApplicationStatus'
+    job_details: RecommendedJob
+    status: JobApplicationStatus
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 class User(BaseModel):
@@ -54,9 +67,9 @@ class User(BaseModel):
     password: Optional[str] = None
     is_first_time_user: bool = True
     preferences: Optional[UserPreferences] = None
-    plan_type: PlanType = PlanType.free  # 🔥 default to 'free'
+    plan_type: PlanType = PlanType.free
     razorpay_subscription_id: Optional[str] = None
-    plan_status: Optional[str] = None # e.g., 'active', 'cancelled', 'halted'
+    plan_status: Optional[str] = None
     subscription_status: Optional[SubscriptionStatus] = None
     subscription_valid_until: Optional[datetime] = None
     last_resume_upload: Optional[datetime] = None
@@ -66,6 +79,7 @@ class User(BaseModel):
     spreadsheet_id: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+    deletion_requested_at: Optional[datetime] = None
 
 
 class UserLogin(BaseModel):
@@ -88,24 +102,43 @@ class Job(BaseModel):
     date_scraped: datetime = Field(default_factory=datetime.utcnow)
 
 
-# 🔷 NEW MODELS FOR RECOMMENDATIONS
-
-# --- Models for Job Application Tracking ---
-class JobApplicationStatus(str, Enum):
-    recommended = "recommended"
-    saved = "saved"
-    applied = "applied"
-
-class RecommendedJob(BaseModel):
-    title: str
-    company: str
-    location: str
-    match_score: Optional[int] = None
-    reason: Optional[str] = None
-    job_url: Optional[str] = None
-    status: Optional[JobApplicationStatus] = None
-
 class Recommendation(BaseModel):
     user_id: str
     recommended_jobs: List[RecommendedJob]
     generated_at: datetime = Field(default_factory=datetime.utcnow)
+
+# --- Response Models ---
+
+class UserProfileResponse(BaseModel):
+    id: str = Field(..., alias="_id")
+    name: str
+    email: EmailStr
+    plan_type: PlanType
+    plan_status: Optional[str] = None
+    is_first_time_user: bool
+    sheets_enabled: bool
+    preferences: Optional[UserPreferences] = None
+    created_at: datetime
+    next_generation_allowed_at: Optional[datetime] = None
+    next_resume_upload_allowed_at: Optional[datetime] = None
+
+    class Config:
+        populate_by_name = True
+        from_attributes = True
+
+
+class ResumeDataResponse(BaseModel):
+    skills: Optional[List[str]] = None
+    roles: Optional[List[str]] = None
+    education: Optional[List[str]] = None
+    experience: Optional[List[str]] = None
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+
+class UserDataResponse(BaseModel):
+    user_profile: UserProfileResponse
+    resume_data: Optional[ResumeDataResponse] = None
+
+class DeleteAccountResponse(BaseModel):
+    message: str
