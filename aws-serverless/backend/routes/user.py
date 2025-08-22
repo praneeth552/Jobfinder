@@ -72,27 +72,38 @@ async def get_subscription_details(current_user: dict = Depends(get_current_user
 
 @router.get("/me", response_model=UserProfileResponse, status_code=status.HTTP_200_OK)
 async def get_user_me(current_user: dict = Depends(get_current_user)):
-    user_id_str = str(current_user["_id"])
+    try:
+        user_id_str = str(current_user["_id"])
 
-    # --- Calculate Next Allowed Generation Time ---
-    last_recommendation = await recommendations_collection.find_one(
-        {"user_id": user_id_str}, sort=[("generated_at", -1)]
-    )
-    if last_recommendation and last_recommendation.get("generated_at"):
-        gen_interval = timedelta(days=7) if current_user.get("plan_type") == "pro" else timedelta(days=30)
-        current_user["next_generation_allowed_at"] = last_recommendation["generated_at"] + gen_interval
-    else:
-        current_user["next_generation_allowed_at"] = datetime.utcnow()
+        # --- Set default for sheets_enabled if missing ---
+        if "sheets_enabled" not in current_user:
+            current_user["sheets_enabled"] = False
 
-    # --- Calculate Next Allowed Resume Upload Time ---
-    if current_user.get("last_resume_upload"):
-        upload_interval = timedelta(days=7) if current_user.get("plan_type") == "pro" else timedelta(days=30)
-        current_user["next_resume_upload_allowed_at"] = current_user["last_resume_upload"] + upload_interval
-    else:
-        current_user["next_resume_upload_allowed_at"] = datetime.utcnow()
+        # --- Calculate Next Allowed Generation Time ---
+        last_recommendation = await recommendations_collection.find_one(
+            {"user_id": user_id_str}, sort=[("generated_at", -1)]
+        )
+        if last_recommendation and last_recommendation.get("generated_at"):
+            gen_interval = timedelta(days=7) if current_user.get("plan_type") == "pro" else timedelta(days=30)
+            current_user["next_generation_allowed_at"] = last_recommendation["generated_at"] + gen_interval
+        else:
+            current_user["next_generation_allowed_at"] = datetime.utcnow()
 
-    current_user["_id"] = user_id_str
-    return current_user
+        # --- Calculate Next Allowed Resume Upload Time ---
+        if current_user.get("last_resume_upload"):
+            upload_interval = timedelta(days=7) if current_user.get("plan_type") == "pro" else timedelta(days=30)
+            current_user["next_resume_upload_allowed_at"] = current_user["last_resume_upload"] + upload_interval
+        else:
+            current_user["next_resume_upload_allowed_at"] = datetime.utcnow()
+
+        current_user["_id"] = user_id_str
+        return current_user
+    except Exception as e:
+        print(f"Error in /user/me for user {current_user.get('email')}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"An unexpected error occurred while fetching user data. Please try again later.",
+        )
 
 @router.get("/job_applications", status_code=status.HTTP_200_OK)
 async def get_user_job_applications(current_user: dict = Depends(get_current_user)):

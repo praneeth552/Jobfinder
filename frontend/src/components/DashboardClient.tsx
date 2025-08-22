@@ -100,11 +100,17 @@ export default function DashboardClient() {
         });
 
         if (res.data?.job_applications) {
-            const jobApplications = res.data.job_applications.map((app: any) => ({
-                ...(app.job_details || {}),
-                id: app.job_details?.job_url,
-                status: app.status,
-            }));
+            const jobApplications = res.data.job_applications.map((app: any, index: number) => {
+                const jobDetails = app.job_details || {};
+                // Create a robust ID. The index is always appended to guarantee uniqueness, which is crucial for dnd-kit.
+                const baseId = jobDetails.job_url || `${jobDetails.title}-${jobDetails.company}`;
+                const id = `${baseId}-${index}`;
+                return {
+                    ...jobDetails,
+                    id: id,
+                    status: app.status,
+                };
+            });
             setJobApplications(jobApplications);
             const saved = jobApplications.filter((app: { status: string }) => app.status === "saved").length;
             const applied = jobApplications.filter((app: { status: string }) => app.status === "applied").length;
