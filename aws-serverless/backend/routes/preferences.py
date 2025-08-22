@@ -29,8 +29,8 @@ SKILLS_DB = [
     'docker', 'kubernetes', 'aws', 'azure', 'gcp', 'vercel', 'heroku', 'terraform', 'ansible', 'jenkins', 'github actions', 'ci/cd',
     'git', 'rest api', 'grpc', 'websockets', 'cybersecurity', 'three.js', 'webrtc', 'solidity'
 ]
-EMAIL_REGEX = r"[\w\.-]+@[\w\.-]+\\.\w+"
-PHONE_REGEX = r"(\(?\d{3}\)?[\s\.-]?)?\d{3}[\s\.-]?\d{4}"
+EMAIL_REGEX = r"[\w\.-]+@[\w\.-]+\.\w+"
+PHONE_REGEX = r"\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}"
 EDUCATION_KEYWORDS = ['B.E', 'B.Tech', 'M.Tech', 'M.S', 'B.Sc', 'M.Sc', 'BCA', 'MCA', 'Bachelor', 'Master', 'PhD', 'Degree']
 MONTHS = r'(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|January|February|March|April|May|June|July|August|September|October|November|December)'
 DATE_RANGE_REGEX = r'(' + MONTHS + r'\s+\d{4})\s*-\s*(' + MONTHS + r'\s+\d{4}|Present|Current)'
@@ -47,23 +47,12 @@ def _get_parsing_helpers():
     import spacy
     import nltk
 
-    # --- Download NLTK data to a writable directory in Lambda ---
-    nltk_data_path = "/tmp/nltk_data"
-    if not os.path.exists(nltk_data_path):
-        os.makedirs(nltk_data_path)
-    
-    if nltk_data_path not in nltk.data.path:
-        nltk.data.path.append(nltk_data_path)
-
-    def download_nltk_data_if_needed(model_name, download_path):
-        try:
-            nltk.data.find(f'tokenizers/{model_name}', paths=[download_path])
-        except LookupError:
-            print(f"Downloading NLTK '{model_name}' to {download_path}...")
-            nltk.download(model_name, download_dir=download_path)
-
-    download_nltk_data_if_needed('punkt', nltk_data_path)
-    download_nltk_data_if_needed('stopwords', nltk_data_path)
+    # --- Point NLTK to the bundled data directory ---
+    # The 'nltk_data' directory is at the root of the Lambda package.
+    # From this script's location in 'routes', we go up one level.
+    NLTK_DATA_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'nltk_data'))
+    if NLTK_DATA_PATH not in nltk.data.path:
+        nltk.data.path.append(NLTK_DATA_PATH)
 
     # Load spacy model
     nlp = spacy.load('en_core_web_sm')
@@ -83,39 +72,52 @@ def _get_parsing_helpers():
 
     def parse_experience(text_block):
         experiences = []
+        # Split by newline and filter out empty lines
         lines = [line.strip() for line in text_block.split('\n') if line.strip()]
+        
+        # Regex to identify a potential job title line (often followed by company)
         job_title_regex = r'([A-Z][a-z\s]+ (?:Engineer|Developer|Analyst|Architect|Manager|Lead|Specialist))'
         
         current_exp = {}
         for i, line in enumerate(lines):
+            # Try to find dates
             dates_match = re.search(DATE_RANGE_REGEX, line, re.IGNORECASE)
             if dates_match:
                 if 'dates' not in current_exp:
                     current_exp['dates'] = dates_match.group(0)
 
+            # Try to find a job title
             title_match = re.search(job_title_regex, line, re.IGNORECASE)
             if title_match:
+                # If we find a new title and the current_exp has details, save it
                 if current_exp.get('title') or current_exp.get('company'):
                     if current_exp: experiences.append(current_exp)
-                    current_exp = {}
+                    current_exp = {} # Start a new one
                 current_exp['title'] = title_match.group(1).strip()
+                # Often the company is on the next line or same line
                 if i + 1 < len(lines) and not re.search(job_title_regex, lines[i+1], re.IGNORECASE):
-                     current_exp['company'] = lines[i+1]
+                     current_exp['company'] = lines[i+1] # A simple heuristic
             
+            # Simple description grab
             if current_exp.get('title') and 'description' not in current_exp:
                 current_exp['description'] = line
 
-        if current_exp:
+        if current_exp: # Add the last one
             experiences.append(current_exp)
             
         return experiences
 
+
     def comprehensive_parse_resume(text):
+        # 1. Basic Info
         name = re.search(r'^([A-Za-z\s]+)', text, re.MULTILINE).group(1).strip() if re.search(r'^([A-Za-z\s]+)', text, re.MULTILINE) else None
         email = re.search(EMAIL_REGEX, text).group(0) if re.search(EMAIL_REGEX, text) else None
         phone = re.search(PHONE_REGEX, text).group(0) if re.search(PHONE_REGEX, text) else None
+
+        # 2. Skills
         skills = list(set([skill for skill in SKILLS_DB if re.search(r'\b' + skill + r'\b', text, re.IGNORECASE)]))
 
+        # 3. Section Splitting (Experience & Education)
         experience_text = ""
         education_text = ""
         
@@ -127,13 +129,16 @@ def _get_parsing_helpers():
         if edu_match:
             education_text = edu_match.group(2)
 
+        # 4. Parse Experience Section
         experiences = parse_experience(experience_text)
         
+        # 5. Parse Education Section
         education_details = []
         for line in education_text.split('\n'):
             if any(keyword in line for keyword in EDUCATION_KEYWORDS):
                 education_details.append(line.strip())
 
+        # 6. Get roles from experience titles
         roles = [exp['title'] for exp in experiences if 'title' in exp]
 
         return {
@@ -143,10 +148,11 @@ def _get_parsing_helpers():
             "skills": list(set(skills))[:25],
             "education": list(set(education_details))[:5],
             "roles": list(set(roles))[:5],
-            "experience": experiences[:5]
+            "experience": experiences[:5] # New detailed experience field
         }
 
     return extract_text_from_file, comprehensive_parse_resume, nlp
+
 
 @router.post("/parse-resume")
 async def parse_resume(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):

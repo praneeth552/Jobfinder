@@ -26,7 +26,7 @@ SKILLS_DB = [
     'docker', 'kubernetes', 'aws', 'azure', 'gcp', 'vercel', 'heroku', 'terraform', 'ansible', 'jenkins', 'github actions', 'ci/cd',
     'git', 'rest api', 'grpc', 'websockets', 'cybersecurity', 'three.js', 'webrtc', 'solidity'
 ]
-EMAIL_REGEX = r"[\w\.-]+@[\w\.-]+\\.\w+"
+EMAIL_REGEX = r"[\w\.-]+@[\w\.-]+\.\w+"
 PHONE_REGEX = r"(\(?\d{3}\)?[\s\.-]?)?\d{3}[\s\.-]?\d{4}"
 EDUCATION_KEYWORDS = ['B.E', 'B.Tech', 'M.Tech', 'M.S', 'B.Sc', 'M.Sc', 'BCA', 'MCA', 'Bachelor', 'Master', 'PhD', 'Degree']
 MONTHS = r'(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|January|February|March|April|May|June|July|August|September|October|November|December)'
