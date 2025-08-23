@@ -1,6 +1,6 @@
 version: 1
 applications:
-  - appRoot: frontend   # 👈 tell Amplify your React app lives here
+  - appRoot: frontend   # your Next.js app is inside 'frontend'
     frontend:
       phases:
         preBuild:
@@ -10,10 +10,9 @@ applications:
           commands:
             - npm run build
       artifacts:
-        baseDirectory: build
+        baseDirectory: .next
         files:
           - '**/*'
       cache:
         paths:
           - node_modules/**/*
-    # optional if you want to run backend stuff later
