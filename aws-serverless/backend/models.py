@@ -115,6 +115,8 @@ class UserProfileResponse(BaseModel):
     email: EmailStr
     plan_type: PlanType
     plan_status: Optional[str] = None
+    subscription_status: Optional[SubscriptionStatus] = None
+    subscription_valid_until: Optional[datetime] = None
     is_first_time_user: bool
     sheets_enabled: bool
     preferences: Optional[UserPreferences] = None

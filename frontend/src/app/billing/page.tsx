@@ -13,7 +13,8 @@ type UserInfo = {
   email: string;
   plan_type: string;
   created_at: string;
-  plan_status?: string; // Corrected property name
+  plan_status?: string;
+  subscription_status?: string;
   subscription_valid_until?: string; // Corrected property name
   payment_history?: Array<{
     date: string;
@@ -163,7 +164,7 @@ export default function BillingPage() {
               <p><strong>Plan:</strong> {user.plan_type === "pro" ? "Pro" : "Free"}</p>
               <p><strong>Account Created:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
               {user.plan_type === "pro" ? (
-                user.plan_status === "cancelled" ? (
+                user.subscription_status === "cancelled" ? (
                   <p><strong>Pro Access Expires On:</strong> {user.subscription_valid_until ? new Date(user.subscription_valid_until).toLocaleDateString() : '--'}</p>
                 ) : (
                   <p><strong>Next Billing Date:</strong> {user.subscription_valid_until ? new Date(user.subscription_valid_until).toLocaleDateString() : '--'}</p>

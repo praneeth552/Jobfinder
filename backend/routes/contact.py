@@ -16,41 +16,41 @@ class ContactForm(BaseModel):
     interest: str
     message: str
 
-# def send_to_discord(form_data: ContactForm):
+def send_to_discord(form_data: ContactForm):
 #     """
 #     Sends the contact form data to a Discord webhook.
 #     """
-#     webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
-#     if not webhook_url:
-#         print("Discord webhook URL not found. Skipping Discord notification.")
-#         return
+    webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
+    if not webhook_url:
+        print("Discord webhook URL not found. Skipping Discord notification.")
+        return
 
-#     embed = {
-#         "title": f"New Contact: {form_data.interest}",
-#         "color": 5814783,  # A nice purple color
-#         "fields": [
-#             {"name": "Name", "value": form_data.name, "inline": True},
-#             {"name": "Email", "value": form_data.email, "inline": True},
-#             {"name": "Interest", "value": form_data.interest, "inline": False},
-#             {"name": "Message", "value": form_data.message, "inline": False},
-#         ],
-#         "footer": {"text": "Sent from Job Finder Contact Form"}
-#     }
+    embed = {
+        "title": f"New Contact: {form_data.interest}",
+        "color": 5814783,  # A nice purple color
+        "fields": [
+            {"name": "Name", "value": form_data.name, "inline": True},
+            {"name": "Email", "value": form_data.email, "inline": True},
+            {"name": "Interest", "value": form_data.interest, "inline": False},
+            {"name": "Message", "value": form_data.message, "inline": False},
+        ],
+        "footer": {"text": "Sent from Job Finder Contact Form"}
+    }
 
-#     data = {
-#         "content": "New contact form submission!",
-#         "embeds": [embed]
-#     }
+    data = {
+        "content": "New contact form submission!",
+        "embeds": [embed]
+    }
     
-#     headers = {"Content-Type": "application/json"}
-#     req = request.Request(webhook_url, data=json.dumps(data).encode(), headers=headers)
+    headers = {"Content-Type": "application/json"}
+    req = request.Request(webhook_url, data=json.dumps(data).encode(), headers=headers)
 
-#     try:
-#         with request.urlopen(req) as response:
-#             if response.status not in [200, 204]:
-#                 print(f"Failed to send to Discord: {response.status} {response.reason}")
-#     except Exception as e:
-#         print(f"Error sending to Discord: {e}")
+    try:
+        with request.urlopen(req) as response:
+            if response.status not in [200, 204]:
+                print(f"Failed to send to Discord: {response.status} {response.reason}")
+    except Exception as e:
+        print(f"Error sending to Discord: {e}")
 
 
 @router.post("/api/contact")
