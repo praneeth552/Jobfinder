@@ -410,8 +410,8 @@ export default function DashboardClient() {
                 isLoading={isLoading}
                 className={`submit-button-swipe px-6 py-2.5 rounded-full font-semibold transition duration-300 w-full sm:w-auto ${
                   !isGenerationAllowed
-                    ? "bg-gray-400 cursor-not-allowed text-white"
-                    : "bg-green-600 hover:bg-green-700 text-white"
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
+                    : "bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg"
                 }`}
                 disabled={isLoading || !isGenerationAllowed}
               >

@@ -4,6 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useEffect, useRef } from "react";
 import LoadingButton from "./LoadingButton"; // Import LoadingButton
+import { Bookmark, CheckCheck } from 'lucide-react';
 
 interface JobApplication {
   id: string;
@@ -132,16 +133,18 @@ const JobCard = ({
               <LoadingButton
                 onClick={handleSaveClick}
                 isLoading={isSaving}
-                className="flex-1 px-4 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700 font-semibold"
+                className="flex-1 px-2 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700 font-semibold flex items-center justify-center"
               >
-                Save
+                <Bookmark size={16} className="mr-2"/>
+                Move to Saved
               </LoadingButton>
               <LoadingButton
                 onClick={handleApplyClick}
                 isLoading={isApplying}
-                className="flex-1 px-4 py-2 rounded-md text-white bg-green-600 hover:bg-green-700 font-semibold"
+                className="flex-1 px-2 py-2 rounded-md text-white bg-green-600 hover:bg-green-700 font-semibold flex items-center justify-center"
               >
-                Apply
+                <CheckCheck size={16} className="mr-2"/>
+                Move to Applied
               </LoadingButton>
             </div>
           )}

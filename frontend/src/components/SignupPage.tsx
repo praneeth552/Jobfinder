@@ -149,8 +149,12 @@ export default function SignupPage() {
       toast.success("Google signup successful!");
       setRedirectPath(is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
       setIsSuccess(true);
-    } catch {
-      toast.error("Google signup failed");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err) && err.response?.data?.detail) {
+        toast.error(err.response.data.detail);
+      } else {
+        toast.error("An unexpected error occurred during Google signup.");
+      }
       setLoading(false);
     }
   };

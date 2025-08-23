@@ -59,7 +59,7 @@ const DropZone = ({ savedCount, appliedCount }: { savedCount: number, appliedCou
           isOver={isOverSaved} 
           onClick={() => router.push("/saved")} 
           count={savedCount} 
-          label="Saved" 
+          label="Saved Jobs" 
           icon={<Bookmark size={20} />} 
           colorClass="#3b82f6" // blue-500
           gradientClass="bg-gradient-to-br from-blue-400 to-blue-600"
@@ -69,7 +69,7 @@ const DropZone = ({ savedCount, appliedCount }: { savedCount: number, appliedCou
           isOver={isOverApplied} 
           onClick={() => router.push("/applied")} 
           count={appliedCount} 
-          label="Applied" 
+          label="Applied Jobs" 
           icon={<CheckCheck size={16} />} 
           colorClass="#22c55e" // green-500
           gradientClass="bg-gradient-to-br from-green-400 to-green-600"

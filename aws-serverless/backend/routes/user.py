@@ -129,6 +129,9 @@ async def get_user_data(current_user: dict = Depends(get_current_user)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    if "sheets_enabled" not in user:
+        user["sheets_enabled"] = False
+
     resume_data = await db.resumes.find_one({"user_id": ObjectId(user_id)})
 
     user["_id"] = str(user["_id"])
@@ -156,6 +159,11 @@ async def delete_user_account(current_user: dict = Depends(get_current_user)):
             }
         },
     )
+    
+    # This is a temporary solution. In a real-world scenario, this should be handled
+    # by a scheduled task that runs after the 30-day grace period.
+    deleted_users_collection = db["deleted_users"]
+    await deleted_users_collection.insert_one({"email": user_email, "deleted_at": datetime.utcnow()})
     
     await send_account_deletion_email(user_email, user_name)
     

@@ -69,6 +69,10 @@ def generate_otp(length=6):
 async def signup_otp(user: UserSignup):
     await verify_turnstile(user.turnstile_token)
     
+    deleted_users_collection = db["deleted_users"]
+    if await deleted_users_collection.find_one({"email": user.email}):
+        raise HTTPException(status_code=403, detail="This email address is associated with a deleted account and cannot be used to sign up again.")
+
     existing_user = await users_collection.find_one({"email": user.email})
     if existing_user:
         if existing_user.get("plan_status") == "pending_deletion":

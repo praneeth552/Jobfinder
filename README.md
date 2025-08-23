@@ -74,6 +74,7 @@ You have the right to delete your account and all associated data at any time. H
 3.  **30-Day Grace Period:** Your account will be immediately "soft-deleted." We enter a 30-day grace period during which your data is preserved but not actively used.
 4.  **Undo Option:** If you change your mind during this 30-day period, you can simply log in to your account again. You will be prompted to restore your account, which will immediately cancel the deletion process.
 5.  **Permanent Deletion:** If you do not restore your account within the 30-day grace period, it will be **permanently and irreversibly deleted** from our systems. This includes your profile, preferences, resume data, and all application history.
+6.  **Preventing Re-Registration:** To maintain the integrity of our user base and prevent abuse, email addresses associated with permanently deleted accounts cannot be used to create new accounts.
 
 Our goal is to provide powerful, time-saving features while respecting your privacy and giving you full control over your data.
 

@@ -17,7 +17,7 @@ const LoadingButton = forwardRef<HTMLButtonElement, LoadingButtonProps & React.B
       disabled={isLoading || props.disabled}
       className={`button-loading-container ${props.className || ""} ${isLoading ? "button-loading" : ""}`}
     >
-      <span className="button-text">{children}</span>
+      <span className="button-text flex items-center justify-center">{children}</span>
       {isLoading && <div className="button-loading-spinner"></div>}
     </button>
   );
