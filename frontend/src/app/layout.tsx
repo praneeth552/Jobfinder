@@ -9,7 +9,7 @@ import ThemedLayout from "@/components/ThemedLayout";
 import Script from "next/script";
 
 export const metadata = {
-  metadataBase: new URL("https://tackleit.xyz"),
+  metadataBase: new URL("https://www.tackleit.xyz"),
   title: {
     default: "Tackleit - AI-Powered Job Finder | Find Jobs Faster",
     template: "%s | Tackleit",
@@ -38,11 +38,11 @@ export const metadata = {
     title: "Tackleit – AI-Powered Job Finder | Find Jobs Faster",
     description:
       "Discover jobs faster with Tackleit, your AI-powered automated job finder. Scraping job postings directly from company websites to match your skills perfectly.",
-    url: "https://tackleit.xyz",
+    url: "https://www.tackleit.xyz",
     siteName: "Tackleit",
     images: [
       {
-        url: "https://tackleit.xyz/og-image.png",
+        url: "https://www.tackleit.xyz/og-image.png",
         width: 1200,
         height: 630,
         alt: "Tackleit - AI-Powered Job Finder Platform",
@@ -57,7 +57,7 @@ export const metadata = {
     description:
       "Find your next job effortlessly with Tackleit. AI-powered platform scraping jobs directly from company sites.",
     creator: "@tackleit",
-    images: ["https://tackleit.xyz/og-image.png"],
+    images: ["https://www.tackleit.xyz/og-image.png"],
   },
   robots: {
     index: true,
@@ -96,8 +96,8 @@ const structuredData = {
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": "Tackleit",
-  "url": "https://tackleit.xyz",
-  "logo": "https://tackleit.xyz/apple-touch-icon.png",
+  "url": "https://www.tackleit.xyz",
+  "logo": "https://www.tackleit.xyz/apple-touch-icon.png",
   "contactPoint": {
     "@type": "ContactPoint",
     "contactType": "customer support",
@@ -107,7 +107,7 @@ const structuredData = {
   ],
   "potentialAction": {
     "@type": "SearchAction",
-    "target": "https://tackleit.xyz/search?q={search_term_string}",
+    "target": "https://www.tackleit.xyz/search?q={search_term_string}",
     "query-input": "required name=search_term_string"
   }
 };
@@ -134,7 +134,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         
         {/* Canonical URL */}
-        <link rel="canonical" href="https://tackleit.xyz" />
+        <link rel="canonical" href="https://www.tackleit.xyz" />
       </head>
       <body>
         <GoogleOAuthProvider
