@@ -75,6 +75,30 @@ async def get_user_me(current_user: dict = Depends(get_current_user)):
     try:
         user_id_str = str(current_user["_id"])
 
+        # --- Data Consistency Check for Pro Users ---
+        if current_user.get("plan_type") == "pro" and not current_user.get("subscription_valid_until"):
+            subscription_id = current_user.get("razorpay_subscription_id")
+            if subscription_id:
+                try:
+                    print(f"User {current_user.get('email')} is missing billing date. Fetching from Razorpay.")
+                    subscription = razorpay_client.subscription.fetch(subscription_id)
+                    # Use 'current_end' for the next billing date
+                    next_billing_date = datetime.fromtimestamp(subscription['current_end'])
+                    
+                    # Update the database for future requests
+                    await users_collection.update_one(
+                        {"_id": ObjectId(user_id_str)},
+                        {"$set": {"subscription_valid_until": next_billing_date}}
+                    )
+                    
+                    # Update the object for the current request
+                    current_user["subscription_valid_until"] = next_billing_date
+                    print(f"Successfully updated billing date for {current_user.get('email')}")
+
+                except Exception as e:
+                    print(f"Could not fetch subscription from Razorpay for user {current_user.get('email')}: {e}")
+                    # If Razorpay fetch fails, we can't do much, but the app won't crash.
+
         # --- Set default for sheets_enabled if missing ---
         if "sheets_enabled" not in current_user:
             current_user["sheets_enabled"] = False

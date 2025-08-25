@@ -210,6 +210,7 @@ export default function SigninPage() {
 
                 <GoogleLogin
                   theme="outline"
+                  shape="pill"
                   onSuccess={handleGoogleSignIn}
                   onError={() => toast.error("Google Login Failed")}
                 />

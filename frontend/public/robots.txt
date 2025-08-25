@@ -1,0 +1,18 @@
+# robots.txt
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/static/
+Disallow: /_next/image/
+Disallow: /_next/data/
+Disallow: /dashboard/
+Disallow: /preferences/
+Disallow: /applied/
+Disallow: /saved/
+Disallow: /upgrade/
+Disallow: /billing/
+Disallow: /otp/
+Disallow: /delete/
+
+Sitemap: https://tackleit.xyz/sitemap.xml

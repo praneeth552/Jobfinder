@@ -268,7 +268,7 @@ export default function SignupPage() {
             </div>
 
             <div className="flex justify-center">
-              <GoogleLogin onSuccess={handleGoogleSignup} onError={() => toast.error("Google signup failed")} theme="outline" />
+              <GoogleLogin onSuccess={handleGoogleSignup} onError={() => toast.error("Google signup failed")} theme="outline" shape="pill" />
             </div>
 
             <p className="mt-6 text-black dark:text-white text-center">

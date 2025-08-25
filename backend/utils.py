@@ -6,6 +6,7 @@ import time
 import os
 from dotenv import load_dotenv
 from database import db
+from subscription_manager import check_and_downgrade_user_if_expired
 
 load_dotenv()
 
@@ -25,8 +26,6 @@ def create_access_token(data: dict, expires_delta: int = 3600):
     to_encode = data.copy()
     to_encode.update({"exp": time.time() + expires_delta})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-from database import db
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
@@ -49,6 +48,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     user = await db.users.find_one({"email": email})
     if user is None:
         raise credentials_exception
+
+    # --- Real-time Subscription Status Check ---
+    user = await check_and_downgrade_user_if_expired(user)
+    # -----------------------------------------
 
     if user.get("plan_status") == "pending_deletion":
         raise HTTPException(

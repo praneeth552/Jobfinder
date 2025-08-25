@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from database import db
-from utils import get_current_user
+from utils import get_current_user, is_pro_user # Import is_pro_user
 import razorpay
 import os
 from dotenv import load_dotenv
@@ -29,6 +29,13 @@ async def create_pro_subscription(current_user: dict = Depends(get_current_user)
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
+        )
+
+    # --- Prevent creating a new subscription if one is already active ---
+    if is_pro_user(user):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User already has an active Pro subscription.",
         )
 
     razorpay_customer_id = user.get("razorpay_customer_id")
@@ -85,6 +92,13 @@ async def cancel_subscription(current_user: dict = Depends(get_current_user)):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Razorpay subscription not found for this user.",
+        )
+
+    # --- Prevent cancelling a subscription that is already cancelled ---
+    if user.get("plan_status") == "cancelled":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This subscription has already been cancelled.",
         )
 
     subscription_id = user.get("razorpay_subscription_id")

@@ -7,20 +7,37 @@ import AuthInitializer from "@/components/AuthInitializer";
 import { ThemeProvider } from "@/context/ThemeContext";
 import ThemedLayout from "@/components/ThemedLayout";
 import Script from "next/script";
-import Head from "next/head";
 
 export const metadata = {
   metadataBase: new URL("https://tackleit.xyz"),
   title: {
-    default: "Tackleit",
+    default: "Tackleit - AI-Powered Job Finder | Find Jobs Faster",
     template: "%s | Tackleit",
   },
   description:
-    "Tackleit is your AI-powered automated job finder that scrapes job postings directly from company websites, matches them to your skills, and organizes everything in one place.",
+    "Tackleit is your AI-powered automated job finder that scrapes job postings directly from company websites, matches them to your skills, and organizes everything in one place. Find your dream job faster with intelligent automation.",
+  keywords: [
+    "AI job finder",
+    "automated job search",
+    "job matching",
+    "career opportunities",
+    "job scraping",
+    "employment platform",
+    "job board",
+    "career finder"
+  ],
+  authors: [{ name: "Tackleit Team" }],
+  creator: "Tackleit",
+  publisher: "Tackleit",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   openGraph: {
-    title: "Tackleit – AI-Powered Job Finder",
+    title: "Tackleit – AI-Powered Job Finder | Find Jobs Faster",
     description:
-      "Discover jobs faster with Tackleit, your AI-powered automated job finder. Scraping job postings directly from company websites to match your skills.",
+      "Discover jobs faster with Tackleit, your AI-powered automated job finder. Scraping job postings directly from company websites to match your skills perfectly.",
     url: "https://tackleit.xyz",
     siteName: "Tackleit",
     images: [
@@ -28,7 +45,7 @@ export const metadata = {
         url: "https://tackleit.xyz/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Tackleit Job Finder Preview",
+        alt: "Tackleit - AI-Powered Job Finder Platform",
       },
     ],
     locale: "en_US",
@@ -42,35 +59,83 @@ export const metadata = {
     creator: "@tackleit",
     images: ["https://tackleit.xyz/og-image.png"],
   },
-  icons: {
-    icon: "https://tackleit.xyz/favicon.svg",
-    shortcut: "https://tackleit.xyz/favicon.svg",
-    apple: "https://tackleit.xyz/apple-touch-icon.png",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [
+      { url: "/apple-touch-icon.png" },
+      { url: "/apple-touch-icon-152x152.png", sizes: "152x152", type: "image/png" },
+    ],
+  },
+  manifest: "/site.webmanifest",
 };
 
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
   viewportFit: "cover",
+};
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Tackleit",
+  "url": "https://tackleit.xyz",
+  "logo": "https://tackleit.xyz/apple-touch-icon.png",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "customer support",
+    "email": "saipraneeth2525@gmail.com"
+  },
+  "sameAs": [
+  ],
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://tackleit.xyz/search?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <Head>
-        {/* Explicit meta tags for Google */}
-        <title>Tackleit – AI-Powered Job Finder</title>
-        <meta
-          name="description"
-          content="Tackleit is your AI-powered automated job finder that scrapes job postings directly from company websites, matches them to your skills, and organizes everything in one place."
+      <head>
+        {/* Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData)
+          }}
         />
+        
+        {/* Additional Meta Tags */}
+        <meta name="theme-color" content="#6366f1" />
+        <meta name="msapplication-TileColor" content="#6366f1" />
+        
+        
+        {/* Preconnect for performance */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        
+        {/* Canonical URL */}
         <link rel="canonical" href="https://tackleit.xyz" />
-        <link rel="icon" href="https://tackleit.xyz/favicon.svg" />
-        <link rel="apple-touch-icon" href="https://tackleit.xyz/apple-touch-icon.png" />
-      </Head>
+      </head>
       <body>
         <GoogleOAuthProvider
           clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ""}
@@ -88,7 +153,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </GoogleOAuthProvider>
 
         {/* External script for particles */}
-        <Script src="https://cdn.jsdelivr.net/npm/tsparticles-all@3/tsparticles.all.bundle.min.js" />
+        <Script 
+          src="https://cdn.jsdelivr.net/npm/tsparticles-all@3/tsparticles.all.bundle.min.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
