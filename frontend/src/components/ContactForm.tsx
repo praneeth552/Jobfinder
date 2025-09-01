@@ -93,13 +93,12 @@ const ContactForm = () => {
       setFormData({ name: "", email: "", interest: "Suggest a feature", message: "" });
     } catch (error: unknown) {
       let errorMessage = "An unexpected error occurred.";
-      if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { data?: { detail?: string } } };
-        errorMessage = axiosError.response?.data?.detail || "Something went wrong.";
+      if (axios.isAxiosError(error) && error.response) {
+        errorMessage = error.response.data.detail || "Something went wrong.";
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
-      toast.error(errorMessage);
+      toast.error(errorMessage, { duration: 5000 });
     } finally {
       setIsSubmitting(false);
     }

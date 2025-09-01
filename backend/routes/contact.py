@@ -5,6 +5,8 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr
 from dotenv import load_dotenv
 from email_utils import send_email
+from database import db
+from models import User
 
 load_dotenv()
 
@@ -56,8 +58,17 @@ def send_to_discord(form_data: ContactForm):
 @router.post("/api/contact")
 async def handle_contact_form(form: ContactForm):
     """
-    Handles submission of the contact form and sends a Discord notification and an email.
+    Handles submission of the contact form.
+    Checks if the user is registered. If so, sends a Discord notification and an email.
+    If not, returns an error message.
     """
+    user = await db.users.find_one({"email": form.email})
+    if not user:
+        raise HTTPException(
+            status_code=403,
+            detail="Please try the product before reaching out. We'd love to hear your thoughts after you've had a chance to experience it."
+        )
+
     email_sent = False
     discord_sent = False
 
