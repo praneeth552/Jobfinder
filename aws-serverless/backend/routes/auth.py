@@ -2,7 +2,13 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from models import User, UserLogin, UserGoogle
 from database import db
-from utils import hash_password, verify_password, create_access_token
+from utils import (
+    hash_password, 
+    verify_password, 
+    create_access_token, 
+    SECRET_KEY, 
+    ALGORITHM
+)
 from google.oauth2 import id_token
 from google.auth.transport import requests
 import os
@@ -370,7 +376,8 @@ async def forgot_password(request: Request, data: ForgotPassword):
         token = create_access_token(data={"email": data.email, "scope": "password_reset"}, expires_delta=timedelta(minutes=10))
         await password_reset_tokens_collection.insert_one({"token": token, "email": data.email, "createdAt": datetime.utcnow()})
         
-        reset_link = f"https://tackleit.in/reset-password?token={token}"
+        frontend_url = os.getenv("FRONTEND_URL", "https://tackleit.xyz")
+        reset_link = f"{frontend_url}/reset-password?token={token}"
         email_body = f"""
         <html>
             <body>
@@ -406,12 +413,12 @@ class ResetPassword(BaseModel):
 @limiter.limit("5/minute")
 async def reset_password(request: Request, data: ResetPassword):
     try:
-        # First, check if token was used
-        token_in_db = await password_reset_tokens_collection.find_one_and_delete({"token": data.token})
+        # First, check if the token exists without deleting it
+        token_in_db = await password_reset_tokens_collection.find_one({"token": data.token})
         if not token_in_db:
             raise HTTPException(status_code=400, detail="Password reset link is invalid or has expired.")
 
-        payload = jwt.decode(data.token, os.getenv("SECRET_KEY"), algorithms=[os.getenv("ALGORITHM")])
+        payload = jwt.decode(data.token, SECRET_KEY, algorithms=[ALGORITHM])
         if payload.get("scope") != "password_reset":
             raise HTTPException(status_code=401, detail="Invalid token scope.")
         
@@ -439,9 +446,12 @@ async def reset_password(request: Request, data: ResetPassword):
         if result.matched_count == 0:
             raise HTTPException(status_code=404, detail="User not found.")
 
+        # Now that all checks have passed and the password is updated, delete the token
+        await password_reset_tokens_collection.delete_one({"token": data.token})
+
         return {"message": "Password has been reset successfully."}
 
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=400, detail="Password reset link has expired.")
-    except jwt.InvalidTokenError:
+    except jwt.JWTError:
         raise HTTPException(status_code=400, detail="Invalid token.")
