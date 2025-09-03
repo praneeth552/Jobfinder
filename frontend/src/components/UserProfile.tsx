@@ -27,7 +27,7 @@ const UserProfile = ({
 }: UserProfileProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState<string | null>(null);
-  const { userName } = useAuth();
+  const { userName, userEmail } = useAuth();
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -126,7 +126,7 @@ const UserProfile = ({
               {authType === 'standard' && (
                 <li className="px-2">
                   <button
-                    onClick={() => router.push('/forgot-password')}
+                    onClick={() => router.push(`/forgot-password?email=${userEmail}`)}
                     className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-all duration-300 ease-in-out hover:scale-105 transform-gpu"
                   >
                     <Settings size={16} />

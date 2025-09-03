@@ -164,8 +164,8 @@ export default function BillingPage() {
               <p><strong>Plan:</strong> {user.plan_type === "pro" ? "Pro" : "Free"}</p>
               <p><strong>Account Created:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
               {user.plan_type === "pro" ? (
-                user.subscription_status === "cancelled" ? (
-                  <p><strong>Pro Access Expires On:</strong> {user.subscription_valid_until ? new Date(user.subscription_valid_until).toLocaleDateString() : '--'}</p>
+                user.subscription_status === "cancelled" || user.plan_status === "cancelled" ? (
+                  <p><strong>Pro access ends on:</strong> {user.subscription_valid_until ? new Date(user.subscription_valid_until).toLocaleDateString() : '--'}</p>
                 ) : (
                   <p><strong>Next Billing Date:</strong> {user.subscription_valid_until ? new Date(user.subscription_valid_until).toLocaleDateString() : '--'}</p>
                 )

@@ -9,6 +9,7 @@ interface AuthContextProps {
   token: string | null;
   userId: string | null;
   userName: string | null;
+  userEmail: string | null; // Added userEmail
   planType: "free" | "pro";
   isAuthenticated: boolean;
   setPlanType: (plan: "free" | "pro") => void;
@@ -21,6 +22,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null); // Added userEmail state
   const [planType, setPlanType] = useState<"free" | "pro">("free");
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -41,8 +43,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           headers: { Authorization: `Bearer ${storedToken}` },
         });
         setUserName(res.data.name);
+        setUserEmail(res.data.email); // Set userEmail
       } catch (error) {
-        console.error("Failed to fetch user name", error);
+        console.error("Failed to fetch user data", error);
         // Clear cookies if the token is invalid
         Cookies.remove("token");
         Cookies.remove("user_id");
@@ -50,6 +53,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setToken(null);
         setUserId(null);
         setUserName(null);
+        setUserEmail(null); // Clear userEmail
         setPlanType("free");
       }
     }
@@ -72,7 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ token, userId, userName, planType, isAuthenticated: !!token, setPlanType, fetchUser }}
+      value={{ token, userId, userName, userEmail, planType, isAuthenticated: !!token, setPlanType, fetchUser }}
     >
       {children}
     </AuthContext.Provider>
