@@ -131,6 +131,23 @@ function SigninForm() {
     }
   };
 
+  const handleForgotPasswordClick = async () => {
+    if (!email) {
+      router.push('/forgot-password');
+      return;
+    }
+    try {
+      const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/check-email`, { email });
+      if (data.auth_type === 'google') {
+        toast.error('This account is linked with Google. Please sign in with Google.');
+      } else {
+        router.push(`/forgot-password?email=${email}`);
+      }
+    } catch (error) {
+      router.push(`/forgot-password?email=${email}`);
+    }
+  };
+
   const handleAnimationFinish = () => {
     if (isSuccess) {
       router.replace(redirectPath);
@@ -226,7 +243,7 @@ function SigninForm() {
                   <div className="text-right text-sm">
                     <button 
                       type="button" 
-                      onClick={() => router.push(`/forgot-password?email=${email}`)}
+                      onClick={handleForgotPasswordClick}
                       className="font-semibold text-purple-600 hover:underline"
                     >
                       Forgot Password?

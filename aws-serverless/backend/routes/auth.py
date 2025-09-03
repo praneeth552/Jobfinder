@@ -88,8 +88,8 @@ async def check_email_availability(request: Request, data: EmailCheck):
     existing_user = await users_collection.find_one({"email": data.email})
     if existing_user:
         if existing_user.get("plan_status") == "pending_deletion":
-            return {"available": False, "message": "Email associated with a deleted account."}
-        return {"available": False, "message": "Email already registered."}
+            return {"available": False, "message": "Email associated with a deleted account.", "auth_type": existing_user.get("auth_type")}
+        return {"available": False, "message": "Email already registered.", "auth_type": existing_user.get("auth_type")}
     
     deleted_users_collection = db["deleted_users"]
     if await deleted_users_collection.find_one({"email": data.email}):
@@ -120,6 +120,11 @@ async def signup_otp(request: Request, user: UserSignup):
                 # If the cooldown has passed, allow re-registration by deleting the old record first
                 await users_collection.delete_one({"email": user.email})
         else:
+            if existing_user.get("auth_type") == "google":
+                raise HTTPException(
+                    status_code=400,
+                    detail="This email is registered with a Google account. Please sign in with Google."
+                )
             raise HTTPException(status_code=400, detail="Email already registered")
 
     if not is_password_strong(user.password):
@@ -178,7 +183,7 @@ async def verify_otp(request: Request, data: VerifyOTP):
         "password": hash_password(temp_user["password"]),
         "auth_type": "standard",
         "is_first_time_user": True,
-        "preferences": {},
+        "preferences": {"role": [], "location": [], "tech_stack": []},
         "plan_type": "free",
         "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow()
@@ -294,6 +299,12 @@ async def google_login(data: GoogleToken):
 
         db_user = await users_collection.find_one({"email": email})
 
+        if db_user and db_user.get("auth_type") == "standard":
+            raise HTTPException(
+                status_code=400,
+                detail="This email is registered with a password. Please sign in using the password form."
+            )
+
         if db_user and db_user.get("plan_status") == "pending_deletion":
             deletion_date = db_user.get("deletion_requested_at")
             if deletion_date and datetime.utcnow() - deletion_date < timedelta(days=30):
@@ -319,7 +330,7 @@ async def google_login(data: GoogleToken):
                 "auth_type": "google",
                 "password": None,
                 "is_first_time_user": True,
-                "preferences": {},
+                "preferences": {"role": [], "location": [], "tech_stack": []},
                 "plan_type": "free",
                 "created_at": datetime.utcnow(),
                 "updated_at": datetime.utcnow()

@@ -8,6 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 
 interface UserProfileProps {
   userPlan: 'free' | 'pro';
+  authType: string | null;
   onLogout: () => void;
   onEditPreferences: () => void;
   onBilling: () => void;
@@ -17,6 +18,7 @@ interface UserProfileProps {
 
 const UserProfile = ({
   userPlan,
+  authType,
   onLogout,
   onEditPreferences,
   onBilling,
@@ -121,6 +123,17 @@ const UserProfile = ({
                   <span>Account Settings</span>
                 </button>
               </li>
+              {authType === 'standard' && (
+                <li className="px-2">
+                  <button
+                    onClick={() => router.push('/forgot-password')}
+                    className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-all duration-300 ease-in-out hover:scale-105 transform-gpu"
+                  >
+                    <Settings size={16} />
+                    <span>Change Password</span>
+                  </button>
+                </li>
+              )}
               <li className="px-2">
                 <button
                   onClick={() => handleAction(onEditPreferences, 'preferences')}

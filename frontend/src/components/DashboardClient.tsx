@@ -43,9 +43,10 @@ export default function DashboardClient() {
   const [isSheetsEnabled, setIsSheetsEnabled] = useState(false);
   const [isToggleLoading, setIsToggleLoading] = useState(false);
   const [userPlan, setUserPlan] = useState<"free" | "pro">("free");
+  const [authType, setAuthType] = useState<string | null>(null);
   const [nextGenerationAllowedAt, setNextGenerationAllowedAt] = useState<number | null>(null);
-  const [isGenerationAllowed, setIsGenerationAllowed] = useState(true);
-  const [timeRemaining, setTimeRemaining] = useState<string>("");
+  
+  const [timeRemaining, setTimeRemaining] = useState<React.ReactNode>("");
   const [batSignalTarget, setBatSignalTarget] = useState<any>(null);
   const [savedJobsCount, setSavedJobsCount] = useState(0);
   const [appliedJobsCount, setAppliedJobsCount] = useState(0);
@@ -81,6 +82,7 @@ export default function DashboardClient() {
                     setNextGenerationAllowedAt(new Date(data.next_generation_allowed_at).getTime());
                 }
                 setUserPlan(data.plan_type || "free");
+                setAuthType(data.auth_type || "standard");
             } catch (error) {
                 console.error("Failed to fetch user data", error);
             }
@@ -167,15 +169,14 @@ export default function DashboardClient() {
     if (nextGenerationAllowedAt) {
       const now = Date.now();
       if (now < nextGenerationAllowedAt) {
-        setIsGenerationAllowed(false);
         const nextDate = new Date(nextGenerationAllowedAt);
-        setTimeRemaining(`Next recommendations available on ${nextDate.toLocaleDateString()}.`);
+        const dateOptions: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+        setTimeRemaining(<>Next recommendations available on <strong className="font-semibold">{nextDate.toLocaleDateString('en-US', dateOptions)}</strong></>);
       } else {
-        setIsGenerationAllowed(true);
         setTimeRemaining("");
       }
     } else {
-        setIsGenerationAllowed(true);
+        setTimeRemaining("");
     }
   }, [nextGenerationAllowedAt]);
 
@@ -207,12 +208,13 @@ export default function DashboardClient() {
   };
 
   const handleGenerateRecommendations = async () => {
-    if (!isGenerationAllowed) return;
+    if (!!timeRemaining) return;
     setIsConfirmationModalOpen(true);
   };
 
   const confirmGenerateRecommendations = async () => {
     setIsConfirmationModalOpen(false);
+    setJobApplications([]); // Clear old jobs immediately
 
     if (getJobsButtonRef.current) {
       const rect = getJobsButtonRef.current.getBoundingClientRect();
@@ -409,11 +411,11 @@ export default function DashboardClient() {
                 onClick={handleGenerateRecommendations}
                 isLoading={isLoading}
                 className={`submit-button-swipe px-6 py-2.5 rounded-full font-semibold transition duration-300 w-full sm:w-auto ${
-                  !isGenerationAllowed
+                  !!timeRemaining
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
                     : "bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg"
                 }`}
-                disabled={isLoading || !isGenerationAllowed}
+                disabled={isLoading || !!timeRemaining}
               >
                 Get Personalized Jobs
               </LoadingButton>
@@ -434,6 +436,7 @@ export default function DashboardClient() {
               )}
               <UserProfile
                 userPlan={userPlan}
+                authType={authType}
                 onLogout={handleLogout}
                 onEditPreferences={handleEditPreferences}
                 onBilling={handleBilling}
@@ -445,7 +448,7 @@ export default function DashboardClient() {
 
           <div className="flex items-center justify-center my-4 md:my-6">
             <AnimatePresence>
-              {!isGenerationAllowed && timeRemaining && (
+              {timeRemaining && (
                 <motion.div
                   key="rate-limit-message"
                   initial={{ opacity: 0, y: -20, scale: 0.95 }}
@@ -455,14 +458,6 @@ export default function DashboardClient() {
                   className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 px-6 py-3 rounded-full shadow-md text-base font-medium"
                 >
                   <span>{timeRemaining}</span>
-                  {userPlan === 'free' && (
-                    <a
-                      onClick={() => router.push('/upgrade')}
-                      className="ml-4 font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
-                    >
-                      Upgrade Now
-                    </a>
-                  )}
                 </motion.div>
               )}
             </AnimatePresence>

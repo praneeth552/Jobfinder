@@ -32,7 +32,15 @@ const SALARY_RANGES = ["0-5 LPA", "5-10 LPA", "10-20 LPA", "20-30 LPA", "30-50 L
 const COMPANY_SIZES = ["Startup (1-50)", "Mid-Size (51-500)", "Large (500+)"];
 const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship"];
 const WORK_ARRANGEMENTS = ["On-site", "Hybrid", "Remote"];
-const UNIQUE_TECH_SKILLS = [".NET", "Angular", "AWS", "Azure", "Django", "Docker", "FastAPI", "Flask", "Go", "GraphQL", "Java", "JavaScript", "Kubernetes", "MongoDB", "MySQL", "Next.js", "Node.js", "Python", "ReactJS", "Redis", "Rust", "Spring Boot", "SQL", "TypeScript", "Vue.js"];
+const WebFrontend = ["HTML5", "CSS3", "JavaScript", "TypeScript", "React", "Angular", "Vue.js", "Next.js", "Svelte", "jQuery", "Bootstrap", "Tailwind CSS", "Sass", "Less", "Redux", "MobX", "GraphQL", "Apollo Client", "Webpack", "Vite", "Babel"];
+const WebBackend = ["Node.js", "Express.js", "Python", "Django", "Flask", "FastAPI", "Java", "Spring Boot", "C#", ".NET", "Ruby", "Ruby on Rails", "PHP", "Laravel", "Go", "Rust", "Elixir", "Phoenix"];
+const Databases = ["MySQL", "PostgreSQL", "Microsoft SQL Server", "SQLite", "MongoDB", "Redis", "Cassandra", "MariaDB", "Firebase", "Supabase", "Prisma", "SQLAlchemy", "Oracle"];
+const Mobile = ["React Native", "Flutter", "Swift", "SwiftUI", "Kotlin", "Jetpack Compose", "Objective-C", "Java (Android)"];
+const DevOpsCloud = ["AWS", "Azure", "Google Cloud (GCP)", "Docker", "Kubernetes", "Terraform", "Ansible", "Jenkins", "GitHub Actions", "CircleCI", "GitLab CI", "Prometheus", "Grafana", "Datadog", "Splunk", "Nginx", "Apache"];
+const DataScienceAI = ["Python", "R", "SQL", "Pandas", "NumPy", "SciPy", "Scikit-learn", "TensorFlow", "PyTorch", "Keras", "Jupyter Notebook", "Apache Spark", "Hadoop", "Tableau", "Power BI", "LangChain", "LLMs"];
+const GeneralTools = ["Git", "Linux", "Bash", "PowerShell", "Jira", "Confluence", "Figma", "Sketch", "Adobe XD"];
+const Testing = ["Jest", "Mocha", "Chai", "Cypress", "Selenium", "Playwright", "JUnit", "PyTest"];
+const UNIQUE_TECH_SKILLS = [...new Set([...WebFrontend, ...WebBackend, ...Databases, ...Mobile, ...DevOpsCloud, ...DataScienceAI, ...GeneralTools, ...Testing])].sort();
 
 // --- Type Definitions ---
 interface WorkExperience { title: string; company: string; dates: string; description: string; }
@@ -67,7 +75,17 @@ const SelectionPill = ({ label, isSelected, onClick }: { label: string, isSelect
 
 const TechStackSelector = ({ selected, onChange }: { selected: string[], onChange: (selected: string[]) => void }) => {
   const [query, setQuery] = useState("");
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter' && query.trim() !== '' && !selected.includes(query.trim())) {
+      event.preventDefault();
+      onChange([...selected, query.trim()]);
+      setQuery('');
+    }
+  };
+
   const filteredSkills = query === "" ? UNIQUE_TECH_SKILLS : UNIQUE_TECH_SKILLS.filter(s => s.toLowerCase().includes(query.toLowerCase()));
+  const canCreate = query.trim() !== '' && !filteredSkills.some(s => s.toLowerCase() === query.trim().toLowerCase());
 
   return (
     <Combobox value={selected} onChange={onChange} multiple>
@@ -76,7 +94,8 @@ const TechStackSelector = ({ selected, onChange }: { selected: string[], onChang
           <Combobox.Input
             className="w-full border-none py-3 pl-4 pr-10 text-sm bg-transparent focus:ring-2 focus:ring-[--primary]"
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search skills (e.g., React, Python)..."
+            onKeyDown={handleKeyDown}
+            placeholder="Search or add skills (e.g., React, Python)..."
           />
           <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
             <ChevronsUpDown className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -94,11 +113,23 @@ const TechStackSelector = ({ selected, onChange }: { selected: string[], onChang
                 )}
               </Combobox.Option>
             ))}
+            {canCreate && (
+              <Combobox.Option
+                value={query.trim()}
+                className={({ active }) => `relative cursor-default select-none py-2 pl-10 pr-4 ${active ? "bg-[--primary] text-white" : ""}`}>
+                Create "{query.trim()}"
+              </Combobox.Option>
+            )}
           </Combobox.Options>
         </Transition>
         <div className="flex flex-wrap gap-2 mt-2 min-h-[2.5rem]">
           {selected.map(skill => (
-            <span key={skill} className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-full">{skill}</span>
+            <span key={skill} className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-x-2">
+              {skill}
+              <button type="button" onClick={() => onChange(selected.filter(s => s !== skill))} className="text-indigo-600 hover:text-indigo-800">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+              </button>
+            </span>
           ))}
         </div>
       </div>
@@ -124,9 +155,10 @@ export default function PreferencesClient() {
   const [isEditing, setIsEditing] = useState(false);
   const [lastResumeUploadDate, setLastResumeUploadDate] = useState<number | null>(null);
   const [nextResumeUploadAllowedAt, setNextResumeUploadAllowedAt] = useState<number | null>(null);
-  const [timeRemainingForResumeUpload, setTimeRemainingForResumeUpload] = useState("");
+  const [timeRemainingForResumeUpload, setTimeRemainingForResumeUpload] = useState<React.ReactNode>("");
   const [isResumeUploadAllowed, setIsResumeUploadAllowed] = useState(true);
   const [userPlan, setUserPlan] = useState("free");
+  const [customRole, setCustomRole] = useState("");
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -141,7 +173,15 @@ export default function PreferencesClient() {
             if (Date.now() < nextUploadTimestamp) {
               setIsResumeUploadAllowed(false);
               const nextDate = new Date(nextUploadTimestamp);
-              setTimeRemainingForResumeUpload(`Next resume upload available on ${nextDate.toLocaleDateString()}.`);
+              const dateOptions: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+              setTimeRemainingForResumeUpload(
+                <>
+                  Next resume upload available on{" "}
+                  <strong className="font-semibold">
+                    {nextDate.toLocaleDateString("en-US", dateOptions)}
+                  </strong>.
+                </>
+              );
             } else {
               setIsResumeUploadAllowed(true);
               setTimeRemainingForResumeUpload("");
@@ -375,7 +415,42 @@ export default function PreferencesClient() {
             variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
 
             <PreferenceCard title="What roles are you looking for?" description="Select up to 3 roles that you're most interested in.">
-              {ROLES.map(r => <SelectionPill key={r} label={r} isSelected={preferences.role.includes(r)} onClick={() => handleMultiSelect('role', r, 3)} />)}
+              <div className="flex flex-wrap gap-2">
+                {ROLES.map(r => <SelectionPill key={r} label={r} isSelected={preferences.role.includes(r)} onClick={() => handleMultiSelect('role', r, 3)} />)}
+                {preferences.role.filter(r => !ROLES.includes(r)).map(r => (
+                    <SelectionPill key={r} label={r} isSelected={true} onClick={() => handleMultiSelect('role', r, 3)} />
+                ))}
+              </div>
+              <div className="w-full mt-4 flex gap-2">
+                  <input
+                    type="text"
+                    value={customRole}
+                    onChange={(e) => setCustomRole(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (customRole && !preferences.role.includes(customRole)) {
+                          handleMultiSelect('role', customRole, 3);
+                          setCustomRole("");
+                        }
+                      }
+                    }}
+                    placeholder="Add a custom role"
+                    className="px-4 py-2.5 rounded-xl border border-white/30 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 flex-grow"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (customRole && !preferences.role.includes(customRole)) {
+                        handleMultiSelect('role', customRole, 3);
+                        setCustomRole("");
+                      }
+                    }}
+                    className="submit-button-swipe bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full"
+                  >
+                    Add
+                  </button>
+              </div>
             </PreferenceCard>
 
             <PreferenceCard title="Where do you want to work?" description="Select up to 3 preferred locations.">

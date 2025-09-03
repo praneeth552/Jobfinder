@@ -2,6 +2,7 @@ from database import db
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
+from google.auth.exceptions import RefreshError
 import json
 from bson import ObjectId
 import os
@@ -25,11 +26,25 @@ async def get_google_service(user_id, service_name, version):
     creds = Credentials.from_authorized_user_info(json.loads(user["google_tokens"]), SCOPES)
 
     if creds.expired and creds.refresh_token:
-        await asyncio.to_thread(creds.refresh, Request())
-        await db.users.update_one(
-            {"_id": ObjectId(user_id)},
-            {"$set": {"google_tokens": creds.to_json()}}
-        )
+        try:
+            await asyncio.to_thread(creds.refresh, Request())
+            await db.users.update_one(
+                {"_id": ObjectId(user_id)},
+                {"$set": {"google_tokens": creds.to_json()}}
+            )
+        except RefreshError as e:
+            print(f"--- Google Token Refresh Error for user {user_id}: {e} ---")
+            # Token is expired or revoked, reset the user's sheet integration
+            await db.users.update_one(
+                {"_id": ObjectId(user_id)},
+                {"$set": {
+                    "google_tokens": None,
+                    "sheets_enabled": False,
+                    "spreadsheet_id": None
+                }}
+            )
+            print(f"--- Reset Google Sheets integration for user {user_id} ---")
+            return None
 
     return build(service_name, version, credentials=creds)
 

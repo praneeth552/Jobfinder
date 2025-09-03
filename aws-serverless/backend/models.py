@@ -119,6 +119,7 @@ class UserProfileResponse(BaseModel):
     subscription_valid_until: Optional[datetime] = None
     is_first_time_user: bool
     sheets_enabled: bool
+    auth_type: Optional[str] = None
     preferences: Optional[UserPreferences] = None
     created_at: datetime
     next_generation_allowed_at: Optional[datetime] = None

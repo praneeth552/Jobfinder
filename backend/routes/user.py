@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from database import db
-from utils import get_current_user, create_access_token
+from utils import get_current_user, create_access_token, is_pro_user
 from email_utils import send_pro_welcome_email, send_account_deletion_email
 from models import UserDataResponse, UserProfileResponse, DeleteAccountResponse, ResumeDataResponse
 from bson import ObjectId
@@ -75,6 +75,17 @@ async def get_user_me(current_user: dict = Depends(get_current_user)):
     try:
         user_id_str = str(current_user["_id"])
 
+        # --- Defensive check for user preferences ---
+        if "preferences" not in current_user or not current_user.get("preferences"):
+            current_user["preferences"] = {"role": [], "location": [], "tech_stack": []}
+        else:
+            if "role" not in current_user["preferences"]:
+                current_user["preferences"]["role"] = []
+            if "location" not in current_user["preferences"]:
+                current_user["preferences"]["location"] = []
+            if "tech_stack" not in current_user["preferences"]:
+                current_user["preferences"]["tech_stack"] = []
+
         # --- Data Consistency Check for Pro Users ---
         if current_user.get("plan_type") == "pro" and not current_user.get("subscription_valid_until"):
             subscription_id = current_user.get("razorpay_subscription_id")
@@ -103,19 +114,22 @@ async def get_user_me(current_user: dict = Depends(get_current_user)):
         if "sheets_enabled" not in current_user:
             current_user["sheets_enabled"] = False
 
+        if "auth_type" not in current_user:
+            current_user["auth_type"] = "standard" # Fallback for older users
+
         # --- Calculate Next Allowed Generation Time ---
         last_recommendation = await recommendations_collection.find_one(
             {"user_id": user_id_str}, sort=[("generated_at", -1)]
         )
         if last_recommendation and last_recommendation.get("generated_at"):
-            gen_interval = timedelta(days=7) if current_user.get("plan_type") == "pro" else timedelta(days=30)
+            gen_interval = timedelta(days=7) if is_pro_user(current_user) else timedelta(days=30)
             current_user["next_generation_allowed_at"] = last_recommendation["generated_at"] + gen_interval
         else:
             current_user["next_generation_allowed_at"] = datetime.utcnow()
 
         # --- Calculate Next Allowed Resume Upload Time ---
         if current_user.get("last_resume_upload"):
-            upload_interval = timedelta(days=7) if current_user.get("plan_type") == "pro" else timedelta(days=30)
+            upload_interval = timedelta(days=7) if is_pro_user(current_user) else timedelta(days=30)
             current_user["next_resume_upload_allowed_at"] = current_user["last_resume_upload"] + upload_interval
         else:
             current_user["next_resume_upload_allowed_at"] = datetime.utcnow()
