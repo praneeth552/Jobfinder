@@ -1,7 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
@@ -16,8 +16,18 @@ import SimpleNavbar from '@/components/SimpleNavbar';
 import ConfirmationModal from '@/components/ConfirmationModal';
 
 export default function SigninPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SigninForm />
+    </Suspense>
+  )
+}
+
+function SigninForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { fetchUser } = useAuth();
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [redirectPath, setRedirectPath] = useState('/dashboard');
@@ -26,6 +36,13 @@ export default function SigninPage() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [recoveryToken, setRecoveryToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const emailFromQuery = searchParams.get('email');
+    if (emailFromQuery) {
+      setEmail(emailFromQuery);
+    }
+  }, [searchParams]);
 
   const handleSuccessfulLogin = async (data: any) => {
     localStorage.setItem("token", data.access_token);
@@ -157,17 +174,35 @@ export default function SigninPage() {
                 <h2 className="text-3xl font-bold mb-6 text-black dark:text-white text-center">
                   Sign in to your account
                 </h2>
+
+                <div className="mb-4">
+                  <GoogleLogin
+                    theme="outline"
+                    shape="pill"
+                    onSuccess={handleGoogleSignIn}
+                    onError={() => toast.error("Google Login Failed")}
+                  />
+                </div>
+
+                <div className="my-4 text-black dark:text-white text-sm flex items-center w-full">
+                  <div className="flex-grow border-t border-white/30 dark:border-gray-700" />
+                  <span className="px-2">OR</span>
+                  <div className="flex-grow border-t border-white/30 dark:border-gray-700" />
+                </div>
+
                 <form
                   className="flex flex-col gap-4 w-full"
                   onSubmit={(e) => {
                     e.preventDefault();
-                    handleSignIn(e.currentTarget.email.value, e.currentTarget.password.value);
+                    handleSignIn(email, e.currentTarget.password.value);
                   }}
                 >
                   <input
                     name="email"
                     type="email"
                     placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="px-4 py-2.5 rounded-xl border border-white/30 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     required
                   />
@@ -188,6 +223,16 @@ export default function SigninPage() {
                     </button>
                   </div>
 
+                  <div className="text-right text-sm">
+                    <button 
+                      type="button" 
+                      onClick={() => router.push(`/forgot-password?email=${email}`)}
+                      className="font-semibold text-purple-600 hover:underline"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
+
                   <div className="rounded-xl overflow-hidden">
                     <TurnstileWidget onVerify={setTurnstileToken} />
                   </div>
@@ -201,19 +246,6 @@ export default function SigninPage() {
                     Sign in
                   </LoadingButton>
                 </form>
-
-                <div className="my-4 text-black dark:text-white text-sm flex items-center w-full">
-                  <div className="flex-grow border-t border-white/30 dark:border-gray-700" />
-                  <span className="px-2">OR</span>
-                  <div className="flex-grow border-t border-white/30 dark:border-gray-700" />
-                </div>
-
-                <GoogleLogin
-                  theme="outline"
-                  shape="pill"
-                  onSuccess={handleGoogleSignIn}
-                  onError={() => toast.error("Google Login Failed")}
-                />
 
                 <p className="mt-6 text-black dark:text-white">
                   Don&apos;t have an account?{" "}

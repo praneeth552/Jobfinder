@@ -1,4 +1,5 @@
 fastapi
+slowapi
 pydantic[email]
 python-dotenv
 motor

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
@@ -50,6 +50,7 @@ export default function SignupPage() {
     password: "",
     confirmPassword: "",
   });
+  const [errors, setErrors] = useState({ name: '', email: '' });
 
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -66,6 +67,67 @@ export default function SignupPage() {
     specialChar: false,
   });
 
+  const disposableEmailDomains = [
+    '10minutemail.com', 'temp-mail.org', 'guerrillamail.com', 'mailinator.com', 
+    'getnada.com', 'throwawaymail.com', 'yopmail.com', 'maildrop.cc'
+  ];
+
+  const [isTyping, setIsTyping] = useState(false);
+
+  useEffect(() => {
+    const handler = setTimeout(async () => {
+      if (form.email && !errors.email && isTyping) {
+        try {
+          const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/check-email`, { email: form.email });
+          if (!res.data.available) {
+            if (res.data.message === "Email already registered.") {
+              setErrors(prev => ({ ...prev, email: "EMAIL_TAKEN" }));
+            } else {
+              setErrors(prev => ({ ...prev, email: res.data.message }));
+            }
+          }
+        } catch (error) {
+          // Silently fail or handle specific errors if needed
+          console.error("Email check failed:", error);
+        }
+      }
+      setIsTyping(false);
+    }, 500); // 500ms debounce delay
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [form.email, errors.email, isTyping]);
+
+  const validateField = (name: string, value: string) => {
+    let error = '';
+    if (name === 'name') {
+      const nameRegex = /^[a-zA-Z0-9\\s.'\/()\\-_,]{3,50}$/;
+      if (!value) {
+        error = 'Name is required.';
+      } else if (value.length < 3 || value.length > 50) {
+        error = 'Name must be between 3 and 50 characters.';
+      } else if (!nameRegex.test(value)) {
+        error = 'Name contains invalid characters.';
+      } else if (/[^a-zA-Z0-9.\s]$/.test(value)) {
+        error = 'Name cannot end with most special characters.';
+      }
+    } else if (name === 'email') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!value) {
+        error = 'Email is required.';
+      } else if (!emailRegex.test(value)) {
+        error = 'Invalid email format.';
+      } else {
+        const domain = value.split('@')[1];
+        if (disposableEmailDomains.includes(domain)) {
+          error = 'Disposable email addresses are not allowed.';
+        }
+      }
+    }
+    setErrors(prev => ({ ...prev, [name]: error }));
+  };
+
   const validatePassword = (password: string) =>
     setPasswordCriteria({
       minLength: password.length >= 8,
@@ -78,7 +140,17 @@ export default function SignupPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
-    if (name === "password") validatePassword(value);
+
+    if (name === "password") {
+      validatePassword(value);
+    } else if (name === 'name') {
+      validateField(name, value);
+    } else if (name === 'email') {
+      // Clear previous email error and start typing
+      setErrors(prev => ({...prev, email: ''}))
+      setIsTyping(true);
+      validateField(name, value);
+    }
   };
 
   const allCriteriaMet = Object.values(passwordCriteria).every(Boolean);
@@ -86,6 +158,16 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Perform final validation on submit
+    validateField('name', form.name);
+    validateField('email', form.email);
+
+    if (errors.name || errors.email || !form.name || !form.email) {
+        toast.error("Please fix the errors before submitting.");
+        return;
+    }
+
     setLoading(true);
 
     if (!turnstileToken) {
@@ -172,6 +254,16 @@ export default function SignupPage() {
           <div className="bg-white/10 dark:bg-black/20 backdrop-blur-xl p-6 sm:p-8 rounded-2xl flex flex-col items-center shadow-lg border border-white/20 dark:border-gray-700">
             <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-black dark:text-white text-center">Create your account</h2>
 
+            <div className="flex justify-center w-full mb-4">
+              <GoogleLogin onSuccess={handleGoogleSignup} onError={() => toast.error("Google signup failed")} theme="outline" shape="pill" />
+            </div>
+
+            <div className="my-3 text-black dark:text-white text-sm flex items-center w-full">
+              <div className="flex-grow border-t border-white/30 dark:border-gray-700"></div>
+              <span className="px-2">OR</span>
+              <div className="flex-grow border-t border-white/30 dark:border-gray-700"></div>
+            </div>
+
             <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit}>
               <input
                 type="text"
@@ -179,18 +271,39 @@ export default function SignupPage() {
                 placeholder="Name"
                 value={form.name}
                 onChange={handleChange}
-                className="px-4 py-2.5 rounded-xl border border-white/30 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                onBlur={() => validateField('name', form.name)}
+                className={`px-4 py-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 ${errors.name ? 'border-red-500 focus:ring-red-500' : 'border-white/30 dark:border-gray-700 focus:ring-purple-500'}`}
                 required
               />
+              {errors.name && <p className="text-red-500 text-xs px-2">{errors.name}</p>}
               <input
                 type="email"
                 name="email"
                 placeholder="Email"
                 value={form.email}
                 onChange={handleChange}
-                className="px-4 py-2.5 rounded-xl border border-white/30 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                onBlur={() => validateField('email', form.email)}
+                className={`px-4 py-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-white/30 dark:border-gray-700 focus:ring-purple-500'}`}
                 required
               />
+              {errors.email && (
+                <div className="text-red-500 text-xs px-2">
+                  {errors.email === "EMAIL_TAKEN" ? (
+                    <span>
+                      Email already registered.{" "}
+                      <button 
+                        type="button"
+                        onClick={() => router.push(`/signin?email=${encodeURIComponent(form.email)}`)}
+                        className="font-semibold text-purple-600 hover:underline"
+                      >
+                        Sign in instead?
+                      </button>
+                    </span>
+                  ) : (
+                    errors.email
+                  )}
+                </div>
+              )}
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -260,16 +373,6 @@ export default function SignupPage() {
                     Sign up
                   </LoadingButton>
             </form>
-
-            <div className="my-3 text-black dark:text-white text-sm flex items-center w-full">
-              <div className="flex-grow border-t border-white/30 dark:border-gray-700"></div>
-              <span className="px-2">OR</span>
-              <div className="flex-grow border-t border-white/30 dark:border-gray-700"></div>
-            </div>
-
-            <div className="flex justify-center">
-              <GoogleLogin onSuccess={handleGoogleSignup} onError={() => toast.error("Google signup failed")} theme="outline" shape="pill" />
-            </div>
 
             <p className="mt-6 text-black dark:text-white text-center">
               Already have an account?{" "}

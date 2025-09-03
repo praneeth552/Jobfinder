@@ -13,6 +13,8 @@ const OtpClient = () => {
     const [otp, setOtp] = useState("");
     const [loading, setLoading] = useState(false);
     const [verifying, setVerifying] = useState(true);
+    const [resendCooldown, setResendCooldown] = useState(0);
+    const [resendLoading, setResendLoading] = useState(false);
 
     useEffect(() => {
         const pendingEmail = sessionStorage.getItem('otp_verification_pending');
@@ -24,6 +26,33 @@ const OtpClient = () => {
             router.replace('/?signup=true');
         }
     }, [router]);
+
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (resendCooldown > 0) {
+            timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+        }
+        return () => clearTimeout(timer);
+    }, [resendCooldown]);
+
+    const handleResendOtp = async () => {
+        if (resendCooldown > 0 || !email) return;
+        setResendLoading(true);
+        try {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/resend-otp`, { email });
+            toast.success(response.data.message || "A new OTP has been sent.");
+            setResendCooldown(60); // Start 60-second cooldown
+        } catch (error: unknown) {
+            let errorMessage = "An unexpected error occurred.";
+            if (axios.isAxiosError(error)) {
+                errorMessage = error.response?.data?.detail || "Failed to resend OTP.";
+            }
+            toast.error(errorMessage);
+        }
+        finally {
+            setResendLoading(false);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -86,6 +115,16 @@ const OtpClient = () => {
                         </LoadingButton>
                     </div>
                 </form>
+                <div className="text-center mt-4">
+                    <LoadingButton
+                        onClick={handleResendOtp}
+                        isLoading={resendLoading}
+                        disabled={resendCooldown > 0 || resendLoading}
+                        className="text-sm text-[--primary] hover:underline disabled:text-gray-500 disabled:cursor-not-allowed"
+                    >
+                        {resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : "Resend OTP"}
+                    </LoadingButton>
+                </div>
             </div>
         </main>
         </>
