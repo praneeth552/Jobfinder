@@ -19,20 +19,20 @@ class UserPreferences(BaseModel):
     work_arrangement: Optional[List[str]] = None
 
     @model_validator(mode="after")
-    def validate_max_lengths(cls, values):
-        if len(values.role) > 3:
+    def validate_max_lengths(self):
+        if len(self.role) > 3:
             raise ValueError("You can select up to 3 roles only.")
-        if len(values.location) > 3:
+        if len(self.location) > 3:
             raise ValueError("You can select up to 3 locations only.")
-        if len(values.tech_stack) > 25:
+        if len(self.tech_stack) > 25:
             raise ValueError("You can select up to 25 tech stack items only.")
-        if values.company_size and len(values.company_size) > 2:
+        if self.company_size and len(self.company_size) > 2:
             raise ValueError("You can select up to 2 company sizes only.")
-        if values.job_type and len(values.job_type) > 2:
+        if self.job_type and len(self.job_type) > 2:
             raise ValueError("You can select up to 2 job types only.")
-        if values.work_arrangement and len(values.work_arrangement) > 2:
+        if self.work_arrangement and len(self.work_arrangement) > 2:
             raise ValueError("You can select up to 2 work arrangements only.")
-        return values
+        return self
 
 
 class SubscriptionStatus(str, Enum):
