@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from database import db
-from utils import get_current_user, create_access_token, is_pro_user
+from dependencies import get_current_user
+from utils import is_pro_user
 from email_utils import send_pro_welcome_email, send_account_deletion_email
 from models import UserDataResponse, UserProfileResponse, DeleteAccountResponse, ResumeDataResponse
 from bson import ObjectId
@@ -208,30 +209,113 @@ async def delete_user_account(current_user: dict = Depends(get_current_user)):
     return {"message": "Your account has been scheduled for deletion."}
 
 @router.post("/me/restore", status_code=status.HTTP_200_OK)
+
 async def restore_user_account(current_user: dict = Depends(get_current_user)):
+
     user_id = current_user.get("_id")
+
     
+
     await users_collection.update_one(
+
         {"_id": ObjectId(user_id)},
+
         {
+
             "$set": {
+
                 "plan_status": "active",
+
             },
+
             "$unset": {
+
                 "deletion_requested_at": ""
+
             }
+
         },
+
     )
+
     
+
     db_user = await users_collection.find_one({"_id": ObjectId(user_id)})
 
+
+
     token = create_access_token({"email": db_user["email"]})
+
     
+
     return {
+
         "message": "Your account has been successfully restored.",
+
         "access_token": token,
+
         "token_type": "bearer",
+
         "is_first_time_user": db_user.get("is_first_time_user", False),
+
         "user_id": str(db_user["_id"]),
+
         "plan_type": db_user.get("plan_type", "free")
+
     }
+
+
+
+@router.post("/redeem-reward", status_code=status.HTTP_200_OK)
+
+async def redeem_reward(current_user: dict = Depends(get_current_user)):
+
+    user_id = current_user.get("_id")
+
+    user = await users_collection.find_one({"_id": ObjectId(user_id)})
+
+
+
+    if not user:
+
+        raise HTTPException(status_code=404, detail="User not found")
+
+
+
+    if user.get("loyalty_coins", 0) < 100:
+
+        raise HTTPException(status_code=400, detail="Not enough TackleTokens to redeem a reward.")
+
+
+
+    # Decrement coins and extend subscription in one operation
+
+    current_expiry = user.get("subscription_valid_until")
+
+    if current_expiry and current_expiry > datetime.utcnow():
+
+        new_expiry = current_expiry + timedelta(days=31)
+
+    else:
+
+        new_expiry = datetime.utcnow() + timedelta(days=31)
+
+
+
+    await users_collection.update_one(
+
+        {"_id": ObjectId(user_id)},
+
+        {
+
+            "$inc": {"loyalty_coins": -100},
+
+            "$set": {"subscription_valid_until": new_expiry}
+
+        }
+
+    )
+
+
+
+    return {"message": "Reward redeemed successfully! Your Pro plan has been extended by one month."}

@@ -46,6 +46,14 @@ export default function HomeClient() {
   }, []);
 
   useEffect(() => {
+    if (!loadingFinished) {
+      document.body.classList.add('loading-screen-active');
+    } else {
+      document.body.classList.remove('loading-screen-active');
+    }
+  }, [loadingFinished]);
+
+  useEffect(() => {
     if (searchParams.get("signup") === "true") {
       setShowSignup(true);
     }

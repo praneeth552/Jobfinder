@@ -1,13 +1,13 @@
-from jose import jwt, JWTError
-from typing import Optional
-from fastapi import Depends, HTTPException, Request
 from passlib.context import CryptContext
+from jose import jwt, JWTError
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
 from database import db
 from subscription_manager import check_and_downgrade_user_if_expired
+from dependencies import get_current_user
 
 load_dotenv()
 
@@ -23,7 +23,7 @@ def hash_password(password: str):
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -31,45 +31,6 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
         expire = datetime.utcnow() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("email")
-        if email is None:
-            raise credentials_exception
-    except JWTError as e:
-        raise HTTPException(
-            status_code=401,
-            detail=f"Invalid token: {e}",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    user = await db.users.find_one({"email": email})
-    if user is None:
-        raise credentials_exception
-
-    # --- Real-time Subscription Status Check ---
-    user = await check_and_downgrade_user_if_expired(user)
-    # -----------------------------------------
-
-    if user.get("plan_status") == "pending_deletion":
-        # Allow access only for the restore endpoint if the token has the 'restore' scope
-        scope = payload.get("scope")
-        if scope != "restore":
-            raise HTTPException(
-                status_code=403,
-                detail="This account is pending deletion and cannot be accessed.",
-            )
-
-    # Convert ObjectId to string for JSON serialization if needed elsewhere
-    user["_id"] = str(user["_id"])
-    return user
 
 
 async def get_user_from_token_query(request: Request):

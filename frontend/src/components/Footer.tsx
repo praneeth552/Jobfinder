@@ -56,6 +56,9 @@ const Footer = () => {
         </div>
 
         <div className="text-center text-gray-500">
+          <p className="mb-2 text-sm">
+            As the sole developer of this application, I am constantly working to improve it. This means that features may be added, changed, or removed to enhance performance and user experience. Your understanding is appreciated.
+          </p>
           <p>&copy; {currentYear} {myName}. All rights reserved.</p>
           <p>Contact: {myEmail}</p>
         </div>

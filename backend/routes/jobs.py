@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
 from models import Job
 from database import db
+from bson import ObjectId
 import logging
 
 # Setup logging
@@ -44,3 +45,16 @@ async def read_jobs():
         job["_id"] = str(job["_id"])
         jobs.append(job)
     return jobs
+
+@router.get("/{job_id}")
+async def read_job(job_id: str):
+    try:
+        oid = ObjectId(job_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid ObjectId format")
+
+    job = await jobs_collection.find_one({"_id": oid})
+    if job:
+        job["_id"] = str(job["_id"])
+        return job
+    raise HTTPException(status_code=404, detail="Job not found")

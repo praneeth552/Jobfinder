@@ -77,6 +77,7 @@ class User(BaseModel):
     google_tokens: Optional[str] = None
     sheets_enabled: bool = False
     spreadsheet_id: Optional[str] = None
+    loyalty_coins: int = 0
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     deletion_requested_at: Optional[datetime] = None
@@ -119,6 +120,7 @@ class UserProfileResponse(BaseModel):
     subscription_valid_until: Optional[datetime] = None
     is_first_time_user: bool
     sheets_enabled: bool
+    loyalty_coins: int = 0
     auth_type: Optional[str] = None
     preferences: Optional[UserPreferences] = None
     created_at: datetime

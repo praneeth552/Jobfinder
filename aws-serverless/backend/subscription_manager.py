@@ -2,6 +2,7 @@
 
 import asyncio
 from datetime import datetime, timedelta
+from bson import ObjectId
 from database import db
 from models import PlanType, SubscriptionStatus
 from email_utils import send_email
@@ -39,8 +40,7 @@ async def check_and_downgrade_user_if_expired(user: dict) -> dict:
         
         # Ensure we are using the correct _id object for the update
         user_id = user.get("_id")
-        if not isinstance(user_id, db.ObjectId):
-             from bson import ObjectId
+        if not isinstance(user_id, ObjectId):
              user_id = ObjectId(user_id)
 
         await users_collection.update_one(

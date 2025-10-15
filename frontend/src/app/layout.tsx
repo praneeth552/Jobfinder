@@ -6,6 +6,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import AuthInitializer from "@/components/AuthInitializer";
 import { ThemeProvider } from "@/context/ThemeContext";
 import ThemedLayout from "@/components/ThemedLayout";
+import GlobalSearchBar from "@/components/GlobalSearchBar";
 import Script from "next/script";
 
 export const metadata = {
@@ -148,6 +149,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 toastOptions={{ style: { zIndex: 9999 } }}
               />
               <ThemedLayout>{children}</ThemedLayout>
+              <GlobalSearchBar />
             </AuthProvider>
           </ThemeProvider>
         </GoogleOAuthProvider>

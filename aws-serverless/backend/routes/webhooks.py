@@ -39,12 +39,15 @@ async def razorpay_webhook(request: Request):
             new_valid_until = datetime.utcnow() + timedelta(days=31)
             await users_collection.update_one(
                 {"razorpay_subscription_id": subscription_id},
-                {"$set": {
-                    "plan_status": "active",
-                    "subscription_status": SubscriptionStatus.active,
-                    "subscription_valid_until": new_valid_until,
-                    "updated_at": datetime.utcnow()
-                }}
+                {
+                    "$set": {
+                        "plan_status": "active",
+                        "subscription_status": SubscriptionStatus.active,
+                        "subscription_valid_until": new_valid_until,
+                        "updated_at": datetime.utcnow()
+                    },
+                    "$inc": {"loyalty_coins": 10}
+                }
             )
             user = await users_collection.find_one({"razorpay_subscription_id": subscription_id})
             if user:

@@ -7,6 +7,7 @@ import os
 from dotenv import load_dotenv
 from database import db
 from subscription_manager import check_and_downgrade_user_if_expired
+from dependencies import get_current_user
 
 load_dotenv()
 
@@ -30,42 +31,6 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
         expire = datetime.utcnow() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("email")
-        if email is None:
-            raise credentials_exception
-    except JWTError as e:
-        raise HTTPException(
-            status_code=401,
-            detail=f"Invalid token: {e}",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    user = await db.users.find_one({"email": email})
-    if user is None:
-        raise credentials_exception
-
-    # --- Real-time Subscription Status Check ---
-    user = await check_and_downgrade_user_if_expired(user)
-    # -----------------------------------------
-
-    if user.get("plan_status") == "pending_deletion":
-        raise HTTPException(
-            status_code=403,
-            detail="This account is pending deletion and cannot be accessed.",
-        )
-
-    # Convert ObjectId to string for JSON serialization if needed elsewhere
-    user["_id"] = str(user["_id"])
-    return user
 
 
 async def get_user_from_token_query(request: Request):
