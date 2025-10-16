@@ -41,13 +41,22 @@ def _resolve_client_secret_path() -> str:
     candidate_paths = []
     if CLIENT_SECRET_FILE:
         candidate_paths.append(CLIENT_SECRET_FILE)
+    # Lambda container default task root
+    lambda_root = os.getenv("LAMBDA_TASK_ROOT")
+    if lambda_root:
+        candidate_paths.append(os.path.join(lambda_root, "client_secret.json"))
+    # Common absolute path used in Lambda
     candidate_paths.append("/var/task/client_secret.json")
     current_dir = os.path.dirname(__file__)
     candidate_paths.append(os.path.realpath(os.path.join(current_dir, "..", "client_secret.json")))
 
+    # Debug: log candidate paths without revealing contents
+    print(f"--- Resolving client_secret.json, candidates: {candidate_paths} ---")
+
     for path in candidate_paths:
         try:
             if path and os.path.isfile(path):
+                print(f"--- Using client_secret.json at: {path} ---")
                 return path
         except Exception:
             continue
@@ -68,7 +77,8 @@ def _resolve_redirect_uri() -> str:
         if GOOGLE_CLIENT_SECRET_JSON:
             client_config = json.loads(GOOGLE_CLIENT_SECRET_JSON)
         else:
-            with open(_resolve_client_secret_path(), "r") as f:
+            resolved_secret_path = _resolve_client_secret_path()
+            with open(resolved_secret_path, "r") as f:
                 client_config = json.load(f)
 
         web_cfg = client_config.get("web") or {}
@@ -121,7 +131,8 @@ async def authorize_sheet_access(current_user: dict = Depends(get_user_from_toke
         return RedirectResponse(auth_url)
     except FileNotFoundError as e:
         # Explicitly surface missing client secret file issues
-        raise HTTPException(status_code=500, detail=f"Google client_secret.json not found: {e}")
+        resolved_path = _resolve_client_secret_path()
+        raise HTTPException(status_code=500, detail=f"Google client_secret.json not found at '{resolved_path}': {e}")
     except Exception as e:
         # Provide actionable context in production
         raise HTTPException(status_code=500, detail=f"Failed to initialize Google OAuth flow. Details: {e}")
