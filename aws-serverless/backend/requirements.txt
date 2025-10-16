@@ -2,7 +2,8 @@
 fastapi
 slowapi
 mangum
-pydantic
+pydantic==2.5.0
+pydantic-settings==2.1.0
 email-validator
 werkzeug
 
@@ -26,7 +27,7 @@ httpx
 requests
 
 # Email & Templates
-fastapi-mail
+fastapi-mail==1.4.1
 Jinja2
 
 # NLP and Parsing Dependencies
