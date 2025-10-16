@@ -96,8 +96,9 @@ const JobCard = ({
           whileHover={{
             scale: 1.03,
             boxShadow: "0 10px 20px rgba(139,69,19,0.2)",
+            borderColor: "rgba(139, 69, 19, 0.5)"
           }}
-          className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-5 cursor-pointer transform transition-transform duration-300 flex flex-col h-full pointer-events-auto"
+          className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-5 cursor-pointer transform transition-transform duration-300 flex flex-col h-full pointer-events-auto border-2 border-transparent"
         >
           <div className="flex-grow">
             <h2 className="text-lg sm:text-xl font-bold mb-2 text-[#B8860B] dark:text-amber-400 break-words">
@@ -115,8 +116,8 @@ const JobCard = ({
                   className="bg-blue-600 h-2.5 rounded-full"
                   style={{ width: `${job.match_score}%` }}
                 />
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Match Score: {job.match_score}/100
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-right">
+                  {job.match_score}%
                 </p>
               </div>
             )}
@@ -133,18 +134,18 @@ const JobCard = ({
               <LoadingButton
                 onClick={handleSaveClick}
                 isLoading={isSaving}
-                className="flex-1 px-2 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700 font-semibold flex items-center justify-center"
+                className="flex-1 px-2 py-2 rounded-md text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 font-semibold flex items-center justify-center"
               >
                 <Bookmark size={16} className="mr-2"/>
-                Move to Saved
+                Save
               </LoadingButton>
               <LoadingButton
                 onClick={handleApplyClick}
                 isLoading={isApplying}
-                className="flex-1 px-2 py-2 rounded-md text-white bg-green-600 hover:bg-green-700 font-semibold flex items-center justify-center"
+                className="flex-1 px-2 py-2 rounded-md text-white bg-indigo-600 hover:bg-indigo-700 font-semibold flex items-center justify-center"
               >
                 <CheckCheck size={16} className="mr-2"/>
-                Move to Applied
+                Apply
               </LoadingButton>
             </div>
           )}

@@ -8,6 +8,9 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import ThemedLayout from "@/components/ThemedLayout";
 import GlobalSearchBar from "@/components/GlobalSearchBar";
 import Script from "next/script";
+import { Inter } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata = {
   metadataBase: new URL("https://www.tackleit.xyz"),
@@ -115,7 +118,7 @@ const structuredData = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <head>
         {/* Structured Data */}
         <script
