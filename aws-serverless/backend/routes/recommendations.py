@@ -10,101 +10,102 @@ import json
 from services.google_sheets import write_to_sheet
 from utils import get_current_user, is_pro_user
 
-# --- Load environment variables ---
+# --- Load Environment ---
 load_dotenv()
 
 router = APIRouter()
 
-# --- Database Collections ---
+# --- Collections ---
 users_collection = db["users"]
 resumes_collection = db["resumes"]
 recommendations_collection = db["recommendations"]
 jobs_collection = db["jobs"]
 
-# --- Configure Gemini ---
+# --- Gemini Configuration ---
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
-# --- Model Configuration ---
-# Stable, fast, and available models:
-# "gemini-2.0-flash" → Recommended for production (fast + reliable)
-# "gemini-2.0-pro" → More powerful, slower, may cost more
-# "gemini-2.5-flash" → Future-ready (beta regions only)
 GEMINI_MODEL_NAME = "gemini-2.5-flash"
 
 GENERATION_CONFIG = {
     "temperature": 0.7,
     "top_p": 0.95,
     "top_k": 40,
-    "max_output_tokens": 8192,
+    "max_output_tokens": 16384,  # Increased from 8192
+    "response_mime_type": "application/json",  # Force JSON output
 }
 
-SAFETY_SETTINGS = {
-    "HARM_CATEGORY_HARASSMENT": "BLOCK_ONLY_HIGH",
-    "HARM_CATEGORY_HATE_SPEECH": "BLOCK_ONLY_HIGH",
-    "HARM_CATEGORY_SEXUALLY_EXPLICIT": "BLOCK_ONLY_HIGH",
-    "HARM_CATEGORY_DANGEROUS_CONTENT": "BLOCK_ONLY_HIGH",
-}
+# Updated safety settings using proper enum imports
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
-# --- Helper Function to Build Prompt ---
+SAFETY_SETTINGS = [
+    {
+        "category": HarmCategory.HARM_CATEGORY_HARASSMENT,
+        "threshold": HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+        "category": HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        "threshold": HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+        "category": HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        "threshold": HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+        "category": HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        "threshold": HarmBlockThreshold.BLOCK_NONE,
+    },
+]
+
+# --- Helper: Build Prompt ---
 def build_prompt(user_profile, jobs):
-    """Constructs the prompt for the Gemini model."""
+    """Builds the job recommendation prompt."""
+    # Truncate descriptions more aggressively
     for job in jobs:
         if "description" in job and job["description"]:
-            job["description"] = job["description"][:500] + "..."
+            job["description"] = job["description"][:300] + "..."  # Reduced from 500
 
-    prompt = f"""
-You are an expert AI Job Recommendation Assistant.
-Your task is to analyze a detailed user profile and a list of available jobs,
-then return a ranked list of the most suitable job recommendations.
+    # Simplified, cleaner prompt
+    return f"""
+Analyze the user profile and job listings. Return ONLY a JSON array of the top 5-8 best matches.
 
-User Profile:
+USER PROFILE:
 {user_profile}
 
-Available Job Postings:
+AVAILABLE JOBS:
 {json.dumps([
     {
         "title": job.get("title"),
         "company": job.get("company"),
         "location": job.get("location"),
-        "description": job.get("description", "No description available"),
+        "description": job.get("description", "No description"),
         "job_url": job.get("job_url"),
     }
     for job in jobs
 ], indent=2)}
 
-Please provide a ranked list of the top 5–10 best matches.
-For each job, include:
-- title
-- company
-- location
-- match_score (0–100)
-- reason (why it’s a match)
-- job_url
-
-⚠️ IMPORTANT:
-Return ONLY a valid JSON array. Do not include text or markdown before/after.
-Example:
+Return this exact JSON structure with 5-8 jobs:
 [
   {{
-    "title": "...",
-    "company": "...",
-    "location": "...",
-    "match_score": 92,
-    "reason": "...",
-    "job_url": "..."
+    "title": "Job Title",
+    "company": "Company Name",
+    "location": "Location",
+    "match_score": 85,
+    "reason": "One concise sentence explaining the match",
+    "job_url": "https://example.com/job"
   }}
 ]
+
+Important: Keep reasons under 30 words each. Return ONLY the JSON array.
 """
-    return prompt
 
 
-# --- Main Route: Generate Recommendations ---
+# --- Main Endpoint ---
 @router.post("/generate_recommendations")
 async def generate_recommendations(current_user: dict = Depends(get_current_user)):
     """Generates personalized job recommendations for the logged-in user."""
     user_id = current_user.get("_id")
 
-    # --- Validate user ID ---
+    # Validate user ID
     try:
         user_object_id = ObjectId(user_id)
     except Exception:
@@ -138,10 +139,9 @@ async def generate_recommendations(current_user: dict = Depends(get_current_user
     # --- Build User Profile ---
     user_profile_parts = []
 
-    # From resume (if available)
     resume_data = await resumes_collection.find_one({"user_id": user_object_id})
     if resume_data:
-        user_profile_parts.append("--- From Resume ---")
+        user_profile_parts.append("RESUME:")
         if resume_data.get("name"):
             user_profile_parts.append(f"Name: {resume_data['name']}")
         if resume_data.get("roles"):
@@ -150,31 +150,30 @@ async def generate_recommendations(current_user: dict = Depends(get_current_user
             user_profile_parts.append(f"Skills: {', '.join(resume_data['skills'])}")
         if resume_data.get("experience_summary"):
             user_profile_parts.append(
-                "Experience Summary:\n" + "\n".join(f"- {exp}" for exp in resume_data["experience_summary"])
+                "Experience: " + "; ".join(resume_data["experience_summary"])
             )
         if resume_data.get("education"):
             user_profile_parts.append(
-                "Education:\n" + "\n".join(f"- {edu}" for edu in resume_data["education"])
+                "Education: " + "; ".join(resume_data["education"])
             )
 
-    # From user preferences
     preferences = user.get("preferences", {})
     if preferences:
-        user_profile_parts.append("\n--- Additional Preferences ---")
+        user_profile_parts.append("\nPREFERENCES:")
         if preferences.get("role"):
             user_profile_parts.append(f"Roles: {', '.join(preferences['role'])}")
         if preferences.get("location"):
-            user_profile_parts.append(f"Location: {', '.join(preferences['location'])}")
+            user_profile_parts.append(f"Locations: {', '.join(preferences['location'])}")
         if preferences.get("tech_stack"):
             user_profile_parts.append(f"Tech Stack: {', '.join(preferences['tech_stack'])}")
         if preferences.get("experience_level"):
-            user_profile_parts.append(f"Experience Level: {preferences['experience_level']}")
+            user_profile_parts.append(f"Experience: {preferences['experience_level']}")
         if preferences.get("company_size"):
             user_profile_parts.append(f"Company Size: {', '.join(preferences['company_size'])}")
         if preferences.get("job_type"):
             user_profile_parts.append(f"Job Type: {', '.join(preferences['job_type'])}")
         if preferences.get("work_arrangement"):
-            user_profile_parts.append(f"Work Arrangement: {', '.join(preferences['work_arrangement'])}")
+            user_profile_parts.append(f"Work: {', '.join(preferences['work_arrangement'])}")
 
     if not user_profile_parts:
         raise HTTPException(status_code=400, detail="User has no resume data or preferences set.")
@@ -184,13 +183,13 @@ async def generate_recommendations(current_user: dict = Depends(get_current_user
     print(f"Compiled User Profile:\n{user_profile_string}")
 
     # --- Fetch Jobs ---
-    jobs = await jobs_collection.find({}).to_list(length=200)
+    jobs = await jobs_collection.find({}).to_list(length=50)  # Reduced from 100
     if not jobs:
         raise HTTPException(status_code=404, detail="No jobs found in the database")
 
     prompt = build_prompt(user_profile_string, jobs)
 
-    # --- Generate Recommendations via Gemini ---
+    # --- Generate Recommendations ---
     try:
         print(f"Sending prompt to Gemini API using model: {GEMINI_MODEL_NAME}...")
         model = genai.GenerativeModel(
@@ -201,29 +200,90 @@ async def generate_recommendations(current_user: dict = Depends(get_current_user
 
         response = model.generate_content(prompt)
 
-        if not response.text:
-            raise HTTPException(status_code=500, detail="Received empty response from Gemini API.")
+        # --- Handle blocked or empty responses ---
+        if not response.candidates or not response.candidates[0].content.parts:
+            finish_reason = (
+                response.candidates[0].finish_reason
+                if response.candidates and response.candidates[0].finish_reason
+                else "unknown"
+            )
+            
+            # Log safety ratings if available
+            if response.candidates and hasattr(response.candidates[0], 'safety_ratings'):
+                print(f"Safety Ratings: {response.candidates[0].safety_ratings}")
+            
+            print(f"⚠️ Gemini returned no valid content (finish_reason={finish_reason})")
+            raise HTTPException(
+                status_code=500,
+                detail=f"AI content filtering triggered. Please try again or contact support if issue persists."
+            )
 
-        # Clean response
-        cleaned_response_text = response.text.strip()
-        if cleaned_response_text.startswith("```"):
-            cleaned_response_text = cleaned_response_text.split("```")[1]
-            if cleaned_response_text.startswith("json"):
-                cleaned_response_text = cleaned_response_text[4:]
-        cleaned_response_text = cleaned_response_text.strip()
+        # --- Extract text safely ---
+        raw_text = response.text.strip()
+        
+        # Remove markdown code blocks
+        if raw_text.startswith("```"):
+            # Find the content between ``` markers
+            parts = raw_text.split("```")
+            if len(parts) >= 2:
+                cleaned_response_text = parts[1]
+                # Remove 'json' language identifier if present
+                if cleaned_response_text.startswith("json"):
+                    cleaned_response_text = cleaned_response_text[4:]
+                cleaned_response_text = cleaned_response_text.strip()
+            else:
+                cleaned_response_text = raw_text
+        else:
+            cleaned_response_text = raw_text
+        
+        # Additional validation: Check if JSON is complete
+        if not cleaned_response_text.endswith("]"):
+            print(f"⚠️ WARNING: Response appears truncated. Last 100 chars: ...{cleaned_response_text[-100:]}")
+            # Try to fix common truncation issues
+            if cleaned_response_text.count("[") > cleaned_response_text.count("]"):
+                # Try to close any open objects and the array
+                if not cleaned_response_text.rstrip().endswith("}"):
+                    cleaned_response_text = cleaned_response_text.rstrip().rstrip(",") + "}"
+                cleaned_response_text += "]"
+                print("Attempted to close truncated JSON")
 
         print(f"Cleaned Response (First 200 chars): {cleaned_response_text[:200]}...")
-        recommended_jobs_data = json.loads(cleaned_response_text)
+        print(f"Cleaned Response (Last 100 chars): ...{cleaned_response_text[-100:]}")
 
+        # --- Parse JSON ---
+        try:
+            recommended_jobs_data = json.loads(cleaned_response_text)
+        except json.JSONDecodeError as json_err:
+            print(f"First JSON parse failed: {json_err}")
+            print(f"Attempting to repair JSON...")
+            
+            # Try to extract valid JSON objects even if array is incomplete
+            import re
+            job_objects = re.findall(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', cleaned_response_text)
+            
+            if job_objects:
+                print(f"Found {len(job_objects)} job objects, attempting to reconstruct array")
+                try:
+                    recommended_jobs_data = [json.loads(obj) for obj in job_objects]
+                    print(f"Successfully parsed {len(recommended_jobs_data)} jobs from partial response")
+                except Exception as repair_err:
+                    print(f"Repair attempt failed: {repair_err}")
+                    raise json_err
+            else:
+                raise json_err
+        
         if not isinstance(recommended_jobs_data, list):
             raise ValueError("AI response is not a JSON array.")
+        
+        if len(recommended_jobs_data) == 0:
+            raise ValueError("AI returned empty job list.")
 
         recommended_jobs = [RecommendedJob(**job) for job in recommended_jobs_data]
         print(f"✅ Successfully generated {len(recommended_jobs)} recommendations.")
 
     except json.JSONDecodeError as e:
         print(f"❌ JSON PARSE ERROR: {e}")
-        print(f"Raw Response:\n{response.text if 'response' in locals() else 'No response'}")
+        print(f"Raw Response:\n{getattr(response, 'text', 'No response text available')}")
         raise HTTPException(status_code=500, detail="Failed to parse AI response as JSON.")
     except Exception as e:
         print(f"❌ ERROR generating recommendations: {e}")
@@ -240,7 +300,7 @@ async def generate_recommendations(current_user: dict = Depends(get_current_user
         {"user_id": user_id}, {"$set": recommendation_data}, upsert=True
     )
 
-    # Update user’s job applications list
+    # --- Update user's job applications list ---
     await users_collection.update_one(
         {"_id": user_object_id},
         {
@@ -253,7 +313,7 @@ async def generate_recommendations(current_user: dict = Depends(get_current_user
         },
     )
 
-    # --- Optional: Write to Google Sheets (Pro Users Only) ---
+    # --- Optional: Write to Google Sheets for Pro Users ---
     sheets_error = None
     if user_is_pro and user.get("sheets_enabled"):
         print(f"Writing recommendations to Google Sheets for user {user_id}...")
@@ -262,19 +322,3 @@ async def generate_recommendations(current_user: dict = Depends(get_current_user
             sheets_error = f"Failed to write to Google Sheets for user {user_id}."
 
     return {"recommendation_data": recommendation_data, "sheets_error": sheets_error}
-
-
-# --- Retrieve Existing Recommendations ---
-@router.get("/recommendations")
-async def get_recommendations(current_user: dict = Depends(get_current_user)):
-    """Fetches the latest job recommendations for the current user."""
-    user_id = current_user.get("_id")
-    rec = await recommendations_collection.find_one({"user_id": user_id})
-
-    if not rec:
-        raise HTTPException(status_code=404, detail="No recommendations found. Please generate them first.")
-
-    return {
-        "recommended_jobs": rec.get("recommended_jobs", []),
-        "generated_at": rec.get("generated_at"),
-    }
