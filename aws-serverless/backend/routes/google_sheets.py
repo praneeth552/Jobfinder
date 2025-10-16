@@ -29,6 +29,30 @@ SCOPES = [
 REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://tackleit.xyz")
 
+def _resolve_client_secret_path() -> str:
+    """
+    Resolve a real path to client_secret.json that works in Lambda and locally.
+    Order:
+      1) GOOGLE_CLIENT_SECRET_FILE env if it exists
+      2) /var/task/client_secret.json (Lambda task root)
+      3) ../client_secret.json relative to this file
+      4) Fallback to CLIENT_SECRET_FILE (even if missing, to surface clear error)
+    """
+    candidate_paths = []
+    if CLIENT_SECRET_FILE:
+        candidate_paths.append(CLIENT_SECRET_FILE)
+    candidate_paths.append("/var/task/client_secret.json")
+    current_dir = os.path.dirname(__file__)
+    candidate_paths.append(os.path.realpath(os.path.join(current_dir, "..", "client_secret.json")))
+
+    for path in candidate_paths:
+        try:
+            if path and os.path.isfile(path):
+                return path
+        except Exception:
+            continue
+    return CLIENT_SECRET_FILE
+
 def _resolve_redirect_uri() -> str:
     """
     Resolve a safe redirect URI for Google OAuth:
@@ -44,7 +68,7 @@ def _resolve_redirect_uri() -> str:
         if GOOGLE_CLIENT_SECRET_JSON:
             client_config = json.loads(GOOGLE_CLIENT_SECRET_JSON)
         else:
-            with open(CLIENT_SECRET_FILE, "r") as f:
+            with open(_resolve_client_secret_path(), "r") as f:
                 client_config = json.load(f)
 
         web_cfg = client_config.get("web") or {}
@@ -71,7 +95,7 @@ def get_google_flow():
         )
     else:
         return Flow.from_client_secrets_file(
-            CLIENT_SECRET_FILE, scopes=SCOPES, redirect_uri=redirect_uri
+            _resolve_client_secret_path(), scopes=SCOPES, redirect_uri=redirect_uri
         )
 
 @router.get("/auth")
