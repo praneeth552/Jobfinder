@@ -8,6 +8,7 @@ from services.google_sheets import handle_oauth_callback
 from database import db
 import os
 import json
+import httpx
 from dotenv import load_dotenv
 from bson import ObjectId
 from utils import get_current_user, get_user_from_token_query
@@ -15,12 +16,8 @@ from utils import get_current_user, get_user_from_token_query
 load_dotenv()
 router = APIRouter()
 
-# --- Construct absolute path for client_secret.json ---
-# The script is in /routes, so we go up one level to the 'backend' directory
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CLIENT_SECRET_PATH = os.path.join(BASE_DIR, "client_secret.json")
-
 # Load environment variables
+CLIENT_SECRET_FILE = os.getenv("GOOGLE_CLIENT_SECRET_FILE", "client_secret.json")
 GOOGLE_CLIENT_SECRET_JSON = os.getenv("GOOGLE_CLIENT_SECRET_JSON")
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -39,14 +36,9 @@ def get_google_flow():
         return Flow.from_client_config(
             client_config, scopes=SCOPES, redirect_uri=REDIRECT_URI
         )
-    elif os.path.exists(CLIENT_SECRET_PATH):
-        return Flow.from_client_secrets_file(
-            CLIENT_SECRET_PATH, scopes=SCOPES, redirect_uri=REDIRECT_URI
-        )
     else:
-        raise FileNotFoundError(
-            "Google client secret not found. "
-            "Set GOOGLE_CLIENT_SECRET_JSON env var or place client_secret.json in the backend root."
+        return Flow.from_client_secrets_file(
+            CLIENT_SECRET_FILE, scopes=SCOPES, redirect_uri=REDIRECT_URI
         )
 
 @router.get("/auth")
