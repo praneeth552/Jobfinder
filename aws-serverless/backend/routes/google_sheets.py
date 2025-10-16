@@ -27,18 +27,51 @@ SCOPES = [
     "https://www.googleapis.com/auth/userinfo.profile",
 ]
 REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://tackleit.xyz")
+
+def _resolve_redirect_uri() -> str:
+    """
+    Resolve a safe redirect URI for Google OAuth:
+    1) Prefer GOOGLE_REDIRECT_URI env when set and non-empty.
+    2) Otherwise, try reading redirect_uris from client secret JSON (env or file).
+       Prefer a URI ending with "/sheets/callback" if present, else take the first.
+    """
+    if REDIRECT_URI and REDIRECT_URI.strip():
+        return REDIRECT_URI
+
+    # Attempt to resolve from provided client config (env var)
+    try:
+        if GOOGLE_CLIENT_SECRET_JSON:
+            client_config = json.loads(GOOGLE_CLIENT_SECRET_JSON)
+        else:
+            with open(CLIENT_SECRET_FILE, "r") as f:
+                client_config = json.load(f)
+
+        web_cfg = client_config.get("web") or {}
+        redirect_uris = web_cfg.get("redirect_uris") or []
+        if not redirect_uris:
+            raise ValueError("No redirect_uris found in client_secret configuration")
+
+        # Prefer the sheets callback if present
+        preferred = [u for u in redirect_uris if u.endswith("/sheets/callback")]
+        return preferred[0] if preferred else redirect_uris[0]
+    except Exception as e:
+        # Last resort fallback for local dev
+        print(f"--- Failed to resolve GOOGLE_REDIRECT_URI from client_secret: {e} ---")
+        return "https://uuv7o727ua.execute-api.us-east-1.amazonaws.com/sheets/callback"
+
 
 def get_google_flow():
-    """Initializes the Google OAuth Flow from env var or file."""
+    """Initializes the Google OAuth Flow from env var or file with a robust redirect URI."""
+    redirect_uri = _resolve_redirect_uri()
     if GOOGLE_CLIENT_SECRET_JSON:
         client_config = json.loads(GOOGLE_CLIENT_SECRET_JSON)
         return Flow.from_client_config(
-            client_config, scopes=SCOPES, redirect_uri=REDIRECT_URI
+            client_config, scopes=SCOPES, redirect_uri=redirect_uri
         )
     else:
         return Flow.from_client_secrets_file(
-            CLIENT_SECRET_FILE, scopes=SCOPES, redirect_uri=REDIRECT_URI
+            CLIENT_SECRET_FILE, scopes=SCOPES, redirect_uri=redirect_uri
         )
 
 @router.get("/auth")
@@ -50,15 +83,24 @@ async def authorize_sheet_access(current_user: dict = Depends(get_user_from_toke
     if not user_id:
         raise HTTPException(status_code=400, detail="User not found")
 
-    print(f"--- USING REDIRECT URI: '{REDIRECT_URI}' ---")
-    flow = get_google_flow()
-    auth_url, state = flow.authorization_url(
-        access_type='offline',
-        include_granted_scopes='true',
-        prompt='consent',
-        state=str(user_id)  # Ensure state is a string
-    )
-    return RedirectResponse(auth_url)
+    try:
+        resolved_redirect = _resolve_redirect_uri()
+        print(f"--- USING RESOLVED REDIRECT URI: '{resolved_redirect}' ---")
+
+        flow = get_google_flow()
+        auth_url, state = flow.authorization_url(
+            access_type='offline',
+            include_granted_scopes='true',
+            prompt='consent',
+            state=str(user_id)
+        )
+        return RedirectResponse(auth_url)
+    except FileNotFoundError as e:
+        # Explicitly surface missing client secret file issues
+        raise HTTPException(status_code=500, detail=f"Google client_secret.json not found: {e}")
+    except Exception as e:
+        # Provide actionable context in production
+        raise HTTPException(status_code=500, detail=f"Failed to initialize Google OAuth flow. Details: {e}")
 
 
 @router.get("/callback")
