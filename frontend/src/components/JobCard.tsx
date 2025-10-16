@@ -98,7 +98,7 @@ const JobCard = ({
             boxShadow: "0 10px 20px rgba(139,69,19,0.2)",
             borderColor: "rgba(139, 69, 19, 0.5)"
           }}
-          className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-5 cursor-pointer transform transition-transform duration-300 flex flex-col h-full pointer-events-auto border-2 border-transparent"
+          className="bg-white/30 dark:bg-slate-800/30 backdrop-blur-lg rounded-xl shadow-md p-5 cursor-pointer transform transition-transform duration-300 flex flex-col h-full pointer-events-auto border-2 border-transparent"
         >
           <div className="flex-grow">
             <h2 className="text-lg sm:text-xl font-bold mb-2 text-[#B8860B] dark:text-amber-400 break-words">

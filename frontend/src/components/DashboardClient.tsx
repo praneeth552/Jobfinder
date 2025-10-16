@@ -23,6 +23,7 @@ import DropZone from "./DropZone";
 import ConfirmationModal from "./ConfirmationModal";
 import HeaderButton from "./HeaderButton";
 import { Coins, User, Briefcase, LogOut, Settings, Gem, Star, Sheet } from 'lucide-react';
+import TimeRemainingButton from "./TimeRemainingButton";
 import GeminiIcon from "./GeminiIcon";
 
 
@@ -509,17 +510,8 @@ export default function DashboardClient() {
 
           <div className="flex items-center justify-center my-4 md:my-6">
             <AnimatePresence>
-              {timeRemaining && (
-                <motion.div
-                  key="rate-limit-message"
-                  initial={{ opacity: 0, y: -20, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 px-6 py-3 rounded-full shadow-md text-base font-medium"
-                >
-                  <span>{timeRemaining}</span>
-                </motion.div>
+              {nextGenerationAllowedAt && (
+                <TimeRemainingButton nextGenerationAllowedAt={nextGenerationAllowedAt} />
               )}
             </AnimatePresence>
           </div>
