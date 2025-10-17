@@ -7,7 +7,7 @@ const AboutUs = () => {
   return (
     <div className="bg-gray-50 text-gray-800 min-h-screen dark:bg-gray-900 dark:text-gray-100">
       <SimpleNavbar />
-      <main className="pt-20">
+      <main className="pt-20 prose dark:prose-invert">
         <div className="container mx-auto px-4 py-16">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl mb-4 dark:text-white">About Tackleit</h1>

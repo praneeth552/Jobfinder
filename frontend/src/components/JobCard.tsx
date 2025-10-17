@@ -2,9 +2,10 @@
 import { motion } from "framer-motion";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import Confetti from "./Confetti";
 import LoadingButton from "./LoadingButton"; // Import LoadingButton
-import { Bookmark, CheckCheck } from 'lucide-react';
+import { Bookmark, CheckCheck, GripVertical } from 'lucide-react';
 
 interface JobApplication {
   id: string;
@@ -29,6 +30,32 @@ interface JobCardProps {
   isApplying?: boolean;
 }
 
+const StatusIndicator = ({ status }: { status: "recommended" | "saved" | "applied" }) => {
+  const statusConfig = {
+    recommended: { color: "bg-blue-500", text: "Recommended" },
+    saved: { color: "bg-yellow-500", text: "Saved" },
+    applied: { color: "bg-green-500", text: "Applied" },
+  };
+
+  return (
+    <div className="flex items-center">
+      <div className={`w-2.5 h-2.5 rounded-full ${statusConfig[status].color} mr-2`}></div>
+      <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">
+        {statusConfig[status].text}
+      </span>
+    </div>
+  );
+};
+
+const CompanyLogo = ({ company }: { company: string }) => {
+  const firstLetter = company ? company.charAt(0).toUpperCase() : "";
+  return (
+    <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xl font-bold text-gray-600 dark:text-gray-300">
+      {firstLetter}
+    </div>
+  );
+};
+
 const JobCard = ({ 
   job, 
   userPlan,
@@ -42,6 +69,8 @@ const JobCard = ({
 }: JobCardProps) => {
   const { attributes, listeners, setNodeRef, transform, transition } = 
     useSortable({ id: job.id, disabled: showMoveButton });
+
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024; // lg breakpoint is 1024px
 
@@ -85,6 +114,7 @@ const JobCard = ({
 
   const handleApplyClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
+    setShowConfetti(true);
     if (onApply) onApply(job);
   };
 
@@ -98,8 +128,13 @@ const JobCard = ({
             boxShadow: "0 10px 20px rgba(139,69,19,0.2)",
             borderColor: "rgba(139, 69, 19, 0.5)"
           }}
-          className="bg-white/30 dark:bg-slate-800/30 backdrop-blur-lg rounded-xl shadow-md p-5 cursor-pointer transform transition-transform duration-300 flex flex-col h-full pointer-events-auto border-2 border-transparent"
+          className="bg-gradient-to-br from-white/30 to-white/10 dark:from-slate-800/30 dark:to-slate-900/50 backdrop-blur-lg rounded-xl shadow-md p-5 cursor-pointer transform transition-transform duration-300 flex flex-col h-full pointer-events-auto border-2 border-transparent"
         >
+          {showConfetti && <Confetti onComplete={() => setShowConfetti(false)} />}
+          <div className="flex items-start justify-between mb-4">
+            <CompanyLogo company={job.company} />
+            <StatusIndicator status={job.status} />
+          </div>
           <div className="flex-grow">
             <h2 className="text-lg sm:text-xl font-bold mb-2 text-[#B8860B] dark:text-amber-400 break-words">
               {job.title}

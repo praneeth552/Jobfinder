@@ -5,7 +5,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import LoadingButton from "@/components/LoadingButton";
 import SimpleNavbar from "./SimpleNavbar";
-import LoadingSpinner from "./LoadingSpinner";
+import BrandSpinner from "./BrandSpinner";
 
 const OtpClient = () => {
     const router = useRouter();
@@ -77,7 +77,7 @@ const OtpClient = () => {
     };
 
     if (verifying) {
-        return <LoadingSpinner />;
+        return <BrandSpinner />;
     }
 
     return (

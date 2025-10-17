@@ -203,3 +203,43 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focu
 .loading-screen-active .global-search-bar {
   display: none;
 }
+
+.prose {
+  @apply text-lg;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  @apply font-bold mb-4;
+}
+
+.prose h1 {
+  @apply text-4xl;
+}
+
+.prose h2 {
+  @apply text-3xl;
+}
+
+.prose h3 {
+  @apply text-2xl;
+}
+
+.prose p {
+  @apply mb-4 leading-relaxed;
+}
+
+.prose ul {
+  @apply list-disc list-inside mb-4;
+}
+
+.prose ol {
+  @apply list-decimal list-inside mb-4;
+}
+
+.prose li {
+  @apply mb-2;
+}
+
+.prose a {
+  @apply text-blue-600 hover:underline;
+}

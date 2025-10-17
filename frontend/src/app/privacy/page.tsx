@@ -12,7 +12,7 @@ const PrivacyPolicy = () => {
             <h1 className="text-4xl font-extrabold text-gray-900 text-center mb-6 dark:text-white">Privacy Policy</h1>
             <p className="text-sm text-gray-500 text-center mb-10 dark:text-gray-400">Last Updated: August 12, 2025</p>
 
-            <div className="space-y-8 text-lg text-gray-700 dark:text-gray-300">
+            <div className="space-y-8 text-lg text-gray-700 dark:text-gray-300 prose dark:prose-invert">
               <section>
                 <h2 className="text-2xl font-bold text-gray-800 mb-4 dark:text-white">1. Introduction</h2>
                 <p>
