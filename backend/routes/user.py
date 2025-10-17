@@ -282,7 +282,7 @@ async def redeem_reward(current_user: dict = Depends(get_current_user)):
 
 
 
-    if user.get("loyalty_coins", 0) < 100:
+    if user.get("loyalty_coins", 0) < 99:
 
         raise HTTPException(status_code=400, detail="Not enough TackleTokens to redeem a reward.")
 
@@ -308,7 +308,7 @@ async def redeem_reward(current_user: dict = Depends(get_current_user)):
 
         {
 
-            "$inc": {"loyalty_coins": -100},
+            "$inc": {"loyalty_coins": -99},
 
             "$set": {"subscription_valid_until": new_expiry}
 

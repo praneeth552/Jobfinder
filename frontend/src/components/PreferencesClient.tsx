@@ -13,6 +13,7 @@ import { Check, ChevronsUpDown, PlusCircle, Trash2 } from "lucide-react";
 import WelcomeCurtain from "@/components/WelcomeCurtain";
 import LoadingButton from "@/components/LoadingButton";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import SimpleNavbar from "./SimpleNavbar";
 
 // --- Data Constants ---
 const ROLES = [
@@ -334,6 +335,8 @@ export default function PreferencesClient() {
 
   return (
     <>
+      <SimpleNavbar />
+      <div className="h-20" />
       <AnimatePresence>{showWelcome && <WelcomeCurtain show={showWelcome} onAnimationComplete={handleWelcomeAnimationComplete} />}</AnimatePresence>
       {isRedirecting && <LoadingSpinner />}
       <main className="flex flex-col items-center min-h-screen px-4 py-12">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, LogOut, Settings, Loader, CreditCard, Bookmark, Check, Star, UserRoundCog, SlidersHorizontal } from 'lucide-react';
@@ -68,7 +68,7 @@ const UserProfile = ({
             <ul className="py-2">
               {userPlan === 'pro' && (
                 <>
-                  <li className="px-2">
+                  <li className="px-2 md:hidden">
                     <motion.button
                       onClick={() => handleAction(onNavigateToSaved, 'saved')}
                       className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors"
@@ -79,7 +79,7 @@ const UserProfile = ({
                       <span>Saved Jobs</span>
                     </motion.button>
                   </li>
-                  <li className="px-2">
+                  <li className="px-2 md:hidden">
                     <motion.button
                       onClick={() => handleAction(onNavigateToApplied, 'applied')}
                       className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors"
@@ -90,7 +90,7 @@ const UserProfile = ({
                       <span>Applied Jobs</span>
                     </motion.button>
                   </li>
-                  <div className="my-2 h-px bg-gray-200 dark:bg-slate-700" />
+                  <div className="my-2 h-px bg-gray-200 dark:bg-slate-700 md:hidden" />
                 </>
               )}
               <li className="px-2">

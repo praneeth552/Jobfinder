@@ -8,6 +8,7 @@ import HeroSection from "@/components/HeroSection";
 import ProblemSolutionSection from "@/components/ProblemSolutionSection";
 import IntroductionSection from "@/components/IntroductionSection";
 import FeaturesSection from "@/components/FeaturesSection";
+import RewardingSection from "@/components/RewardingSection";
 import LoadingScreen from "@/components/LoadingScreen";
 import NewFooter from "@/components/NewFooter";
 import ContactForm from "@/components/ContactForm";
@@ -86,6 +87,7 @@ export default function HomeClient() {
             <HeroSection onGetStarted={handleGetStarted} />
             <IntroductionSection />
             <FeaturesSection />
+            <RewardingSection />
             <TechStack />
             <ProblemSolutionSection />
             <ContactForm />
