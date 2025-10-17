@@ -50,7 +50,7 @@ const StatusIndicator = ({ status }: { status: "recommended" | "saved" | "applie
 const CompanyLogo = ({ company }: { company: string }) => {
   const firstLetter = company ? company.charAt(0).toUpperCase() : "";
   return (
-    <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xl font-bold text-gray-600 dark:text-gray-300">
+    <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center text-2xl font-bold text-gray-700 dark:text-gray-200 shadow-md">
       {firstLetter}
     </div>
   );
@@ -123,37 +123,60 @@ const JobCard = ({
        <div {...(isMobile ? {} : listeners)} className="lg:cursor-grab h-full">
         <motion.div
           ref={cardRef}
+          initial={{ border: "2px solid transparent" }}
           whileHover={{
-            scale: 1.03,
-            boxShadow: "0 10px 20px rgba(139,69,19,0.2)",
-            borderColor: "rgba(139, 69, 19, 0.5)"
+            scale: 1.02,
+            boxShadow: "0 0 20px rgba(99, 102, 241, 0.5)",
+            borderColor: "rgba(99, 102, 241, 1)",
+            transition: {
+              boxShadow: {
+                duration: 0.8,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut",
+              },
+              borderColor: {
+                duration: 0.8,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut",
+              },
+            },
           }}
-          className="bg-gradient-to-br from-white/30 to-white/10 dark:from-slate-800/30 dark:to-slate-900/50 backdrop-blur-lg rounded-xl shadow-md p-5 cursor-pointer transform transition-transform duration-300 flex flex-col h-full pointer-events-auto border-2 border-transparent"
+          className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-lg p-6 cursor-pointer transform transition-all duration-300 flex flex-col h-full pointer-events-auto"
         >
           {showConfetti && <Confetti onComplete={() => setShowConfetti(false)} />}
           <div className="flex items-start justify-between mb-4">
             <CompanyLogo company={job.company} />
-            <StatusIndicator status={job.status} />
+            <div className="flex items-center">
+              <StatusIndicator status={job.status} />
+              <div {...listeners} className="hidden lg:block ml-4 cursor-grab p-2 text-gray-400 hover:text-gray-600">
+                <GripVertical size={20} />
+              </div>
+            </div>
           </div>
-          <div className="flex-grow">
-            <h2 className="text-lg sm:text-xl font-bold mb-2 text-[#B8860B] dark:text-amber-400 break-words">
+          <div className="flex-grow mt-4">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900 dark:text-white break-words">
               {job.title}
             </h2>
-            <p className="text-sm sm:text-base text-gray-800 dark:text-gray-300 mb-1 break-words">
-              <span className="font-semibold">Company:</span> {job.company}
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-1 break-words">
+              {job.company}
             </p>
-            <p className="text-sm sm:text-base text-gray-800 dark:text-gray-300 mb-3 break-words">
-              <span className="font-semibold">Location:</span> {job.location}
+            <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-4 break-words">
+              {job.location}
             </p>
             {job.match_score && (
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-3">
-                <div
-                  className="bg-blue-600 h-2.5 rounded-full"
-                  style={{ width: `${job.match_score}%` }}
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-right">
-                  {job.match_score}%
-                </p>
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Match Score</span>
+                  <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">{job.match_score}%</span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                  <div
+                    className="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-500"
+                    style={{ width: `${job.match_score}%` }}
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -165,21 +188,21 @@ const JobCard = ({
 
           {/* Mobile-only buttons */}
           {(userPlan === "pro" && onSave && onApply && !showMoveButton) && (
-            <div className="lg:hidden flex items-center gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="lg:hidden flex items-center gap-3 mt-auto pt-4 border-t border-gray-200/50 dark:border-gray-700/50">
               <LoadingButton
                 onClick={handleSaveClick}
                 isLoading={isSaving}
-                className="flex-1 px-2 py-2 rounded-md text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 font-semibold flex items-center justify-center"
+                className="flex-1 px-4 py-2.5 rounded-lg text-gray-700 dark:text-gray-200 bg-gray-200/70 dark:bg-gray-700/70 hover:bg-gray-300/70 dark:hover:bg-gray-600/70 font-semibold flex items-center justify-center transition-colors duration-300"
               >
-                <Bookmark size={16} className="mr-2"/>
+                <Bookmark size={18} className="mr-2"/>
                 Save
               </LoadingButton>
               <LoadingButton
                 onClick={handleApplyClick}
                 isLoading={isApplying}
-                className="flex-1 px-2 py-2 rounded-md text-white bg-indigo-600 hover:bg-indigo-700 font-semibold flex items-center justify-center"
+                className="flex-1 px-4 py-2.5 rounded-lg text-white bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 font-semibold flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300"
               >
-                <CheckCheck size={16} className="mr-2"/>
+                <CheckCheck size={18} className="mr-2"/>
                 Apply
               </LoadingButton>
             </div>

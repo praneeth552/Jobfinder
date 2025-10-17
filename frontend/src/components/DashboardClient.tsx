@@ -360,10 +360,10 @@ export default function DashboardClient() {
             <motion.h1
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.8 }}
-              className="text-2xl sm:text-3xl font-bold text-[#8B4513] dark:text-white text-center md:text-left"
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+              className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:to-purple-400 text-center md:text-left pb-2"
             >
-              Job Recommendations
+              Your AI-Curated Job Feed
             </motion.h1>
             
             <motion.div 
