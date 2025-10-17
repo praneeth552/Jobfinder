@@ -28,6 +28,7 @@ interface JobCardProps {
   onApply?: (job: JobApplication) => void;
   isSaving?: boolean;
   isApplying?: boolean;
+  variants?: any;
 }
 
 const StatusIndicator = ({ status }: { status: "recommended" | "saved" | "applied" }) => {
@@ -65,7 +66,8 @@ const JobCard = ({
   onSave,
   onApply,
   isSaving = false,
-  isApplying = false
+  isApplying = false,
+  variants
 }: JobCardProps) => {
   const { attributes, listeners, setNodeRef, transform, transition } = 
     useSortable({ id: job.id, disabled: showMoveButton });
@@ -123,6 +125,7 @@ const JobCard = ({
        <div {...(isMobile ? {} : listeners)} className="lg:cursor-grab h-full">
         <motion.div
           ref={cardRef}
+          variants={variants}
           initial={{ border: "2px solid transparent" }}
           whileHover={{
             scale: 1.02,

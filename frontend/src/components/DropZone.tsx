@@ -27,11 +27,18 @@ const DropZone = ({ savedCount, appliedCount }: { savedCount: number, appliedCou
       onClick={onClick}
       whileHover={{ scale: 1.05, boxShadow: '0px 10px 20px rgba(0,0,0,0.1)' }}
       whileTap={{ scale: 0.95 }}
-      className={`relative cursor-pointer rounded-full flex items-center justify-center w-28 h-16 text-white font-bold text-lg shadow-lg transition-all duration-300 ${gradientClass}`}
-      style={{ 
-        boxShadow: isOver ? `0 0 20px ${colorClass}`: '0 4px 15px rgba(0,0,0,0.1)',
+      animate={{
+        boxShadow: isOver ? [`0 0 20px ${colorClass}`, `0 0 30px ${colorClass}`, `0 0 20px ${colorClass}`] : '0 4px 15px rgba(0,0,0,0.1)',
         border: isOver ? `2px solid ${colorClass}` : '2px solid transparent'
       }}
+      transition={{
+        boxShadow: {
+          duration: 1.5,
+          repeat: Infinity,
+          ease: "easeInOut",
+        },
+      }}
+      className={`relative cursor-pointer rounded-full flex items-center justify-center w-28 h-16 text-white font-bold text-lg shadow-lg transition-all duration-300 ${gradientClass}`}
     >
       <div className="flex items-center">
         {icon}

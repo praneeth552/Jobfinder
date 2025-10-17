@@ -38,6 +38,15 @@ interface JobApplication {
   job_url?: string;
 }
 
+const cardVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { type: "spring", stiffness: 100, damping: 10 },
+  },
+};
+
 export default function DashboardClient() {
   const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -563,6 +572,7 @@ export default function DashboardClient() {
                     onApply={() => handleCardAction(job, 'applied')}
                     isSaving={cardActionLoading[job.id]}
                     isApplying={cardActionLoading[job.id]}
+                    variants={cardVariants}
                   />
                 ))}
               </motion.div>

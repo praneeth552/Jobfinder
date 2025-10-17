@@ -83,7 +83,15 @@ const HeaderButton: React.FC<HeaderButtonProps> = ({
       whileTap={{ scale: 0.96 }}
       whileHover={{
         scale: 1.05,
-        boxShadow: '0 0 12px rgba(100, 180, 255, 0.4)',
+        boxShadow: "0 0 12px rgba(100, 180, 255, 0.4)",
+        transition: {
+          boxShadow: {
+            duration: 0.8,
+            repeat: Infinity,
+            repeatType: "reverse",
+            ease: "easeInOut",
+          },
+        },
       }}
       role="button"
       tabIndex={0}

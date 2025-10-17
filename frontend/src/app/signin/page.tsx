@@ -259,6 +259,7 @@ function SigninForm() {
                     isLoading={loading}
                     className="submit-button-swipe bg-purple-600 hover:bg-purple-700 text-white w-full px-4 py-3 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500"
                     disabled={loading || !turnstileToken}
+                    ripple
                   >
                     Sign in
                   </LoadingButton>

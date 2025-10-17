@@ -365,13 +365,14 @@ export default function SignupPage() {
               </div>
 
               <LoadingButton
-                    type="submit"
-                    isLoading={loading}
-                    className="submit-button-swipe bg-purple-600 hover:bg-purple-700 text-white w-full px-4 py-3 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500"
-                    disabled={loading || !turnstileToken}
-                  >
-                    Sign up
-                  </LoadingButton>
+                type="submit"
+                isLoading={loading}
+                className="submit-button-swipe bg-purple-600 hover:bg-purple-700 text-white w-full px-4 py-3 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500"
+                disabled={loading || !turnstileToken}
+                ripple
+              >
+                Sign up
+              </LoadingButton>
             </form>
 
             <p className="mt-6 text-black dark:text-white text-center">
