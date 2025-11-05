@@ -118,25 +118,62 @@ async def write_to_sheet(user_id: str, data: List) -> bool:
             print("--- Failed to create or find spreadsheet ID. Aborting write. ---")
             return False
 
+    TARGET_SHEET_NAME = "Tackleit Jobs"
     try:
         service = await get_google_service(user_id, 'sheets', 'v4')
         if not service:
             print("--- Failed to create Google service for writing. ---")
             return False
 
-        print(f"--- Writing to spreadsheet ID: {spreadsheet_id} ---")
+        print(f"--- Ensuring sheet '{TARGET_SHEET_NAME}' exists in spreadsheet ID: {spreadsheet_id} ---")
+
+        # Get spreadsheet properties to check for our target sheet
+        spreadsheet_properties = await asyncio.to_thread(
+            service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute
+        )
+        sheets = spreadsheet_properties.get('sheets', [])
+        
+        target_sheet_exists = any(sheet['properties']['title'] == TARGET_SHEET_NAME for sheet in sheets)
+        default_sheet = next((sheet for sheet in sheets if sheet['properties']['title'] == 'Sheet1'), None)
+
+        if not target_sheet_exists and default_sheet:
+            print(f"--- Renaming 'Sheet1' to '{TARGET_SHEET_NAME}' ---")
+            rename_request = {
+                "updateSheetProperties": {
+                    "properties": {"sheetId": default_sheet['properties']['sheetId'], "title": TARGET_SHEET_NAME},
+                    "fields": "title"
+                }
+            }
+            await asyncio.to_thread(
+                service.spreadsheets().batchUpdate(
+                    spreadsheetId=spreadsheet_id, body={'requests': [rename_request]}
+                ).execute
+            )
+        elif not target_sheet_exists:
+            print(f"--- Creating new sheet named '{TARGET_SHEET_NAME}' ---")
+            add_sheet_request = {"addSheet": {"properties": {"title": TARGET_SHEET_NAME}}}
+            await asyncio.to_thread(
+                service.spreadsheets().batchUpdate(
+                    spreadsheetId=spreadsheet_id, body={'requests': [add_sheet_request]}
+                ).execute
+            )
+
+        # Now, clear and write to the target sheet
+        print(f"--- Clearing and writing to sheet: {TARGET_SHEET_NAME} ---")
         
         header = ["Title", "Company", "Location", "Match Score", "Reason", "Job URL"]
         rows = [header] + [[job.get(key, "") for key in ["title", "company", "location", "match_score", "reason", "job_url"]] for job in data]
-
+        
         body = {'values': rows}
         
-        clear_request = service.spreadsheets().values().clear(spreadsheetId=spreadsheet_id, range='Sheet1')
+        # Clear the sheet first
+        clear_request = service.spreadsheets().values().clear(spreadsheetId=spreadsheet_id, range=TARGET_SHEET_NAME)
         await asyncio.to_thread(clear_request.execute)
 
+        # Update the sheet with new data
         update_request = service.spreadsheets().values().update(
             spreadsheetId=spreadsheet_id,
-            range='Sheet1',
+            range=TARGET_SHEET_NAME,
             valueInputOption='USER_ENTERED',
             body=body
         )
@@ -147,4 +184,10 @@ async def write_to_sheet(user_id: str, data: List) -> bool:
 
     except Exception as e:
         print(f"--- An error occurred writing to the sheet: {e} ---")
+        if "was not found" in str(e):
+            print("--- Spreadsheet not found. Resetting spreadsheet_id for user. ---")
+            await db.users.update_one(
+                {"_id": ObjectId(user_id)},
+                {"$set": {"spreadsheet_id": None}}
+            )
         return False
