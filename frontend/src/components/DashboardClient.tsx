@@ -6,17 +6,10 @@ import Cookies from "js-cookie";
 import axios from "axios";
 import GoogleSheetsToggle from "@/components/GoogleSheetsToggle";
 import UserProfile from "@/components/UserProfile";
-import LoadingButton from "@/components/LoadingButton";
 import SimpleNavbar from "./SimpleNavbar";
 import { toast } from "react-hot-toast";
 import JobCardSkeleton from "./JobCardSkeleton";
-import {
-  DndContext,
-  closestCenter,
-  useSensor,
-  useSensors,
-  PointerSensor,
-} from "@dnd-kit/core";
+import { DndContext, closestCenter, useSensor, useSensors, PointerSensor } from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import JobCard from "./JobCard";
 import DropZone from "./DropZone";
@@ -25,7 +18,6 @@ import HeaderButton from "./HeaderButton";
 import { Coins, User, Briefcase, LogOut, Settings, Gem, Star, Sheet } from 'lucide-react';
 import TimeRemainingButton from "./TimeRemainingButton";
 import GeminiIcon from "./GeminiIcon";
-
 
 interface JobApplication {
   id: string;
@@ -40,16 +32,13 @@ interface JobApplication {
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: { type: "spring", stiffness: 100, damping: 10 },
-  },
+  visible: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 100, damping: 10 } },
 };
 
 export default function DashboardClient() {
   const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // For initial page load
+  const [isGenerating, setIsGenerating] = useState(false); // For background task
   const [error, setError] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isSheetsEnabled, setIsSheetsEnabled] = useState(false);
@@ -71,56 +60,24 @@ export default function DashboardClient() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const token = typeof window !== "undefined" ? Cookies.get("token") : null;
   const userId = typeof window !== "undefined" ? Cookies.get("user_id") : null;
   const plan = typeof window !== "undefined" ? Cookies.get("plan_type") : "free";
 
-  useEffect(() => {
-    setIsClient(true);
-    setUserPlan((plan as "free" | "pro") || "free");
-
-    const upgradeSuccess = searchParams.get("upgrade_success");
-    if (upgradeSuccess === "true") {
-      toast.success("Welcome to Pro! Enjoy your new features.");
-      router.replace(window.location.pathname, undefined);
-    }
-
-    const fetchUser = async () => {
-      const token = Cookies.get("token");
-      if (token) {
-        try {
-          const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/me`, { headers: { Authorization: `Bearer ${token}` } });
-          if (data.next_generation_allowed_at) {
-            setNextGenerationAllowedAt(new Date(data.next_generation_allowed_at).getTime());
-          }
-          setLoyaltyCoins(data.loyalty_coins || 0);
-          setUserPlan(data.plan_type || "free");
-          setAuthType(data.auth_type || "standard");
-          setUserName(data.name || '');
-        } catch (error) {
-          console.error("Failed to fetch user data", error);
-        }
-      }
-    };
-    fetchUser();
-  }, [plan, searchParams, router]);
-
   const fetchAllJobs = useCallback(async () => {
     if (!userId || !token) return;
     setIsLoading(true);
     setError(null);
-
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/job_applications`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       if (res.data?.job_applications) {
         const jobApps = res.data.job_applications.map((app: any, index: number) => {
           const jobDetails = app.job_details || {};
-          const baseId = jobDetails.job_url || `${jobDetails.title}-${jobDetails.company}`;
-          const id = `${baseId}-${index}`;
+          const id = `${jobDetails.job_url || `${jobDetails.title}-${jobDetails.company}`}-${index}`;
           return { ...jobDetails, id, status: app.status };
         });
         setJobApplications(jobApps);
@@ -137,8 +94,36 @@ export default function DashboardClient() {
   }, [token, userId]);
 
   useEffect(() => {
+    setIsClient(true);
+    setUserPlan((plan as "free" | "pro") || "free");
+    const upgradeSuccess = searchParams.get("upgrade_success");
+    if (upgradeSuccess === "true") {
+      toast.success("Welcome to Pro! Enjoy your new features.");
+      router.replace(window.location.pathname, undefined);
+    }
+
+    const fetchUser = async () => {
+      if (token) {
+        try {
+          const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/me`, { headers: { Authorization: `Bearer ${token}` } });
+          setNextGenerationAllowedAt(new Date(data.next_generation_allowed_at).getTime());
+          setLoyaltyCoins(data.loyalty_coins || 0);
+          setUserPlan(data.plan_type || "free");
+          setAuthType(data.auth_type || "standard");
+          setUserName(data.name || '');
+        } catch (error) { console.error("Failed to fetch user data", error); }
+      }
+    };
+    fetchUser();
     fetchAllJobs();
-  }, [fetchAllJobs]);
+
+    // Cleanup polling on component unmount
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, [plan, searchParams, router, fetchAllJobs, token]);
 
   useEffect(() => {
     const fetchSheetStatus = async () => {
@@ -159,46 +144,17 @@ export default function DashboardClient() {
     const checkRedirectStatus = () => {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get("sheets_success") === "true") {
+        toast.success("Google Sheets connected successfully!");
         fetchSheetStatus();
-        router.replace(window.location.pathname);
+        router.replace(window.location.pathname, undefined);
       }
     };
 
-    fetchSheetStatus();
+    if (plan === "pro") {
+        fetchSheetStatus();
+    }
     checkRedirectStatus();
   }, [userId, token, plan, router]);
-
-  useEffect(() => {
-    if (nextGenerationAllowedAt) {
-      const now = Date.now();
-      if (now < nextGenerationAllowedAt) {
-        const nextDate = new Date(nextGenerationAllowedAt);
-        const dateOptions: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-        setTimeRemaining(<>Next recommendations on <strong className="font-semibold">{nextDate.toLocaleDateString('en-US', dateOptions)}</strong></>);
-      } else {
-        setTimeRemaining("");
-      }
-    } else {
-      setTimeRemaining("");
-    }
-  }, [nextGenerationAllowedAt]);
-
-  const handleExpandButton = useCallback((id: string) => {
-    const wasExpanded = expandedButton !== '';
-    const willCollapse = wasExpanded && id === '';
-
-    if (willCollapse) {
-      if (expandedButton === 'generate') {
-        setWiggleSheetsKey(prev => prev + 1);
-      } else if (expandedButton === 'sheets') {
-        setWiggleTokensKey(prev => prev + 1);
-      } else if (expandedButton === 'tokens') {
-        setWiggleProfileKey(prev => prev + 1);
-      }
-    }
-    
-    setExpandedButton(id);
-  }, [expandedButton]);
 
   const handleSheetToggle = async () => {
     if (!userId) return;
@@ -221,56 +177,6 @@ export default function DashboardClient() {
       }
     }
     setIsToggleLoading(false);
-  };
-
-  const handleGenerateRecommendations = () => {
-    if (!!timeRemaining) {
-      toast.error("You've reached your recommendation limit for now.");
-      return;
-    }
-    setIsConfirmationModalOpen(true);
-  };
-
-  const confirmGenerateRecommendations = async () => {
-    setIsConfirmationModalOpen(false);
-    setJobApplications([]);
-
-    if (!userId || !token) {
-      setError("User not authenticated. Please sign in again.");
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setError(null);
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/generate_recommendations`, null, { headers: { Authorization: `Bearer ${token}` }, timeout: 120000 });
-      if (res.data.sheets_error) {
-        toast.error(`Google Sheets Sync Failed: ${res.data.sheets_error}`);
-      }
-      if (res.data.recommended_jobs) {
-        const jobApps = res.data.recommended_jobs.map((job: any, index: number) => {
-          const baseId = job.job_url || `${job.title}-${job.company}`;
-          const id = `${baseId}-${index}`;
-          return { ...job, id, status: 'recommended' };
-        });
-        setJobApplications(jobApps);
-      }
-      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/me`, { headers: { Authorization: `Bearer ${token}` } });
-      if (data.next_generation_allowed_at) {
-        setNextGenerationAllowedAt(new Date(data.next_generation_allowed_at).getTime());
-      }
-    } catch (err: unknown) {
-      let errorMessage = "An unexpected error occurred.";
-      if (axios.isAxiosError(err) && err.response?.data?.detail) {
-        errorMessage = err.response.data.detail;
-      } else if (err instanceof Error) {
-        errorMessage = err.message;
-      }
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleRedeemReward = async () => {
@@ -359,6 +265,113 @@ export default function DashboardClient() {
     }
   };
 
+  const handleExpandButton = useCallback((id: string) => {
+    const wasExpanded = expandedButton !== '';
+    const willCollapse = wasExpanded && id === '';
+
+    if (willCollapse) {
+      if (expandedButton === 'generate') {
+        setWiggleSheetsKey(prev => prev + 1);
+      } else if (expandedButton === 'sheets') {
+        setWiggleTokensKey(prev => prev + 1);
+      } else if (expandedButton === 'tokens') {
+        setWiggleProfileKey(prev => prev + 1);
+      }
+    }
+    
+    setExpandedButton(id);
+  }, [expandedButton]);
+
+  const pollTaskStatus = useCallback((taskId: string) => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+    }
+
+    pollingIntervalRef.current = setInterval(async () => {
+      try {
+        const { data: task } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/recommendations/status/${taskId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (task.status === 'complete') {
+          if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+          setIsGenerating(false);
+          toast.success(`Successfully generated ${task.result?.count || 'new'} recommendations!`);
+          if (task.result?.sheets_error) {
+            toast.error(`Google Sheets Sync Failed: ${task.result.sheets_error}`, { duration: 6000 });
+          }
+          await fetchAllJobs();
+          // Fetch user again to update rate limit info
+          const { data: userData } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/me`, { headers: { Authorization: `Bearer ${token}` } });
+          if (userData.next_generation_allowed_at) {
+            setNextGenerationAllowedAt(new Date(userData.next_generation_allowed_at).getTime());
+          }
+        } else if (task.status === 'failed') {
+          if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+          setIsGenerating(false);
+          setError(task.error || 'Recommendation generation failed.');
+          toast.error(task.error || 'An unknown error occurred during generation.');
+        }
+        // If status is 'pending' or 'running', do nothing and let it poll again
+      } catch (error) {
+        if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+        setIsGenerating(false);
+        setError('Failed to get task status.');
+        toast.error('Could not check the status of the recommendation task.');
+        console.error("Polling error:", error);
+      }
+    }, 5000); // Poll every 5 seconds
+  }, [token, fetchAllJobs]);
+
+  const confirmGenerateRecommendations = async () => {
+    setIsConfirmationModalOpen(false);
+    if (!userId || !token) {
+      setError("User not authenticated. Please sign in again.");
+      return;
+    }
+
+    setIsGenerating(true);
+    setError(null);
+    setJobApplications([]); // Clear existing jobs immediately
+
+    try {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/recommendations/start`, null, { 
+        headers: { Authorization: `Bearer ${token}` } 
+      });
+      
+      if (res.status === 202 && res.data.task_id) {
+        toast.success("Started generating recommendations! This might take a minute.");
+        pollTaskStatus(res.data.task_id);
+      } else {
+        throw new Error("Failed to start the generation task.");
+      }
+    } catch (err: unknown) {
+      let errorMessage = "An unexpected error occurred.";
+      if (axios.isAxiosError(err) && err.response?.data?.detail) {
+        errorMessage = err.response.data.detail;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      setError(errorMessage);
+      toast.error(errorMessage);
+      setIsGenerating(false);
+    }
+  };
+
+  // --- All other handlers like handleSheetToggle, handleLogout, etc. remain the same ---
+
+  const handleGenerateRecommendations = () => {
+    if (!!timeRemaining) {
+      toast.error("You've reached your recommendation limit for now.");
+      return;
+    }
+    if (isGenerating) {
+      toast.loading("Generation is already in progress...");
+      return;
+    }
+    setIsConfirmationModalOpen(true);
+  };
+
   const recommendedJobs = jobApplications.filter((j) => j.status === "recommended");
 
   return (
@@ -390,7 +403,7 @@ export default function DashboardClient() {
             >
               <HeaderButton
                 id="generate"
-                icon={isLoading ? <LoadingSpinner /> : <GeminiIcon />}
+                icon={isGenerating ? <LoadingSpinner /> : <GeminiIcon />}
                 expandedContent={
                   <span className="whitespace-nowrap text-sm font-semibold">Get Personalized Jobs</span>
                 }
@@ -398,11 +411,11 @@ export default function DashboardClient() {
                 isExpanded={expandedButton === 'generate'}
                 onExpand={handleExpandButton}
                 ariaLabel="Get Personalized Jobs"
-                className={!!timeRemaining ? "opacity-60 cursor-not-allowed" : ""}
+                className={!!timeRemaining || isGenerating ? "opacity-60 cursor-not-allowed" : ""}
                 shouldTriggerWiggle={true}
               />
 
-              {isClient && userPlan === "pro" && (
+                            {isClient && userPlan === "pro" && (
                 <motion.div
                   key={`sheets-wrapper-${wiggleSheetsKey}`}
                   animate={{
@@ -526,16 +539,16 @@ export default function DashboardClient() {
 
           <div className="flex items-center justify-center my-4 md:my-6">
             <AnimatePresence>
-              {nextGenerationAllowedAt && (
+              {nextGenerationAllowedAt && !isGenerating && (
                 <TimeRemainingButton nextGenerationAllowedAt={nextGenerationAllowedAt} />
               )}
             </AnimatePresence>
           </div>
 
-          {isLoading && (
+          {(isLoading || isGenerating) && (
             <div className="text-center">
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                This might take a while, we are generating jobs based on your preferences...
+                {isGenerating ? "Generating new recommendations, this may take up to a minute..." : "Loading your dashboard..."}
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, index) => <JobCardSkeleton key={index} />)}
@@ -549,47 +562,49 @@ export default function DashboardClient() {
             </p>
           )}
 
-          {!isLoading && !error && jobApplications.length === 0 && (
+          {!isLoading && !isGenerating && !error && jobApplications.length === 0 && (
             <p className="text-center text-gray-600 dark:text-gray-300 text-lg">
               No recommendations found. Try generating a new list!
             </p>
           )}
 
-          <DndContext
-            sensors={useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))}
-            collisionDetection={closestCenter}
-            onDragEnd={onDragEnd}
-          >
-            <SortableContext items={recommendedJobs.map((j) => j.id)}>
-              <motion.div
-                variants={{
-                  hidden: { opacity: 0 },
-                  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
-                }}
-                initial="hidden"
-                animate="visible"
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              >
-                {recommendedJobs.map((job) => (
-                  <JobCard
-                    key={job.id}
-                    job={job}
-                    userPlan={userPlan}
-                    onSave={() => handleCardAction(job, 'saved')}
-                    onApply={() => handleCardAction(job, 'applied')}
-                    isSaving={cardActionLoading[job.id]}
-                    isApplying={cardActionLoading[job.id]}
-                    variants={cardVariants}
-                  />
-                ))}
-              </motion.div>
-            </SortableContext>
-            {userPlan === "pro" && (
-              <div className="hidden lg:flex">
-                <DropZone savedCount={savedJobsCount} appliedCount={appliedJobsCount} />
-              </div>
-            )}
-          </DndContext>
+          {!isGenerating && (
+            <DndContext
+              sensors={useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))}
+              collisionDetection={closestCenter}
+              onDragEnd={onDragEnd}
+            >
+              <SortableContext items={recommendedJobs.map((j) => j.id)}>
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+                  }}
+                  initial="hidden"
+                  animate="visible"
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                >
+                  {recommendedJobs.map((job) => (
+                    <JobCard
+                      key={job.id}
+                      job={job}
+                      userPlan={userPlan}
+                      onSave={() => handleCardAction(job, 'saved')}
+                      onApply={() => handleCardAction(job, 'applied')}
+                      isSaving={cardActionLoading[job.id]}
+                      isApplying={cardActionLoading[job.id]}
+                      variants={cardVariants}
+                    />
+                  ))}
+                </motion.div>
+              </SortableContext>
+              {userPlan === "pro" && (
+                <div className="hidden lg:flex">
+                  <DropZone savedCount={savedJobsCount} appliedCount={appliedJobsCount} />
+                </div>
+              )}
+            </DndContext>
+          )}
         </div>
       </motion.div>
       <ConfirmationModal
