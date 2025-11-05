@@ -321,4 +321,4 @@ async def generate_recommendations(current_user: dict = Depends(get_current_user
         if not success:
             sheets_error = f"Failed to write to Google Sheets for user {user_id}."
 
-    return {"recommendation_data": recommendation_data, "sheets_error": sheets_error}
+    return {"recommended_jobs": [job.dict() for job in recommended_jobs], "sheets_error": sheets_error}

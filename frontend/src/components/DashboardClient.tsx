@@ -243,15 +243,22 @@ export default function DashboardClient() {
     try {
       setIsLoading(true);
       setError(null);
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/generate_recommendations`, null, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/generate_recommendations`, null, { headers: { Authorization: `Bearer ${token}` }, timeout: 60000 });
       if (res.data.sheets_error) {
         toast.error(`Google Sheets Sync Failed: ${res.data.sheets_error}`);
+      }
+      if (res.data.recommended_jobs) {
+        const jobApps = res.data.recommended_jobs.map((job: any, index: number) => {
+          const baseId = job.job_url || `${job.title}-${job.company}`;
+          const id = `${baseId}-${index}`;
+          return { ...job, id, status: 'recommended' };
+        });
+        setJobApplications(jobApps);
       }
       const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/me`, { headers: { Authorization: `Bearer ${token}` } });
       if (data.next_generation_allowed_at) {
         setNextGenerationAllowedAt(new Date(data.next_generation_allowed_at).getTime());
       }
-      fetchAllJobs();
     } catch (err: unknown) {
       let errorMessage = "An unexpected error occurred.";
       if (axios.isAxiosError(err) && err.response?.data?.detail) {
