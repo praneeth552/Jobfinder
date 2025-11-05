@@ -332,7 +332,6 @@ export default function DashboardClient() {
 
     setIsGenerating(true);
     setError(null);
-    setJobApplications([]); // Clear existing jobs immediately
 
     try {
       const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/recommendations/start`, null, { 

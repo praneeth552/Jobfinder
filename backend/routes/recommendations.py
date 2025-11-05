@@ -26,7 +26,7 @@ tasks_collection = db["generation_tasks"]
 
 # --- Gemini Configuration ---
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-GEMINI_MODEL_NAME = "gemini-1.5-flash-latest"
+GEMINI_MODEL_NAME = "gemini-flash-latest"
 GENERATION_CONFIG = {
     "temperature": 0.7,
     "top_p": 0.95,
