@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import os
 import json
 import uuid
+import asyncio
 from services.google_sheets import write_to_sheet
 from utils import get_current_user, is_pro_user
 
