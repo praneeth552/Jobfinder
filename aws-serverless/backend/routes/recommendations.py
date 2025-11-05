@@ -26,21 +26,21 @@ tasks_collection = db["generation_tasks"]
 
 # --- Gemini Configuration ---
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-GEMINI_MODEL_NAME = "gemini-1.5-flash"
+GEMINI_MODEL_NAME = "gemini-2.5-flash"
 GENERATION_CONFIG = {
     "temperature": 0.7,
     "top_p": 0.95,
     "top_k": 40,
-    "max_output_tokens": 8192,
+    "max_output_tokens": 16384,
     "response_mime_type": "application/json",
 }
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
-SAFETY_SETTINGS = [
-    {"category": HarmCategory.HARM_CATEGORY_HARASSMENT, "threshold": HarmBlockThreshold.BLOCK_NONE},
-    {"category": HarmCategory.HARM_CATEGORY_HATE_SPEECH, "threshold": HarmBlockThreshold.BLOCK_NONE},
-    {"category": HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, "threshold": HarmBlockThreshold.BLOCK_NONE},
-    {"category": HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, "threshold": HarmBlockThreshold.BLOCK_NONE},
-]
+SAFETY_SETTINGS = {
+    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+}
 
 # --- Helper: Build Prompt ---
 def build_prompt(user_profile, jobs):
@@ -116,7 +116,8 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
         response = await asyncio.to_thread(model.generate_content, prompt)
 
         if not response.candidates or not response.candidates[0].content.parts:
-            raise Exception("AI content filtering triggered.")
+            feedback = response.prompt_feedback if hasattr(response, 'prompt_feedback') else 'No feedback available'
+            raise Exception(f"AI content filtering triggered. Feedback: {feedback}")
 
         raw_text = response.text.strip()
         if raw_text.startswith("```"):
@@ -125,7 +126,16 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
         else:
             cleaned_response_text = raw_text
 
-        recommended_jobs_data = json.loads(cleaned_response_text)
+        try:
+            recommended_jobs_data = json.loads(cleaned_response_text)
+        except json.JSONDecodeError:
+            import re
+            json_objects_str = re.findall(r'\{[^{}]*\}', cleaned_response_text)
+            if json_objects_str:
+                recommended_jobs_data = [json.loads(s) for s in json_objects_str]
+            else:
+                raise ValueError("Failed to parse or repair JSON response from AI.")
+
         if not isinstance(recommended_jobs_data, list) or len(recommended_jobs_data) == 0:
             raise ValueError("AI response is not a valid list of jobs.")
 
