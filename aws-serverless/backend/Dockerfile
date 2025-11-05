@@ -1,6 +1,9 @@
 # Use the official AWS Lambda Python base image
 FROM public.ecr.aws/lambda/python:3.11
 
+# Install build tools
+RUN yum groupinstall -y "Development Tools" && yum install -y gcc
+
 # Copy function code and other files
 COPY . ${LAMBDA_TASK_ROOT}
 
