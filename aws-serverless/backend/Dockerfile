@@ -1,21 +1,29 @@
-# Use the official AWS Lambda Python base image
+# AWS Lambda Python 3.11
 FROM public.ecr.aws/lambda/python:3.11
 
-# Install build tools
-RUN yum groupinstall -y "Development Tools" && yum install -y gcc
+ENV PIP_NO_CACHE_DIR=1
+WORKDIR ${LAMBDA_TASK_ROOT}
 
-# Copy function code and other files
-COPY . ${LAMBDA_TASK_ROOT}
+# 1) Install build tools for Python packaging (not OS compilers)
+RUN pip install --upgrade pip setuptools wheel
 
-# Copy the requirements file
-COPY requirements.txt ${LAMBDA_TASK_ROOT}
+# 2) Copy requirements first for better caching
+COPY requirements.txt .
 
-# Install the specified packages from requirements.txt
-RUN pip install -r requirements.txt
+# 3) Preinstall native-heavy libs from wheels only (adjust/pin as needed)
+# If your app uses these, keep them. If not, remove the ones you don't need.
+RUN pip install --no-cache-dir --only-binary=:all: --target "${LAMBDA_TASK_ROOT}" \
+    "numpy==2.1.3"
 
-# Download the spaCy model during the build process
-RUN python -m spacy download en_core_web_sm
+# 4) Install the rest of your deps into the task root
+RUN pip install --no-cache-dir -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
-# Set the CMD to your handler. 
-# The format is "<filename>.<handler_function_name>"
-CMD [ "main.handler" ]
+# 5) spaCy model (use wheel for reproducibility; matches spaCy 3.7.x)
+RUN python -m pip install --no-cache-dir \
+  https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+
+# 6) Copy your application code last
+COPY . .
+
+# 7) Lambda handler: <module>.<function>
+CMD ["main.handler"]
