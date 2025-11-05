@@ -6,27 +6,27 @@ import { Timer } from 'lucide-react';
 
 interface TimeRemainingButtonProps {
   nextGenerationAllowedAt: number;
+  onTimeRemainingChange: (time: React.ReactNode) => void;
 }
 
-const TimeRemainingButton: React.FC<TimeRemainingButtonProps> = ({ nextGenerationAllowedAt }) => {
+const TimeRemainingButton: React.FC<TimeRemainingButtonProps> = ({ nextGenerationAllowedAt, onTimeRemainingChange }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<React.ReactNode>("");
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    let newTimeRemaining: React.ReactNode = "";
     if (nextGenerationAllowedAt) {
       const now = Date.now();
       if (now < nextGenerationAllowedAt) {
         const nextDate = new Date(nextGenerationAllowedAt);
         const dateOptions: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-        setTimeRemaining(<>Next recommendations on <strong className="font-semibold">{nextDate.toLocaleDateString('en-US', dateOptions)}</strong></>);
-      } else {
-        setTimeRemaining("");
+        newTimeRemaining = <>Next recommendations on <strong className="font-semibold">{nextDate.toLocaleDateString('en-US', dateOptions)}</strong></>;
       }
-    } else {
-      setTimeRemaining("");
     }
-  }, [nextGenerationAllowedAt]);
+    setTimeRemaining(newTimeRemaining);
+    onTimeRemainingChange(newTimeRemaining);
+  }, [nextGenerationAllowedAt, onTimeRemainingChange]);
 
   useEffect(() => {
     if (isExpanded) {
