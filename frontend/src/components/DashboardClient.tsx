@@ -243,7 +243,7 @@ export default function DashboardClient() {
     try {
       setIsLoading(true);
       setError(null);
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/generate_recommendations`, null, { headers: { Authorization: `Bearer ${token}` }, timeout: 60000 });
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/generate_recommendations`, null, { headers: { Authorization: `Bearer ${token}` }, timeout: 120000 });
       if (res.data.sheets_error) {
         toast.error(`Google Sheets Sync Failed: ${res.data.sheets_error}`);
       }

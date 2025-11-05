@@ -1,4 +1,4 @@
-# 📁 File: backend/routes/sheets.py
+# 📁 File: aws-serverless/routes/sheets.py
 # ⛳ Purpose: Handles Google Sheets OAuth flow — authorization and callback routes.
 
 from fastapi import APIRouter, Request, Depends, HTTPException
