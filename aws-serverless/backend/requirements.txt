@@ -37,7 +37,6 @@ pdfminer.six==20221105
 docx2txt==0.8
 beautifulsoup4==4.12.2
 
-importlib-metadata==4.13.0
 # Utilities
 python-dotenv
 python-multipart
