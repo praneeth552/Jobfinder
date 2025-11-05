@@ -6,6 +6,29 @@ provider:
   name: aws
   region: us-east-1
   architecture: x86_64 # Use x86_64 to match the GitHub Actions runner environment
+  httpApi:
+    cors:
+      allowedOrigins:
+        - http://localhost
+        - http://localhost:3000
+        - http://127.0.0.1
+        - http://127.0.0.1:3000
+        - https://jobfinder-frontend-pied.vercel.app
+        - https://main.d1yb9ogprne3f8.amplifyapp.com
+        - http://tackleit.xyz
+        - https://tackleit.xyz
+        - http://www.tackleit.xyz
+        - https://www.tackleit.xyz
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+      allowedMethods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+      allowCredentials: true
   
   ecr:
     images:

@@ -545,66 +545,68 @@ export default function DashboardClient() {
             </AnimatePresence>
           </div>
 
-          {(isLoading || isGenerating) && (
-            <div className="text-center">
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                {isGenerating ? "Generating new recommendations, this may take up to a minute..." : "Loading your dashboard..."}
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Array.from({ length: 6 }).map((_, index) => <JobCardSkeleton key={index} />)}
-              </div>
-            </div>
-          )}
-
-          {error && (
-            <p className="text-center text-red-500 bg-red-100 dark:bg-red-900/50 dark:text-red-400 p-4 rounded-lg">
-              {error}
-            </p>
-          )}
-
-          {!isLoading && !isGenerating && !error && jobApplications.length === 0 && (
-            <p className="text-center text-gray-600 dark:text-gray-300 text-lg">
-              No recommendations found. Try generating a new list!
-            </p>
-          )}
-
-          {!isGenerating && (
-            <DndContext
-              sensors={useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))}
-              collisionDetection={closestCenter}
-              onDragEnd={onDragEnd}
-            >
-              <SortableContext items={recommendedJobs.map((j) => j.id)}>
-                <motion.div
-                  variants={{
-                    hidden: { opacity: 0 },
-                    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
-                  }}
-                  initial="hidden"
-                  animate="visible"
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                >
-                  {recommendedJobs.map((job) => (
-                    <JobCard
-                      key={job.id}
-                      job={job}
-                      userPlan={userPlan}
-                      onSave={() => handleCardAction(job, 'saved')}
-                      onApply={() => handleCardAction(job, 'applied')}
-                      isSaving={cardActionLoading[job.id]}
-                      isApplying={cardActionLoading[job.id]}
-                      variants={cardVariants}
-                    />
-                  ))}
-                </motion.div>
-              </SortableContext>
-              {userPlan === "pro" && (
-                <div className="hidden lg:flex">
-                  <DropZone savedCount={savedJobsCount} appliedCount={appliedJobsCount} />
+          <DndContext
+            sensors={useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))}
+            collisionDetection={closestCenter}
+            onDragEnd={onDragEnd}
+          >
+            {(isLoading || isGenerating) && (
+              <div className="text-center">
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  {isGenerating ? "Generating new recommendations, this may take up to a minute..." : "Loading your dashboard..."}
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Array.from({ length: 6 }).map((_, index) => <JobCardSkeleton key={index} />)}
                 </div>
-              )}
-            </DndContext>
-          )}
+              </div>
+            )}
+
+            {error && (
+              <p className="text-center text-red-500 bg-red-100 dark:bg-red-900/50 dark:text-red-400 p-4 rounded-lg">
+                {error}
+              </p>
+            )}
+
+            {!isLoading && !isGenerating && !error && jobApplications.length === 0 && (
+              <p className="text-center text-gray-600 dark:text-gray-300 text-lg">
+                No recommendations found. Try generating a new list!
+              </p>
+            )}
+
+            {!isLoading && !isGenerating && !error && jobApplications.length > 0 && (
+              <>
+                <SortableContext items={recommendedJobs.map((j) => j.id)}>
+                  <motion.div
+                    variants={{
+                      hidden: { opacity: 0 },
+                      visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+                    }}
+                    initial="hidden"
+                    animate="visible"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                  >
+                    {recommendedJobs.map((job) => (
+                      <JobCard
+                        key={job.id}
+                        job={job}
+                        userPlan={userPlan}
+                        onSave={() => handleCardAction(job, 'saved')}
+                        onApply={() => handleCardAction(job, 'applied')}
+                        isSaving={cardActionLoading[job.id]}
+                        isApplying={cardActionLoading[job.id]}
+                        variants={cardVariants}
+                      />
+                    ))}
+                  </motion.div>
+                </SortableContext>
+                {userPlan === "pro" && (
+                  <div className="hidden lg:flex">
+                    <DropZone savedCount={savedJobsCount} appliedCount={appliedJobsCount} />
+                  </div>
+                )}
+              </>
+            )}
+          </DndContext>
         </div>
       </motion.div>
       <ConfirmationModal
