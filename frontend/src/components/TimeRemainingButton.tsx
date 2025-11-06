@@ -52,7 +52,6 @@ const TimeRemainingButton: React.FC<TimeRemainingButtonProps> = ({ nextGeneratio
 
   return (
     <motion.div
-      layout="position"
       transition={{
         layout: {
           type: 'spring',
