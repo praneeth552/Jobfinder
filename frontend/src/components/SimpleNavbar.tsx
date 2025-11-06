@@ -57,6 +57,8 @@ export default function SimpleNavbar() {
         variants={navVariants}
         initial="initial"
         animate="animate"
+      layout={false}  // Add this
+      style={{ willChange: 'auto' }}  // Add this
         className={`fixed top-4 left-2 right-2 max-w-6xl mx-auto flex justify-between items-center px-4 sm:px-6 py-3 z-[1000] transition-all duration-300 rounded-2xl
           ${hasScrolled ? "bg-[--card-background] border border-[--border] shadow-lg backdrop-blur-lg" : "bg-transparent"}`}>
         <Link href="/" className="text-2xl font-bold cursor-pointer">
@@ -64,8 +66,11 @@ export default function SimpleNavbar() {
         </Link>
 
         <div className="flex items-center space-x-4">
-          <ThemeToggle />
+          <motion.div layout={false}>  {/* Add this wrapper */}
+            <ThemeToggle />
+          </motion.div>
           <motion.button
+            layout={false}  // Add this prop
             onClick={openModal}
             className="submit-button-swipe font-semibold h-10 w-32 md:w-40 flex items-center justify-center"
             whileHover={{ scale: 1.05 }}

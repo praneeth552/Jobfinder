@@ -65,14 +65,18 @@ const GlobalSearchBar = () => {
   const hasResults = results.jobs.length > 0 || results.pages.length > 0;
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 global-search-bar">
+    <motion.div 
+      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50"
+      layout={false}  // Add this
+      style={{ willChange: 'auto' }}  // Add this
+    >
       <HeaderButton
         id="search"
         icon={<Search size={24} />}
         expandedContent={
-          <motion.div
-            className="flex flex-col"
-            initial={false}
+                  <motion.div
+                    className="flex flex-col"
+                    layout={false}  // Add this            initial={false}
             animate={{
               width: showResults ? 460 : 400,
               height: showResults ? 420 : "auto",
@@ -200,7 +204,7 @@ const GlobalSearchBar = () => {
         ariaLabel="Global Search"
         autoCollapse={false}
       />
-    </div>
+  </motion.div>
   );
 };
 

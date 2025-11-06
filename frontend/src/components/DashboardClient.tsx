@@ -17,6 +17,7 @@ import ConfirmationModal from "./ConfirmationModal";
 import HeaderButton from "./HeaderButton";
 import { Coins, User, Briefcase, LogOut, Settings, Gem, Star, Sheet } from 'lucide-react';
 import TimeRemainingButton from "./TimeRemainingButton";
+import TimeRemainingSkeleton from "./TimeRemainingSkeleton";
 import GeminiIcon from "./GeminiIcon";
 
 interface JobApplication {
@@ -54,6 +55,7 @@ export default function DashboardClient() {
   const [loyaltyCoins, setLoyaltyCoins] = useState(0);
   const [expandedButton, setExpandedButton] = useState<string>('');
   const [userName, setUserName] = useState('');
+  const [isUserLoading, setIsUserLoading] = useState(true);
   const [wiggleSheetsKey, setWiggleSheetsKey] = useState(0);
   const [wiggleTokensKey, setWiggleTokensKey] = useState(0);
   const [wiggleProfileKey, setWiggleProfileKey] = useState(0);
@@ -94,6 +96,7 @@ export default function DashboardClient() {
   }, [token, userId]);
 
   useEffect(() => {
+    setIsUserLoading(true);
     setIsClient(true);
     setUserPlan((plan as "free" | "pro") || "free");
     const upgradeSuccess = searchParams.get("upgrade_success");
@@ -112,6 +115,9 @@ export default function DashboardClient() {
           setAuthType(data.auth_type || "standard");
           setUserName(data.name || '');
         } catch (error) { console.error("Failed to fetch user data", error); }
+        finally { setIsUserLoading(false); }
+      } else {
+        setIsUserLoading(false);
       }
     };
     fetchUser();
@@ -372,6 +378,7 @@ export default function DashboardClient() {
   };
 
   const recommendedJobs = jobApplications.filter((j) => j.status === "recommended");
+  const isRateLimited = nextGenerationAllowedAt && Date.now() < nextGenerationAllowedAt;
 
   return (
     <>
@@ -399,6 +406,8 @@ export default function DashboardClient() {
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
+              layout={false}  // Add this
+              style={{ willChange: 'auto' }}  // Add this
             >
               <HeaderButton
                 id="generate"
@@ -410,11 +419,11 @@ export default function DashboardClient() {
                 isExpanded={expandedButton === 'generate'}
                 onExpand={handleExpandButton}
                 ariaLabel="Get Personalized Jobs"
-                className={!!timeRemaining || isGenerating ? "opacity-60 cursor-not-allowed" : ""}
+                className={isUserLoading || isRateLimited || isGenerating ? "opacity-60 cursor-not-allowed" : ""}
                 shouldTriggerWiggle={true}
               />
 
-                            {isClient && userPlan === "pro" && (
+              {isClient && userPlan === "pro" && (
                 <motion.div
                   key={`sheets-wrapper-${wiggleSheetsKey}`}
                   animate={{
@@ -537,14 +546,18 @@ export default function DashboardClient() {
           </div>
 
           <div className="flex items-center justify-center my-4 md:my-6">
-            <AnimatePresence>
-              {nextGenerationAllowedAt && !isGenerating && (
-                <TimeRemainingButton 
-                  nextGenerationAllowedAt={nextGenerationAllowedAt} 
-                  onTimeRemainingChange={setTimeRemaining}
-                />
-              )}
-            </AnimatePresence>
+            {isUserLoading ? (
+              <TimeRemainingSkeleton />
+            ) : (
+              <AnimatePresence>
+                {nextGenerationAllowedAt && !isGenerating && (
+                  <TimeRemainingButton 
+                    nextGenerationAllowedAt={nextGenerationAllowedAt} 
+                    onTimeRemainingChange={setTimeRemaining}
+                  />
+                )}
+              </AnimatePresence>
+            )}
           </div>
 
           <DndContext

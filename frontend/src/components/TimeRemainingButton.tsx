@@ -52,7 +52,7 @@ const TimeRemainingButton: React.FC<TimeRemainingButtonProps> = ({ nextGeneratio
 
   return (
     <motion.div
-      layout
+      layout="position"
       transition={{
         layout: {
           type: 'spring',
@@ -85,7 +85,7 @@ const TimeRemainingButton: React.FC<TimeRemainingButtonProps> = ({ nextGeneratio
             key="content"
             layout
             initial={{ opacity: 0, scale: 0.9 }}
-            animate={{
+            animate={{ 
               opacity: 1,
               scale: 1.03,
               transition: {
@@ -112,13 +112,27 @@ const TimeRemainingButton: React.FC<TimeRemainingButtonProps> = ({ nextGeneratio
             key="icon"
             layout
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={{
+            animate={{ 
               opacity: 1,
               scale: 1,
+              rotate: [0, -10, 10, -10, 10, 0],
               transition: {
-                type: 'spring',
-                stiffness: 280,
-                damping: 16,
+                opacity: {
+                  type: 'spring',
+                  stiffness: 280,
+                  damping: 16,
+                },
+                scale: {
+                  type: 'spring',
+                  stiffness: 280,
+                  damping: 16,
+                },
+                rotate: {
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatDelay: 3,
+                  ease: "easeInOut",
+                },
               },
             }}
             exit={{
