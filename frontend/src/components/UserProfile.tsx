@@ -61,7 +61,7 @@ const UserProfile = ({
             transition={{ type: 'spring', stiffness: 300, damping: 20, mass: 0.8 }}
                                                 className={userPlan === 'pro' 
                                                   ? "absolute top-full right-0 mt-3 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-2xl z-[9999] border border-gray-200 dark:border-slate-700 overflow-hidden"
-                                                  : "absolute top-full mt-3 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-2xl z-[9999] border border-gray-200 dark:border-slate-700 overflow-hidden left-1/2 -translate-x-1/2 transform md:right-0 md:left-auto md:translate-x-0"
+                                                  : "absolute top-full mt-3 w-25 bg-white dark:bg-slate-800 rounded-xl shadow-2xl z-[9999] border border-gray-200 dark:border-slate-700 overflow-hidden left-1/2 -translate-x-1/2 transform md:right-0 md:left-auto md:translate-x-0"
                                                 }>
             <div className="p-4 border-b border-gray-200 dark:border-slate-700">
               <p className="font-semibold text-gray-800 dark:text-white">{userName || 'User'}</p>
