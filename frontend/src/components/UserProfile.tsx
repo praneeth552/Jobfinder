@@ -61,7 +61,7 @@ const UserProfile = ({
             transition={{ type: 'spring', stiffness: 300, damping: 20, mass: 0.8 }}
             className={userPlan === 'pro' 
               ? "absolute top-full right-0 mt-3 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-2xl z-[9999] border border-gray-200 dark:border-slate-700 overflow-hidden"
-              : "absolute top-full mt-3 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-2xl z-[9999] border border-gray-200 dark:border-slate-700 overflow-hidden right-0" // Changed: always right-0 for free users
+              : "absolute top-full mt-3 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-2xl z-[9999] border border-gray-200 dark:border-slate-700 overflow-hidden md:right-0 right-[-65px]"
             }
           >
             <div className="p-4 border-b border-gray-200 dark:border-slate-700">

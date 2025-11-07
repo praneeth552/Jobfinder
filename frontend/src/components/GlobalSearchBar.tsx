@@ -78,9 +78,16 @@ const GlobalSearchBar = () => {
         icon={
           <motion.div
             key={iconKey}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{
+                opacity: 1,
+                scale: [1, 1.2, 0.9, 1.1, 1],
+            }}
+            transition={{
+                duration: 0.5,
+                ease: "easeInOut",
+                times: [0, 0.4, 0.6, 0.8, 1]
+            }}
           >
             <Search size={24} className="text-slate-700 dark:text-slate-200" />
           </motion.div>
