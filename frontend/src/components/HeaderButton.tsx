@@ -84,10 +84,9 @@ const HeaderButton: React.FC<HeaderButtonProps> = ({
         width: isExpanded ? contentWidth : 48,
       }}
       transition={{
-        type: 'spring',
-        stiffness: 300,
-        damping: 25,
-        mass: 0.8,
+        type: 'tween',
+        duration: 0.4,
+        ease: 'circOut',
       }}
       whileTap={{ scale: 0.96 }}
       whileHover={{
