@@ -57,24 +57,37 @@ export default function SimpleNavbar() {
         variants={navVariants}
         initial="initial"
         animate="animate"
-      layout={false}  // Add this
-      style={{ willChange: 'auto' }}  // Add this
+        layout={false}
+        style={{ 
+          willChange: 'auto',
+          contain: 'layout style paint',
+          isolation: 'isolate'
+        }}
         className={`fixed top-4 left-2 right-2 max-w-6xl mx-auto flex justify-between items-center px-4 sm:px-6 py-3 z-[1000] transition-all duration-300 rounded-2xl
           ${hasScrolled ? "bg-[--card-background] border border-[--border] shadow-lg backdrop-blur-lg" : "bg-transparent"}`}>
-        <Link href="/" className="text-2xl font-bold cursor-pointer">
+        <Link href="/" className="text-2xl font-bold cursor-pointer flex-shrink-0">
           TackleIt
         </Link>
 
-        <div className="flex items-center space-x-4">
-          <motion.div layout={false}>  {/* Add this wrapper */}
+        <div className="flex items-center space-x-4 min-w-[180px] md:min-w-[240px] justify-end flex-shrink-0">
+          <div
+            style={{ 
+              contain: 'layout style',
+              willChange: 'auto'
+            }}
+          >
             <ThemeToggle />
-          </motion.div>
+          </div>
           <motion.button
-            layout={false}  // Add this prop
             onClick={openModal}
-            className="submit-button-swipe font-semibold h-10 w-32 md:w-40 flex items-center justify-center"
+            className="submit-button-swipe font-semibold h-10 w-32 md:w-40 flex items-center justify-center flex-shrink-0"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            layout={false}
+            style={{ 
+              willChange: 'auto',
+              contain: 'layout style'
+            }}
           >
             <AnimatePresence mode="wait">
               <motion.span
@@ -84,7 +97,8 @@ export default function SimpleNavbar() {
                 animate="center"
                 exit="exit"
                 transition={{ duration: 0.3 }}
-                className="block" // Ensure span takes up space
+                className="block whitespace-nowrap"
+                style={{ contain: 'layout' }}
               >
                 {buttonTexts[textIndex]}
               </motion.span>

@@ -39,6 +39,7 @@ async def search(
         {"title": "Saved Jobs", "path": "/saved"},
         {"title": "Applied Jobs", "path": "/applied"},
         {"title": "Preferences", "path": "/preferences"},
+        {"title": "Data", "path": "/data"},
         {"title": "Pricing", "path": "/pricing"},
         {"title": "Upgrade", "path": "/upgrade"},
         {"title": "Workflow", "path": "/workflow"},

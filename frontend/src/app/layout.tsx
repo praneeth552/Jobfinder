@@ -1,3 +1,4 @@
+
 import "./globals.css";
 import type { ReactNode } from "react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -5,10 +6,9 @@ import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/context/AuthContext";
 import AuthInitializer from "@/components/AuthInitializer";
 import { ThemeProvider } from "@/context/ThemeContext";
-import ThemedLayout from "@/components/ThemedLayout";
-import GlobalSearchBar from "@/components/GlobalSearchBar";
 import Script from "next/script";
 import { Inter } from 'next/font/google';
+import AppContent from "@/components/AppContent";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -151,8 +151,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 position="top-center"
                 toastOptions={{ style: { zIndex: 9999 } }}
               />
-              <ThemedLayout>{children}</ThemedLayout>
-              <GlobalSearchBar />
+              <AppContent>{children}</AppContent>
             </AuthProvider>
           </ThemeProvider>
         </GoogleOAuthProvider>

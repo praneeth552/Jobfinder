@@ -39,8 +39,12 @@ function SigninForm() {
 
   useEffect(() => {
     const emailFromQuery = searchParams.get('email');
+    const redirectFromQuery = searchParams.get('redirect');
     if (emailFromQuery) {
       setEmail(emailFromQuery);
+    }
+    if (redirectFromQuery) {
+      setRedirectPath(redirectFromQuery);
     }
   }, [searchParams]);
 
@@ -51,7 +55,15 @@ function SigninForm() {
     Cookies.set("user_id", data.user_id, { expires: 1 });
     Cookies.set("plan_type", data.plan_type || "free", { expires: 1 });
     await fetchUser();
-    setRedirectPath(data.is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
+    
+    // Check if there's a redirect parameter, otherwise use default logic
+    const redirectFromQuery = searchParams.get('redirect');
+    if (redirectFromQuery) {
+      setRedirectPath(redirectFromQuery);
+    } else {
+      setRedirectPath(data.is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
+    }
+    
     toast.success("Sign-in successful!");
     setIsSuccess(true);
   };

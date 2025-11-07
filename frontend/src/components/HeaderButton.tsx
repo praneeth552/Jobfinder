@@ -78,7 +78,7 @@ const HeaderButton: React.FC<HeaderButtonProps> = ({
       tabIndex={0}
       onClick={handleClick}
       onKeyPress={(e) => e.key === 'Enter' && handleClick()}
-      className={`relative flex items-center justify-center h-12 rounded-full border border-slate-300/70 dark:border-white/20 bg-slate-200/50 dark:bg-white/10 shadow-lg backdrop-blur-sm transition-colors duration-300 hover:bg-slate-300/70 dark:hover:bg-white/20 cursor-pointer ${className}`}
+      className={`relative flex items-center justify-center h-12 rounded-full border border-slate-300/70 dark:border-white/20 bg-slate-200/50 dark:bg-white/10 shadow-lg backdrop-blur-sm transition-colors duration-300 hover:bg-slate-300/70 dark:hover:bg-white/20 cursor-pointer flex-shrink-0 ${className}`}
       aria-label={ariaLabel}
       animate={{
         width: isExpanded ? contentWidth : 48,
@@ -101,7 +101,14 @@ const HeaderButton: React.FC<HeaderButtonProps> = ({
           },
         },
       }}
-      style={{ willChange: 'auto' }}
+      layout={false}
+      style={{
+        willChange: 'auto',
+        minWidth: isExpanded ? 'auto' : '48px',
+        contain: 'layout style',
+        isolation: 'isolate',
+        overflow: 'hidden'
+      }}
     >
       <AnimatePresence mode="sync" initial={false}>
         {isExpanded ? (
@@ -112,7 +119,8 @@ const HeaderButton: React.FC<HeaderButtonProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="flex items-center gap-3 px-4 whitespace-nowrap"
+            className="flex items-center gap-3 px-4 whitespace-nowrap relative z-10"
+            style={{ overflow: 'visible' }}
           >
             {expandedContent}
           </motion.div>

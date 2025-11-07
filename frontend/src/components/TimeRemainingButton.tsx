@@ -7,13 +7,15 @@ import { Timer } from 'lucide-react';
 interface TimeRemainingButtonProps {
   nextGenerationAllowedAt: number;
   onTimeRemainingChange: (time: React.ReactNode) => void;
+  padding?: number;
 }
 
 const COLLAPSED_W = 48;
 
 const TimeRemainingButton: React.FC<TimeRemainingButtonProps> = ({
   nextGenerationAllowedAt,
-  onTimeRemainingChange
+  onTimeRemainingChange,
+  padding = 32
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<React.ReactNode>('');
@@ -25,14 +27,13 @@ const TimeRemainingButton: React.FC<TimeRemainingButtonProps> = ({
   useEffect(() => {
     const compute = () => {
       if (typeof window === 'undefined') return;
-      const pad = 32; // ~16px left/right breathing room
-      const vw = Math.max(0, window.innerWidth - pad);
+      const vw = Math.max(0, window.innerWidth - padding);
       setExpandedW(Math.min(450, Math.max(260, vw)));
     };
     compute();
     window.addEventListener('resize', compute);
     return () => window.removeEventListener('resize', compute);
-  }, []);
+  }, [padding]);
 
   useEffect(() => {
     let newTimeRemaining: React.ReactNode = '';
@@ -98,7 +99,7 @@ const TimeRemainingButton: React.FC<TimeRemainingButtonProps> = ({
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 10 }}
-              className="flex items-center gap-3 px-5 py-2 text-sm text-slate-700 dark:text-slate-200 sm:whitespace-nowrap whitespace-normal break-words"
+              className="flex items-center gap-3 px-5 py-2 text-sm text-slate-700 dark:text-slate-200 whitespace-nowrap"
               style={{ transform: 'translateZ(0)', willChange: 'transform, opacity' }}
             >
               <motion.div

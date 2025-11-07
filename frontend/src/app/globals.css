@@ -243,3 +243,29 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focu
 .prose a {
   @apply text-blue-600 hover:underline;
 }
+
+/* Custom Scrollbar for Search Results */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(203, 213, 225);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgb(148, 163, 184);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(51, 65, 85);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgb(71, 85, 105);
+}

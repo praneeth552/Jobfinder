@@ -12,6 +12,7 @@ interface AuthContextProps {
   userEmail: string | null; // Added userEmail
   planType: "free" | "pro";
   isAuthenticated: boolean;
+  isInitialized: boolean;
   setPlanType: (plan: "free" | "pro") => void;
   fetchUser: () => Promise<void>;
 }
@@ -25,6 +26,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userEmail, setUserEmail] = useState<string | null>(null); // Added userEmail state
   const [planType, setPlanType] = useState<"free" | "pro">("free");
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchUser = useCallback(async () => {
     const storedToken = Cookies.get("token");
@@ -61,22 +63,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        fetchUser();
-      }
+    const initialize = async () => {
+      await fetchUser();
+      setIsLoading(false);
     };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
+    initialize();
   }, [fetchUser]);
+
+  if (isLoading) {
+    return null; // Or a loading spinner
+  }
 
   return (
     <AuthContext.Provider
-      value={{ token, userId, userName, userEmail, planType, isAuthenticated: !!token, setPlanType, fetchUser }}
+      value={{ token, userId, userName, userEmail, planType, isAuthenticated: !!token, isInitialized, setPlanType, fetchUser }}
     >
       {children}
     </AuthContext.Provider>

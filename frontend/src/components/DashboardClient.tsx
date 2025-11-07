@@ -55,10 +55,12 @@ export default function DashboardClient() {
   const [loyaltyCoins, setLoyaltyCoins] = useState(0);
   const [expandedButton, setExpandedButton] = useState<string>('');
   const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isUserLoading, setIsUserLoading] = useState(true);
   const [wiggleSheetsKey, setWiggleSheetsKey] = useState(0);
   const [wiggleTokensKey, setWiggleTokensKey] = useState(0);
   const [wiggleProfileKey, setWiggleProfileKey] = useState(0);
+
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -114,6 +116,7 @@ export default function DashboardClient() {
           setUserPlan(data.plan_type || "free");
           setAuthType(data.auth_type || "standard");
           setUserName(data.name || '');
+          setUserEmail(data.email || null);
         } catch (error) { console.error("Failed to fetch user data", error); }
         finally { setIsUserLoading(false); }
       } else {
@@ -157,7 +160,7 @@ export default function DashboardClient() {
     };
 
     if (plan === "pro") {
-        fetchSheetStatus();
+      fetchSheetStatus();
     }
     checkRedirectStatus();
   }, [userId, token, plan, router]);
@@ -252,7 +255,7 @@ export default function DashboardClient() {
     if (newStatus) {
       setJobApplications(prev => prev.map(j => j.id === activeId ? { ...j, status: newStatus! } : j));
       try {
-        const url = newStatus === 'recommended' 
+        const url = newStatus === 'recommended'
           ? `${process.env.NEXT_PUBLIC_API_URL}/jobs/application/move_to_recommendations`
           : `${process.env.NEXT_PUBLIC_API_URL}/jobs/application/save_job`;
         await axios.post(url, { ...jobToMove, status: newStatus }, { headers: { Authorization: `Bearer ${token}` } });
@@ -273,20 +276,27 @@ export default function DashboardClient() {
 
   const handleExpandButton = useCallback((id: string) => {
     const wasExpanded = expandedButton !== '';
+    const previouslyExpanded = expandedButton;
     const willCollapse = wasExpanded && id === '';
 
-    if (willCollapse) {
-      if (expandedButton === 'generate') {
-        setWiggleSheetsKey(prev => prev + 1);
-      } else if (expandedButton === 'sheets') {
-        setWiggleTokensKey(prev => prev + 1);
-      } else if (expandedButton === 'tokens') {
-        setWiggleProfileKey(prev => prev + 1);
-      }
-    }
-    
+    // Update state immediately for responsive UI
     setExpandedButton(id);
+
+    // Trigger wiggle animation on next frame to avoid layout conflicts
+    if (willCollapse) {
+      requestAnimationFrame(() => {
+        if (previouslyExpanded === 'generate') {
+          setWiggleSheetsKey(prev => prev + 1);
+        } else if (previouslyExpanded === 'sheets') {
+          setWiggleTokensKey(prev => prev + 1);
+        } else if (previouslyExpanded === 'tokens') {
+          setWiggleProfileKey(prev => prev + 1);
+        }
+      });
+    }
   }, [expandedButton]);
+
+
 
   const pollTaskStatus = useCallback((taskId: string) => {
     if (pollingIntervalRef.current) {
@@ -340,10 +350,10 @@ export default function DashboardClient() {
     setError(null);
 
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/recommendations/start`, null, { 
-        headers: { Authorization: `Bearer ${token}` } 
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/recommendations/start`, null, {
+        headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (res.status === 202 && res.data.task_id) {
         toast.success("Started generating recommendations! This might take a minute.");
         pollTaskStatus(res.data.task_id);
@@ -400,14 +410,18 @@ export default function DashboardClient() {
             >
               Your AI-Curated Job Feed
             </motion.h1>
-            
-            <motion.div 
+
+            <motion.div
               className="flex items-center justify-center md:justify-end gap-3 w-full md:w-auto relative z-10"
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               layout={false}
-              style={{ willChange: 'auto', minWidth: userPlan === 'free' ? '280px' : 'auto' }} // Add this
+              style={{
+                willChange: 'auto',
+                contain: 'layout style',
+                isolation: 'isolate'
+              }}
             >
               <HeaderButton
                 id="generate"
@@ -433,7 +447,9 @@ export default function DashboardClient() {
                       times: [0, 0.2, 0.5, 0.75, 1],
                       ease: "easeInOut"
                     }
-                  }}>
+                  }}
+                  style={{ contain: 'layout style', isolation: 'isolate' }}
+                  layout={false}>
                   <HeaderButton
                     id="sheets"
                     icon={isToggleLoading ? <LoadingSpinner /> : <Sheet size={22} />}
@@ -467,7 +483,9 @@ export default function DashboardClient() {
                       times: [0, 0.2, 0.5, 0.75, 1],
                       ease: "easeInOut"
                     }
-                  }}>
+                  }}
+                  style={{ contain: 'layout style', isolation: 'isolate' }}
+                  layout={false}>
                   <HeaderButton
                     id="tokens"
                     icon={<Coins size={24} />}
@@ -499,7 +517,7 @@ export default function DashboardClient() {
                   />
                 </motion.div>
               )}
-              
+
               <motion.div
                 key={`profile-wrapper-${wiggleProfileKey}`}
                 animate={{
@@ -509,7 +527,12 @@ export default function DashboardClient() {
                     times: [0, 0.2, 0.5, 0.75, 1],
                     ease: "easeInOut"
                   }
-                }}>
+                }}
+                style={{
+                  contain: 'layout style',
+                  isolation: 'isolate'
+                }}
+                layout={false}>
                 <HeaderButton
                   id="profile"
                   icon={<User size={22} />}
@@ -523,6 +546,7 @@ export default function DashboardClient() {
                       onNavigateToSaved={() => router.push('/saved')}
                       onNavigateToApplied={() => router.push('/applied')}
                       userName={userName}
+                      userEmail={userEmail}
                       isExpanded={expandedButton === 'profile'}
                     />
                   }
@@ -551,10 +575,13 @@ export default function DashboardClient() {
             ) : (
               <AnimatePresence>
                 {nextGenerationAllowedAt && !isGenerating && (
-                  <TimeRemainingButton 
-                    nextGenerationAllowedAt={nextGenerationAllowedAt} 
-                    onTimeRemainingChange={setTimeRemaining}
-                  />
+                  <div className="flex-shrink-0">
+                    <TimeRemainingButton
+                      nextGenerationAllowedAt={nextGenerationAllowedAt}
+                      onTimeRemainingChange={setTimeRemaining}
+                      padding={15}
+                    />
+                  </div>
                 )}
               </AnimatePresence>
             )}

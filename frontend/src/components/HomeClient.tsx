@@ -63,6 +63,7 @@ export default function HomeClient() {
   const handleFinishLoading = () => {
     setLoadingFinished(true);
     sessionStorage.setItem("loadingFinished", "true");
+    window.dispatchEvent(new CustomEvent("loading-finished"));
   };
 
   const handleGetStarted = () => {
