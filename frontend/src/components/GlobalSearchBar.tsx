@@ -18,6 +18,7 @@ const GlobalSearchBar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState<SearchResult>({ jobs: [], pages: [] });
   const [isLoading, setIsLoading] = useState(false);
+  const [iconKey, setIconKey] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -27,6 +28,8 @@ const GlobalSearchBar = () => {
     } else {
       setSearchTerm("");
       setResults({ jobs: [], pages: [] });
+      // Trigger icon fade animation on collapse
+      setIconKey(prev => prev + 1);
     }
   }, [isExpanded]);
 
@@ -72,13 +75,22 @@ const GlobalSearchBar = () => {
     >
       <HeaderButton
         id="search"
-        icon={<Search size={24} />}
+        icon={
+          <motion.div
+            key={iconKey}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+          >
+            <Search size={24} className="text-slate-700 dark:text-slate-200" />
+          </motion.div>
+        }
         expandedContent={
                   <motion.div
                     className="flex flex-col"
                     layout={false}  // Add this            initial={false}
             animate={{
-              width: showResults ? 460 : 400,
+              width: "auto",
               height: showResults ? 420 : "auto",
             }}
             transition={{
