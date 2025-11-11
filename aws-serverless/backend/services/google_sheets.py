@@ -85,13 +85,23 @@ async def _find_or_create_spreadsheet_id(user_id: str) -> Optional[str]:
 
 async def handle_oauth_callback(user_id: str, tokens: str):
     user_object_id = ObjectId(user_id)
+    
+    # Fetch the user to check the bonus flag
+    user_doc = await db.users.find_one({"_id": user_object_id})
+    
+    update_fields = {
+        "google_tokens": tokens,
+        "sheets_enabled": True,
+        "spreadsheet_id": None
+    }
+    
+    if user_doc and not user_doc.get("google_sheets_bonus_awarded", False):
+        update_fields["time_saved_minutes"] = user_doc.get("time_saved_minutes", 0) + 15
+        update_fields["google_sheets_bonus_awarded"] = True
+
     await db.users.update_one(
         {"_id": user_object_id},
-        {"$set": {
-            "google_tokens": tokens,
-            "sheets_enabled": True,
-            "spreadsheet_id": None
-        }},
+        {"$set": update_fields},
         upsert=True
     )
     print(f"--- Successfully enabled sheets for user {user_id} and stored tokens. ---")

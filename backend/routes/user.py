@@ -3,7 +3,7 @@ from database import db
 from dependencies import get_current_user
 from utils import is_pro_user
 from email_utils import send_pro_welcome_email, send_account_deletion_email
-from models import UserDataResponse, UserProfileResponse, DeleteAccountResponse, ResumeDataResponse
+from models import UserDataResponse, UserProfileResponse, DeleteAccountResponse, ResumeDataResponse, UserStatsResponse
 from bson import ObjectId
 from datetime import datetime, timedelta
 import razorpay
@@ -182,6 +182,16 @@ async def get_user_data(current_user: dict = Depends(get_current_user)):
         "user_profile": user,
         "resume_data": resume_data,
     }
+
+@router.get("/me/stats", response_model=UserStatsResponse, status_code=status.HTTP_200_OK)
+async def get_user_stats(current_user: dict = Depends(get_current_user)):
+    user_id = current_user.get("_id")
+    user = await users_collection.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    total_minutes_saved = user.get("time_saved_minutes", 0)
+    return {"total_minutes_saved": total_minutes_saved}
 
 @router.delete("/me/delete", response_model=DeleteAccountResponse, status_code=status.HTTP_200_OK)
 async def delete_user_account(current_user: dict = Depends(get_current_user)):

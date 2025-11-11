@@ -33,13 +33,13 @@ interface JobCardProps {
 
 const StatusIndicator = ({ status }: { status: "recommended" | "saved" | "applied" }) => {
   const statusConfig = {
-    recommended: { color: "bg-blue-500", text: "Recommended" },
-    saved: { color: "bg-yellow-500", text: "Saved" },
-    applied: { color: "bg-green-500", text: "Applied" },
+    recommended: { color: "bg-blue-500", text: "Recommended", tooltip: "This job was recommended to you based on your preferences." },
+    saved: { color: "bg-yellow-500", text: "Saved", tooltip: "You've saved this job to review later." },
+    applied: { color: "bg-green-500", text: "Applied", tooltip: "You've marked this job as applied." },
   };
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center" title={statusConfig[status].tooltip}>
       <div className={`w-2.5 h-2.5 rounded-full ${statusConfig[status].color} mr-2`}></div>
       <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">
         {statusConfig[status].text}
@@ -81,137 +81,135 @@ const JobCard = ({
     transition,
   };
 
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const cardElement = cardRef.current;
-    if (cardElement) {
-      const handleClick = (e: MouseEvent) => {
-        if ((e.target as HTMLElement).closest('button')) {
-          return;
-        }
-        e.stopPropagation();
-        if (job.job_url) {
-          window.open(job.job_url, "_blank");
-        }
-      };
-
-      cardElement.addEventListener("click", handleClick);
-
-      return () => {
-        cardElement.removeEventListener("click", handleClick);
-      };
-    }
-  }, [job.job_url]);
-
-  const handleMoveClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    if (onMove) onMove(job);
-  };
-
-  const handleSaveClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    if (onSave) onSave(job);
-  };
-
-  const handleApplyClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    setShowConfetti(true);
-    if (onApply) onApply(job);
-  };
-
-  return (
-    <div ref={setNodeRef} style={style} {...attributes} className="h-full">
-       <div {...(isMobile ? {} : listeners)} className="lg:cursor-grab h-full">
-        <motion.div
-          ref={cardRef}
-          variants={variants}
-          initial={{ border: "2px solid transparent" }}
-          whileHover={{
-            scale: 1.02,
-            boxShadow: "0 0 20px rgba(99, 102, 241, 0.5)",
-            borderColor: "rgba(99, 102, 241, 1)",
-            transition: {
-              boxShadow: {
-                duration: 0.8,
-                repeat: Infinity,
-                repeatType: "reverse",
-                ease: "easeInOut",
-              },
-              borderColor: {
-                duration: 0.8,
-                repeat: Infinity,
-                repeatType: "reverse",
-                ease: "easeInOut",
-              },
-            },
-          }}
-          className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-lg p-6 cursor-pointer transform transition-all duration-300 flex flex-col h-full pointer-events-auto"
-        >
-          {showConfetti && <Confetti onComplete={() => setShowConfetti(false)} />}
-          <div className="flex items-start justify-between mb-4">
-            <CompanyLogo company={job.company} />
-            <div className="flex items-center">
-              <StatusIndicator status={job.status} />
-              <div {...listeners} className="hidden lg:block ml-4 cursor-grab p-2 text-gray-400 hover:text-gray-600">
-                <GripVertical size={20} />
-              </div>
-            </div>
-          </div>
-          <div className="flex-grow mt-4">
-            <h2 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900 dark:text-white break-words">
-              {job.title}
-            </h2>
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-1 break-words">
-              {job.company}
-            </p>
-            <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-4 break-words">
-              {job.location}
-            </p>
-            {job.match_score && (
-              <div className="mb-4">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Match Score</span>
-                  <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">{job.match_score}%</span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                  <div
-                    className="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-500"
-                    style={{ width: `${job.match_score}%` }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-          {job.reason && (
-            <p className="text-gray-600 dark:text-gray-400 italic text-xs sm:text-sm mt-auto pt-4">
-              &quot;{job.reason}&quot;
-            </p>
-          )}
-
-          {/* Mobile-only buttons */}
-          {(userPlan === "pro" && onSave && onApply && !showMoveButton) && (
-            <div className="lg:hidden flex items-center gap-3 mt-auto pt-4 border-t border-gray-200/50 dark:border-gray-700/50">
-              <LoadingButton
-                onClick={handleSaveClick}
-                isLoading={isSaving}
-                className="flex-1 px-4 py-2.5 rounded-lg text-gray-700 dark:text-gray-200 bg-gray-200/70 dark:bg-gray-700/70 hover:bg-gray-300/70 dark:hover:bg-gray-600/70 font-semibold flex items-center justify-center transition-colors duration-300"
+        const cardRef = useRef<HTMLDivElement>(null);
+  
+        const handleMoveClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+          e.stopPropagation();
+          if (onMove) onMove(job);
+        };
+  
+        const handleSaveClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+          e.stopPropagation();
+          if (onSave) onSave(job);
+        };
+  
+        const handleApplyClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+          e.stopPropagation();
+          setShowConfetti(true);
+          if (onApply) onApply(job);
+        };
+  
+        const handleViewJobClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+          e.stopPropagation();
+          if (job.job_url) {
+            window.open(job.job_url, "_blank");
+          }
+        };
+  
+        return (
+          <div ref={setNodeRef} style={style} {...attributes} className="h-full">
+             <div {...(isMobile ? {} : listeners)} className="lg:cursor-grab h-full">
+              <motion.div
+                ref={cardRef}
+                variants={variants}
+                initial={{ border: "2px solid transparent" }}
+                whileHover={{
+                  scale: 1.02,
+                  boxShadow: "0 0 20px rgba(99, 102, 241, 0.5)",
+                  borderColor: "rgba(99, 102, 241, 1)",
+                  transition: {
+                    boxShadow: {
+                      duration: 0.8,
+                      repeat: Infinity,
+                      repeatType: "reverse",
+                      ease: "easeInOut",
+                    },
+                    borderColor: {
+                      duration: 0.8,
+                      repeat: Infinity,
+                      repeatType: "reverse",
+                      ease: "easeInOut",
+                    },
+                  },
+                }}
+                className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-lg p-6 transform transition-all duration-300 flex flex-col h-full pointer-events-auto"
               >
-                <Bookmark size={18} className="mr-2"/>
-                Save
-              </LoadingButton>
-              <LoadingButton
-                onClick={handleApplyClick}
-                isLoading={isApplying}
-                className="flex-1 px-4 py-2.5 rounded-lg text-white bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 font-semibold flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <CheckCheck size={18} className="mr-2"/>
-                Apply
-              </LoadingButton>
-            </div>
-          )}
-
-          {/* Desktop-only move button */}
+                {showConfetti && <Confetti onComplete={() => setShowConfetti(false)} />}
+                <div className="flex items-start justify-between mb-4">
+                  <CompanyLogo company={job.company} />
+                  <div className="flex items-center">
+                    <StatusIndicator status={job.status} />
+                    <div {...listeners} className="hidden lg:block ml-4 cursor-grab p-2 text-gray-400 hover:text-gray-600">
+                      <GripVertical size={20} />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex-grow mt-4">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900 dark:text-white break-words">
+                    {job.title}
+                  </h2>
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-1 break-words">
+                    {job.company}
+                  </p>
+                  <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-4 break-words">
+                    {job.location}
+                  </p>
+                  {job.match_score && (
+                    <div className="mb-4">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Match Score</span>
+                        <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">{job.match_score}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                        <div
+                          className="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-500"
+                          style={{ width: `${job.match_score}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {job.reason && (
+                  <p className="text-gray-600 dark:text-gray-400 italic text-xs sm:text-sm mt-auto pt-4">
+                    &quot;{job.reason}&quot;
+                  </p>
+                )}
+  
+                {/* Action Buttons */}
+                <div className="mt-auto pt-4 border-t border-gray-200/50 dark:border-gray-700/50 flex flex-col gap-3">
+                  {/* Always-visible View Job button */}
+                  {job.job_url && (
+                    <LoadingButton
+                      onClick={handleViewJobClick}
+                      className="w-full px-4 py-2.5 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 font-semibold flex items-center justify-center transition-colors duration-300"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-external-link mr-2"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                      View Job
+                    </LoadingButton>
+                  )}
+                  {/* Mobile-only Save and Apply buttons */}
+                  {(userPlan === "pro" && onSave && onApply && !showMoveButton) && (
+                    <div className="flex lg:hidden flex-row gap-3">
+                      <LoadingButton
+                        onClick={handleSaveClick}
+                        isLoading={isSaving}
+                        className="flex-1 px-4 py-2.5 rounded-lg text-gray-700 dark:text-gray-200 bg-gray-200/70 dark:bg-gray-700/70 hover:bg-gray-300/70 dark:hover:bg-gray-600/70 font-semibold flex items-center justify-center transition-colors duration-300"
+                      >
+                        <Bookmark size={18} className="mr-2"/>
+                        Save
+                      </LoadingButton>
+                      <LoadingButton
+                        onClick={handleApplyClick}
+                        isLoading={isApplying}
+                        className="flex-1 px-4 py-2.5 rounded-lg text-white bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 font-semibold flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300"
+                      >
+                        <CheckCheck size={18} className="mr-2"/>
+                        Apply
+                      </LoadingButton>
+                    </div>
+                  )}
+                </div>
+                {/* Desktop-only move button */}
           {showMoveButton && onMove && (
             <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
               <LoadingButton

@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import Script from "next/script";
 import { Inter } from 'next/font/google';
 import AppContent from "@/components/AppContent";
+import QueryProvider from "@/components/QueryProvider";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -151,7 +152,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 position="top-center"
                 toastOptions={{ style: { zIndex: 9999 } }}
               />
-              <AppContent>{children}</AppContent>
+              <QueryProvider>
+                <AppContent>{children}</AppContent>
+              </QueryProvider>
             </AuthProvider>
           </ThemeProvider>
         </GoogleOAuthProvider>

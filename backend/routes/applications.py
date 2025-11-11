@@ -39,37 +39,65 @@ async def save_job_application(
     job_to_save: RecommendedJob,
     current_user: User = Depends(get_current_user)
 ):
-    user_id = current_user["_id"]
+    user_id = str(current_user["_id"]) # Convert ObjectId to string for consistent use
     
-    # Ensure job_applications field exists and is a list
-    if "job_applications" not in current_user or not isinstance(current_user["job_applications"], list):
-        current_user["job_applications"] = []
+    # Fetch the full user document to get current time_saved_minutes and job_applications
+    user_doc = await db.users.find_one({"_id": ObjectId(user_id)})
+    if not user_doc:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Convert user_doc to a Pydantic User model instance for easier manipulation
+    user_model = User(**user_doc)
 
+    time_to_add = 0
+    old_status = None
+    
     # Check if the job already exists in job_applications
     existing_app_index = -1
-    for i, app in enumerate(current_user["job_applications"]):
-        if app['job_details']['job_url'] == job_to_save.job_url:
+    for i, app in enumerate(user_model.job_applications):
+        if app.job_details.job_url == job_to_save.job_url:
             existing_app_index = i
+            old_status = app.status
             break
 
     if existing_app_index != -1:
         # Update existing application
-        current_user["job_applications"][existing_app_index]["status"] = job_to_save.status
+        user_model.job_applications[existing_app_index].status = job_to_save.status
+        
+        # Calculate time saved for status change
+        if old_status == JobApplicationStatus.recommended and job_to_save.status == JobApplicationStatus.saved:
+            time_to_add += 1
+        elif old_status == JobApplicationStatus.recommended and job_to_save.status == JobApplicationStatus.applied:
+            time_to_add += 3
+        elif old_status == JobApplicationStatus.saved and job_to_save.status == JobApplicationStatus.applied:
+            time_to_add += 2 # 3 (applied) - 1 (saved)
     else:
         # Add new application
         new_job_application = JobApplication(
             job_details=job_to_save,
             status=job_to_save.status
         )
-        current_user["job_applications"].append(new_job_application.dict())
+        user_model.job_applications.append(new_job_application)
+        
+        # Calculate time saved for new job
+        if job_to_save.status == JobApplicationStatus.saved:
+            time_to_add += 1
+        elif job_to_save.status == JobApplicationStatus.applied:
+            time_to_add += 3
 
     # Update the user document in MongoDB
+    update_fields = {"job_applications": [app.dict() for app in user_model.job_applications]}
+    if time_to_add > 0:
+        update_fields["time_saved_minutes"] = user_model.time_saved_minutes + time_to_add
+
     await db.users.update_one(
         {"_id": ObjectId(user_id)},
-        {"$set": {"job_applications": current_user["job_applications"]}}
+        {"$set": update_fields}
     )
 
-    # Remove the job from the recommendations list
+    # Remove the job from the recommendations list (if it was there)
+    # This part of the logic seems to be for a different collection,
+    # ensure it's intended to remove from 'recommendations' collection, not user's job_applications
     await db.recommendations.delete_one(
         {"user_id": ObjectId(user_id), "job_url": job_to_save.job_url}
     )

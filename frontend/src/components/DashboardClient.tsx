@@ -19,6 +19,7 @@ import { Coins, User, Briefcase, LogOut, Settings, Gem, Star, Sheet } from 'luci
 import TimeRemainingButton from "./TimeRemainingButton";
 import TimeRemainingSkeleton from "./TimeRemainingSkeleton";
 import GeminiIcon from "./GeminiIcon";
+import TimeSavedCard from "./TimeSavedCard"; // Import TimeSavedCard
 
 interface JobApplication {
   id: string;
@@ -585,6 +586,11 @@ export default function DashboardClient() {
                 )}
               </AnimatePresence>
             )}
+          </div>
+
+          {/* Time Saved Card */}
+          <div className="mb-8 max-w-md mx-auto">
+            <TimeSavedCard />
           </div>
 
           <DndContext

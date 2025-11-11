@@ -141,12 +141,20 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
 
         recommended_jobs = [RecommendedJob(**job) for job in recommended_jobs_data]
 
+        # Calculate time saved for this batch
+        unique_companies = set(job.company for job in recommended_jobs)
+        search_time_saved = len(unique_companies) * 5
+        evaluation_time_saved = len(recommended_jobs) * 6
+        total_batch_time_saved = search_time_saved + evaluation_time_saved
+
         recommendation_data = {"user_id": user_id, "recommended_jobs": [job.dict() for job in recommended_jobs], "generated_at": datetime.utcnow()}
         await recommendations_collection.update_one({"user_id": user_id}, {"$set": recommendation_data}, upsert=True)
 
+        # Update user's job_applications and time_saved_minutes
         await users_collection.update_one(
             {"_id": user_object_id},
-            {"$set": {"job_applications": [{"job_details": job.dict(), "status": "recommended", "updated_at": datetime.utcnow()} for job in recommended_jobs]}},
+            {"$set": {"job_applications": [{"job_details": job.dict(), "status": "recommended", "updated_at": datetime.utcnow()} for job in recommended_jobs]},
+             "$inc": {"time_saved_minutes": total_batch_time_saved}}
         )
 
         sheets_error = None

@@ -78,6 +78,8 @@ class User(BaseModel):
     sheets_enabled: bool = False
     spreadsheet_id: Optional[str] = None
     loyalty_coins: int = 0
+    time_saved_minutes: int = 0
+    google_sheets_bonus_awarded: bool = False
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     deletion_requested_at: Optional[datetime] = None
@@ -147,3 +149,6 @@ class UserDataResponse(BaseModel):
 
 class DeleteAccountResponse(BaseModel):
     message: str
+
+class UserStatsResponse(BaseModel):
+    total_minutes_saved: int
