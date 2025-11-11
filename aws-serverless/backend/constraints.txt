@@ -1,3 +1,3 @@
 # constraints.txt
-numpy==2.1.3
+numpy==1.26.4
 # Remove the importlib-metadata line - not needed for Python 3.11
