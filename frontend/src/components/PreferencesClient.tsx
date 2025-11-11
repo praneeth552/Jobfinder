@@ -500,7 +500,7 @@ export default function PreferencesClient() {
       {/* MODALS */}
       <AnimatePresence>
         {editableData && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1001] p-4">
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
               <h2 className="text-3xl font-bold text-center mb-2 text-gray-800 dark:text-white">Review Your Profile</h2>
               <p className="text-center text-gray-600 dark:text-gray-400 mb-8">We've extracted the following details from your resume. Please review and edit as needed.</p>

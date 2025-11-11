@@ -33,6 +33,7 @@ Jinja2
 # NLP and Parsing Dependencies
 spacy==3.7.2
 nltk==3.8.1
+numpy>=1.25.0,<2.0.0  # Updated - compatible with spaCy 3.7.2
 pdfminer.six==20221105
 docx2txt==0.9
 beautifulsoup4==4.12.2
