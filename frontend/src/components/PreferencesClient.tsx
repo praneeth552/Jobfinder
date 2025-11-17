@@ -153,6 +153,7 @@ export default function PreferencesClient() {
   const [editableData, setEditableData] = useState<ParsedResumeData | null>(null);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [showSaveConfirmationModal, setShowSaveConfirmationModal] = useState(false);
+  const [dataToSave, setDataToSave] = useState<ParsedResumeData | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [lastResumeUploadDate, setLastResumeUploadDate] = useState<number | null>(null);
   const [nextResumeUploadAllowedAt, setNextResumeUploadAllowedAt] = useState<number | null>(null);
@@ -280,6 +281,8 @@ export default function PreferencesClient() {
       return;
     }
     setPreferences(prev => ({ ...prev, role: [...new Set([...prev.role, ...editableData.roles])].slice(0, 3), tech_stack: [...new Set([...prev.tech_stack, ...editableData.skills])].slice(0, 25) }));
+    setDataToSave(editableData);
+    setEditableData(null);
     setShowSaveConfirmationModal(true);
   };
 
@@ -287,10 +290,10 @@ export default function PreferencesClient() {
     setShowSaveConfirmationModal(false);
     setIsSubmitting(true);
     const token = Cookies.get("token");
-    if (editableData) {
+    if (dataToSave) {
       const toastId = toast.loading("Saving your detailed resume profile...");
       try {
-        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/preferences/save-resume`, { shouldSaveToProfile, resumeData: editableData }, { headers: { Authorization: `Bearer ${token}` } });
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/preferences/save-resume`, { shouldSaveToProfile, resumeData: dataToSave }, { headers: { Authorization: `Bearer ${token}` } });
         toast.success(shouldSaveToProfile ? "Resume profile saved!" : "Preferences updated for this session!", { id: toastId });
         if (shouldSaveToProfile) {
           // After saving, the backend updates the next upload date.
@@ -300,7 +303,7 @@ export default function PreferencesClient() {
     }
     await handleSubmit();
     setIsSubmitting(false);
-    setEditableData(null);
+    setDataToSave(null);
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -602,7 +605,7 @@ export default function PreferencesClient() {
       </AnimatePresence>
       <AnimatePresence>
         {showSaveConfirmationModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1002] p-4">
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl p-8 max-w-lg w-full">
               <h2 className="text-2xl font-bold mb-4">Supercharge Your Recommendations?</h2>
               <p className="text-[--foreground]/70 mb-6">

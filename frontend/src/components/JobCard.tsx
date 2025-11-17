@@ -222,6 +222,10 @@ const JobCard = ({
               </LoadingButton>
             </div>
           )}
+          <div className="text-xs text-gray-500 dark:text-gray-400 mt-4 text-center">
+            Job details are sourced from the employer&apos;s official career site. 
+            Click &quot;View Job&quot; to verify information and apply.
+          </div>
         </motion.div>
       </div>
     </div>

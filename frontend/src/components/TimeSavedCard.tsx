@@ -75,45 +75,24 @@ const TimeSavedCard = () => {
     </div>
   );
 
-  const body = useMemo(() => {
-    if (isLoading) {
-      return (
-        <div className="flex h-48 flex-col items-center justify-center gap-4">
-          <div className="h-8 w-3/4 animate-pulse rounded bg-white/40 dark:bg-white/10" />
-          <div className="h-6 w-1/2 animate-pulse rounded bg-white/40 dark:bg-white/10" />
-        </div>
-      );
-    }
-
-    if (error || totalMinutesSaved === 0) return null;
-
-    const formattedTime = formatMinutesToHumanReadable(totalMinutesSaved);
-
+  if (isLoading) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
-        className="relative z-10 flex flex-col items-center text-center"
-      >
-        <Clock size={48} className="mb-3 opacity-90" />
-        <h3 className="mb-1 text-2xl font-semibold tracking-tight">You've Saved</h3>
-        <p className="text-4xl font-extrabold tracking-tight text-indigo-600 drop-shadow-sm dark:text-indigo-400">
-          {formattedTime}
-        </p>
-        <div className="mt-3">
-          <Tooltip content={tooltipContent}>
-            <button
-              className="text-sm opacity-80 transition hover:opacity-100 hover:underline"
-              aria-label="How is this calculated?"
-            >
-              How is this calculated?
-            </button>
-          </Tooltip>
+      <div className="relative overflow-hidden rounded-3xl">
+        <div className="relative rounded-3xl border border-white/30 bg-white/15 p-6 shadow-2xl backdrop-blur-2xl transition-colors dark:border-white/10 dark:bg-white/5">
+          <div className="flex h-48 flex-col items-center justify-center gap-4">
+            <div className="h-8 w-3/4 animate-pulse rounded bg-white/40 dark:bg-white/10" />
+            <div className="h-6 w-1/2 animate-pulse rounded bg-white/40 dark:bg-white/10" />
+          </div>
         </div>
-      </motion.div>
+      </div>
     );
-  }, [isLoading, error, totalMinutesSaved]);
+  }
+
+  if (error || totalMinutesSaved === 0) {
+    return null;
+  }
+
+  const formattedTime = formatMinutesToHumanReadable(totalMinutesSaved);
 
   return (
     <section className="relative overflow-hidden rounded-3xl">
@@ -141,7 +120,28 @@ const TimeSavedCard = () => {
           className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-white/0 via-white/30 to-white/0"
         />
 
-        {body}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+          className="relative z-10 flex flex-col items-center text-center"
+        >
+          <Clock size={48} className="mb-3 opacity-90" />
+          <h3 className="mb-1 text-2xl font-semibold tracking-tight">You've Saved</h3>
+          <p className="text-4xl font-extrabold tracking-tight text-indigo-600 drop-shadow-sm dark:text-indigo-400">
+            {formattedTime}
+          </p>
+          <div className="mt-3">
+            <Tooltip content={tooltipContent}>
+              <button
+                className="text-sm opacity-80 transition hover:opacity-100 hover:underline"
+                aria-label="How is this calculated?"
+              >
+                How is this calculated?
+              </button>
+            </Tooltip>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

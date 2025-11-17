@@ -9,7 +9,7 @@ import UserProfile from "@/components/UserProfile";
 import SimpleNavbar from "./SimpleNavbar";
 import { toast } from "react-hot-toast";
 import JobCardSkeleton from "./JobCardSkeleton";
-import { DndContext, closestCenter, useSensor, useSensors, PointerSensor } from "@dnd-kit/core";
+import { DndContext, closestCenter, pointerWithin, useSensor, useSensors, PointerSensor } from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import JobCard from "./JobCard";
 import DropZone from "./DropZone";
@@ -411,6 +411,9 @@ export default function DashboardClient() {
             >
               Your AI-Curated Job Feed
             </motion.h1>
+            <p className="text-center md:text-left text-sm text-gray-600 dark:text-gray-400 -mt-2">
+              AI-generated match insights are for guidance only. Always review the official job posting.
+            </p>
 
             <motion.div
               className="flex items-center justify-center md:justify-end gap-3 w-full md:w-auto relative z-10"
@@ -595,7 +598,7 @@ export default function DashboardClient() {
 
           <DndContext
             sensors={useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))}
-            collisionDetection={closestCenter}
+            collisionDetection={pointerWithin}
             onDragEnd={onDragEnd}
           >
             {(isLoading || isGenerating) && (

@@ -23,8 +23,13 @@ export default function TurnstileWidget({ onVerify }: { onVerify: (token:string)
 
     const render = () => {
       if (ref.current && window.turnstile) {
+        const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+        if (!siteKey) {
+          console.error("Turnstile site key is not set. Please set NEXT_PUBLIC_TURNSTILE_SITE_KEY environment variable.");
+          return;
+        }
         const id = window.turnstile.render(ref.current, {
-          sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!,
+          sitekey: siteKey,
           callback: onVerify,
         });
         widgetId.current = id;
