@@ -47,4 +47,3 @@ const AppContent = ({ children }: { children: ReactNode }) => {
 };
 
 export default AppContent;
-
