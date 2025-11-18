@@ -233,7 +233,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
                   exit={{ rotate: 90, opacity: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <X size={28} className="text-white" />
+                  <X size={28} className={theme === 'dark' ? 'text-white' : 'text-gray-900'} />
                 </motion.div>
               ) : (
                 <motion.div
