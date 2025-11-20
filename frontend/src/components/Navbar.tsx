@@ -152,7 +152,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
                 : "bg-white/80 dark:bg-black/60 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
               : "bg-white/50 dark:bg-black/20 backdrop-blur-md border border-white/10"}`}
         >
-          <Link href="/">
+          <Link href="/workflow">
             <motion.div
               className={`text-2xl font-bold cursor-pointer flex items-center gap-2 ${getTextColor()}`}
               whileHover={{ scale: 1.05 }}

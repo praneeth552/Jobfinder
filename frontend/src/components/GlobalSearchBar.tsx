@@ -150,7 +150,7 @@ const GlobalSearchBar = () => {
 
     // Check if user is authenticated for protected routes
     const token = Cookies.get("token");
-    const protectedRoutes = ['/dashboard', '/preferences', '/billing', '/saved', '/applied', '/data'];
+    const protectedRoutes = ['/dashboard', '/preferences', '/billing', '/saved', '/applied', '/data', '/delete', '/jobs'];
     const isProtected = protectedRoutes.some(route => path.startsWith(route));
 
     if (isProtected && !token) {

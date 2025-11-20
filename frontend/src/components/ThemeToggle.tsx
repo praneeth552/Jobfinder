@@ -23,23 +23,30 @@ const ThemeToggle = () => {
 
   return (
     <motion.div
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      whileHover={{ scale: 1.08 }}
+      whileTap={{ scale: 0.92 }}
+      transition={{ type: "spring", stiffness: 500, damping: 25 }}
     >
-      <div
+      <motion.div
         onClick={toggleTheme}
-        className={`relative flex items-center w-20 h-10 p-1 rounded-full cursor-pointer transition-colors duration-700 ease-in-out border border-gray-300/50 dark:border-gray-600/50 shadow-inner overflow-hidden ${isDark ? "bg-gray-900 justify-end" : "bg-sky-200 justify-start"
+        className={`relative flex items-center w-20 h-10 p-1 rounded-full cursor-pointer border border-gray-300/50 dark:border-gray-600/50 shadow-inner overflow-hidden ${isDark ? "bg-gray-900 justify-end" : "bg-sky-200 justify-start"
           }`}
+        animate={{
+          backgroundColor: isDark ? "#111827" : "#bae6fd"
+        }}
+        transition={{
+          duration: 0.6,
+          ease: [0.4, 0, 0.2, 1]
+        }}
       >
         <AnimatePresence mode="wait">
           {isDark ? (
             <motion.div
               key="dark-bg"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
               className="absolute inset-0"
             >
               <Sparkles />
@@ -56,10 +63,10 @@ const ThemeToggle = () => {
           ) : (
             <motion.div
               key="light-bg"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
               className="absolute inset-0"
             >
               {/* Clouds */}
@@ -75,9 +82,9 @@ const ThemeToggle = () => {
           layout
           transition={{
             type: "spring",
-            stiffness: 120,
-            damping: 20,
-            mass: 1.2
+            stiffness: 700,
+            damping: 30,
+            mass: 0.8
           }}
           className={`relative w-8 h-8 rounded-full shadow-lg flex items-center justify-center z-10 backdrop-blur-sm ${isDark ? "bg-gray-800/90" : "bg-white/90"
             }`}
@@ -87,17 +94,36 @@ const ThemeToggle = () => {
             initial={{ opacity: 0, rotate: -180, scale: 0.5, filter: "blur(4px)" }}
             animate={{ opacity: 1, rotate: 0, scale: 1, filter: "blur(0px)" }}
             exit={{ opacity: 0, rotate: 180, scale: 0.5, filter: "blur(4px)" }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
+            transition={{
+              duration: 0.5,
+              ease: [0.4, 0, 0.2, 1]
+            }}
             className="flex items-center justify-center"
           >
             {isDark ? (
-              <img src="/batman-icon.svg" alt="Dark Mode" className="w-5 h-5" />
+              <motion.img
+                src="/batman-icon.svg"
+                alt="Dark Mode"
+                className="w-5 h-5"
+                whileHover={{ rotate: 10 }}
+                transition={{ type: "spring", stiffness: 300, damping: 10 }}
+              />
             ) : (
-              <Sun size={18} className="text-amber-500" />
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  repeatDelay: 3
+                }}
+              >
+                <Sun size={18} className="text-amber-500" />
+              </motion.div>
             )}
           </motion.div>
         </motion.div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 };
