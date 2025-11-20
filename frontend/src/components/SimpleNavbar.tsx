@@ -1,140 +1,110 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import ContactForm from "./ContactForm";
-import MobileContactModal from "./MobileContactModal";
 import ThemeToggle from "./ThemeToggle";
-
-const buttonTexts = ["Got Ideas?", "Collaborate?"];
+import { useRouter } from "next/navigation";
 
 export default function SimpleNavbar() {
   const [hasScrolled, setHasScrolled] = useState(false);
-  const [isContactModalOpen, setContactModalOpen] = useState(false);
   const [textIndex, setTextIndex] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
+  const buttonTexts = ["Got Ideas?", "Collaborate?"];
+  const router = useRouter();
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTextIndex((prevIndex) => (prevIndex + 1) % buttonTexts.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => setHasScrolled(window.scrollY > 10);
+    const handleScroll = () => {
+      setHasScrolled(window.scrollY > 20);
+    };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const openModal = () => setContactModalOpen(true);
-  const closeModal = () => setContactModalOpen(false);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTextIndex((prev) => (prev + 1) % buttonTexts.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleCollaborateClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const contactSection = document.getElementById('contact-section');
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      router.push('/contact');
+    }
+  };
 
   const navVariants = {
     initial: { y: -100, opacity: 0 },
-    animate: { y: 0, opacity: 1 },
-    transition: { duration: 0.8, ease: [0.6, 0.05, -0.01, 0.9] },
+    animate: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.5, ease: "easeOut" }
+    }
   };
 
   const slideVariants = {
-    enter: { opacity: 0, y: 10 },
-    center: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -10 },
+    enter: { y: 20, opacity: 0 },
+    center: { y: 0, opacity: 1 },
+    exit: { y: -20, opacity: 0 },
   };
 
   return (
-    <>
+    <div className="fixed top-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
       <motion.nav
-        variants={navVariants}
+        variants={navVariants as any}
         initial="initial"
         animate="animate"
-        layout={false}
-        style={{ 
-          willChange: 'auto',
-          contain: 'layout style paint',
-          isolation: 'isolate'
-        }}
-        className={`fixed top-4 left-2 right-2 max-w-6xl mx-auto flex justify-between items-center px-4 sm:px-6 py-3 z-[1000] transition-all duration-300 rounded-2xl
-          ${hasScrolled ? "bg-[--card-background] border border-[--border] shadow-lg backdrop-blur-lg" : "bg-transparent"}`}>
-        <Link href="/" className="text-2xl font-bold cursor-pointer flex-shrink-0">
-          TackleIt
-        </Link>
-
-        <div className="flex items-center space-x-4 min-w-[180px] md:min-w-[240px] justify-end flex-shrink-0">
-          <div
-            style={{ 
-              contain: 'layout style',
-              willChange: 'auto'
-            }}
-          >
-            <ThemeToggle />
-          </div>
-          <motion.button
-            onClick={openModal}
-            className="submit-button-swipe font-semibold h-10 w-32 md:w-40 flex items-center justify-center flex-shrink-0"
+        className={`pointer-events-auto w-[95%] max-w-5xl flex justify-between items-center px-6 py-3 transition-all duration-500 rounded-full
+          ${hasScrolled
+            ? "bg-white/80 dark:bg-black/60 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
+            : "bg-white/50 dark:bg-black/20 backdrop-blur-md border border-white/10"}`}
+      >
+        <Link href="/">
+          <motion.div
+            className="text-2xl font-bold cursor-pointer flex items-center gap-2 text-[--foreground]"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            layout={false}
-            style={{ 
-              willChange: 'auto',
-              contain: 'layout style'
-            }}
           >
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={textIndex}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.3 }}
-                className="block whitespace-nowrap"
-                style={{ contain: 'layout' }}
-              >
-                {buttonTexts[textIndex]}
-              </motion.span>
-            </AnimatePresence>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[--primary] to-purple-500">TackleIt</span>
+          </motion.div>
+        </Link>
+
+        <div className="flex items-center gap-2">
+          <div className="flex items-center bg-white/5 rounded-full p-1 border border-white/10 backdrop-blur-sm">
+            <ThemeToggle />
+          </div>
+
+          <motion.button
+            onClick={handleCollaborateClick}
+            className="relative px-6 py-2.5 bg-[--primary] text-white rounded-full font-semibold text-sm shadow-lg shadow-[--primary]/25 hover:shadow-xl hover:shadow-[--primary]/40 transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden group w-[160px] flex justify-center"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <span className="relative z-10 flex items-center justify-center gap-2 w-full">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={textIndex}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ duration: 0.3 }}
+                  className="block whitespace-nowrap absolute"
+                >
+                  {buttonTexts[textIndex]}
+                </motion.span>
+              </AnimatePresence>
+              {/* Invisible text to maintain height */}
+              <span className="invisible">Collaborate?</span>
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </motion.button>
         </div>
       </motion.nav>
-
-      {isMobile ? (
-        <MobileContactModal isOpen={isContactModalOpen} onClose={closeModal} />
-      ) : (
-        <AnimatePresence>
-          {isContactModalOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100]"
-              onClick={closeModal}
-            >
-              <motion.div
-                initial={{ scale: 0.9, y: -30 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.9, y: -30 }}
-                className="relative w-full max-w-lg custom-card"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <button onClick={closeModal} className="absolute top-3 right-3 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-10">
-                  <X size={20} />
-                </button>
-                <ContactForm />
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      )}
-    </>
+    </div>
   );
 }

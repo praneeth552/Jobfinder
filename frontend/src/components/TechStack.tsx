@@ -48,7 +48,7 @@ const TechStack = () => {
             priority={isPriority}
           />
           {namesToDisplay.includes(t.name) && (
-            <span className="text-xl font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap opacity-70 transition-all duration-300 ease-in-out group-hover:opacity-100 dark:group-hover:text-white">{t.name}</span>
+            <span className="text-xl font-semibold text-[--foreground]/60 whitespace-nowrap opacity-70 transition-all duration-300 ease-in-out group-hover:opacity-100 group-hover:text-[--foreground]">{t.name}</span>
           )}
         </div>
       ))}
@@ -56,8 +56,13 @@ const TechStack = () => {
   );
 
   return (
-    <div className="py-16 text-center bg-white dark:bg-slate-900">
-      <h2 className="text-4xl font-bold text-gray-800 dark:text-white mb-12">Powered by the latest technologies</h2>
+    <div className="py-24 text-center bg-[--background] relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[--primary]/5 to-transparent pointer-events-none" />
+
+      <h2 className="text-3xl md:text-4xl font-bold text-[--foreground] mb-16 relative z-10">
+        Powered by the <span className="text-[--primary]">latest technologies</span>
+      </h2>
+
       <div className="w-full overflow-hidden relative flex [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] group">
         {renderTrack('track1', true)}
         {renderTrack('track2', false)}

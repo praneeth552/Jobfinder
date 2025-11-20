@@ -5,37 +5,58 @@
 :root {
   /* Color Palette */
   --background: #ffffff;
-  --foreground: #111827;
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --secondary: #f9fafb;
-  --border: #e5e7eb;
-  --card-background: rgba(255, 255, 255, 0.7);
+  --foreground: #0f172a;
+  /* Slate 900 */
+  --primary: #6366f1;
+  /* Indigo 500 */
+  --primary-hover: #4f46e5;
+  /* Indigo 600 */
+  --secondary: #f8fafc;
+  /* Slate 50 */
+  --border: #e2e8f0;
+  /* Slate 200 */
+  --card-background: rgba(255, 255, 255, 0.8);
+
+  /* Premium Accents */
+  --accent-glow: rgba(99, 102, 241, 0.15);
+  --glass-border: rgba(255, 255, 255, 0.5);
 
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
 
   /* Design System */
-  --border-radius: 0.75rem;
-  --card-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  --border-radius: 1rem;
+  --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
   --card-shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --spotlight-gradient: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(99, 102, 241, 0.15), transparent 80%);
 
   /* Background Gradient */
-  --background-gradient-start: rgba(245, 245, 255, 0.6);
-  --background-gradient-end: rgba(230, 230, 250, 0.6);
+  --background-gradient-start: #f8fafc;
+  --background-gradient-end: #eef2ff;
 }
 
 .dark {
-  --background: #111827;
-  --foreground: #f9fafb;
-  --primary: #6366f1;
-  --primary-hover: #818cf8;
-  --secondary: #1f2937;
-  --border: #374151;
-  --card-background: rgba(31, 41, 55, 0.5);
+  --background: #020617;
+  /* Slate 950 */
+  --foreground: #f8fafc;
+  /* Slate 50 */
+  --primary: #818cf8;
+  /* Indigo 400 */
+  --primary-hover: #6366f1;
+  /* Indigo 500 */
+  --secondary: #0f172a;
+  /* Slate 900 */
+  --border: #1e293b;
+  /* Slate 800 */
+  --card-background: rgba(15, 23, 42, 0.6);
 
-  --background-gradient-start: rgba(17, 24, 39, 0.7);
-  --background-gradient-end: rgba(31, 41, 55, 0.7);
+  /* Premium Accents */
+  --accent-glow: rgba(129, 140, 248, 0.15);
+  --glass-border: rgba(255, 255, 255, 0.1);
+
+  --background-gradient-start: #020617;
+  --background-gradient-end: #0f172a;
+  --spotlight-gradient: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(129, 140, 248, 0.15), transparent 80%);
 }
 
 html {
@@ -50,6 +71,15 @@ body {
   background-color: var(--background);
   font-family: var(--font-sans);
   position: relative;
+  transition: color 0.5s ease-in-out, background-color 0.5s ease-in-out;
+}
+
+*,
+*::before,
+*::after {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 500ms;
 }
 
 body::before {
@@ -62,8 +92,9 @@ body::before {
   background-image: url('/background.jpeg');
   background-size: cover;
   background-position: center;
-  opacity: 0.05;
+  opacity: 0.03;
   z-index: -2;
+  pointer-events: none;
 }
 
 body::after {
@@ -77,36 +108,48 @@ body::after {
   background-size: 400% 400%;
   animation: gradientAnimation 20s ease infinite;
   z-index: -1;
+  pointer-events: none;
 }
 
 @keyframes gradientAnimation {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Responsive Typography */
-h1, .h1 { font-size: clamp(2.5rem, 5vw, 4rem); }
-h2, .h2 { font-size: clamp(1.8rem, 4vw, 3rem); }
-p, a, span, div { font-size: clamp(0.9rem, 1.5vw, 1rem); }
+h1,
+.h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+}
+
+h2,
+.h2 {
+  font-size: clamp(1.8rem, 4vw, 3rem);
+}
+
+p,
+a,
+span,
+div {
+  font-size: clamp(0.9rem, 1.5vw, 1rem);
+}
 
 /* Global transition for interactive elements */
-a, button, input, textarea {
+a,
+button,
+input,
+textarea {
   transition: all 0.2s ease-in-out;
 }
-
-/* Input Field Polish */
-/* input[type="text"], input[type="email"], input[type="password"], input[type="tel"], textarea {
-  background-color: var(--secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--border-radius);
-  padding: 0.75rem 1rem;
-}
-input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="tel"]:focus, textarea:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent);
-} */
 
 /* Custom Card Style */
 .custom-card {
@@ -115,33 +158,36 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focu
   border: 1px solid var(--border);
   box-shadow: var(--card-shadow);
   transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
+
 .custom-card:hover {
   box-shadow: var(--card-shadow-hover);
   transform: translateY(-4px);
+  border-color: var(--primary);
 }
 
 /* Refined Submit Button */
-/* Refined Submit Button with Fixed Overflow */
 .submit-button-swipe {
   position: relative;
-  overflow: hidden; /* This was already there, but ensuring it's present */
+  overflow: hidden;
   z-index: 1;
   background-color: var(--primary);
   color: white;
   border-radius: 9999px;
   padding: 0.75rem 1.5rem;
   font-weight: 600;
-  transition: background-color 0.3s ease;
-  /* Add these properties to ensure proper clipping */
-  isolation: isolate; /* Creates a new stacking context */
-  border: none; /* Remove any default borders that might interfere */
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  isolation: isolate;
+  border: none;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .submit-button-swipe:hover {
   background-color: var(--primary-hover);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+  transform: translateY(-1px);
 }
 
 .submit-button-swipe::before {
@@ -154,50 +200,12 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focu
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   transform: skewX(-30deg);
   transition: left 0.8s ease;
-  z-index: -1; /* Ensure it's behind the button text */
-  /* Additional fixes */
-  border-radius: inherit; /* Match the button's border radius */
-}
-
-.submit-button-swipe:hover::before {
-  left: 150%;
-}
-
-/* Alternative approach - if the above doesn't work, try this more contained version */
-.submit-button-swipe-alt {
-  position: relative;
-  overflow: hidden;
-  z-index: 1;
-  background-color: var(--primary);
-  color: white;
-  border-radius: 9999px;
-  padding: 0.75rem 1.5rem;
-  font-weight: 600;
-  transition: background-color 0.3s ease;
-  isolation: isolate;
-  border: none;
-}
-
-.submit-button-swipe-alt:hover {
-  background-color: var(--primary-hover);
-}
-
-.submit-button-swipe-alt::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -50%; /* Start less far to the left */
-  width: 30%; /* Smaller width */
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  transform: skewX(-25deg);
-  transition: left 0.6s ease;
   z-index: -1;
   border-radius: inherit;
 }
 
-.submit-button-swipe-alt:hover::before {
-  left: 120%; /* Don't go as far right */
+.submit-button-swipe:hover::before {
+  left: 150%;
 }
 
 .loading-screen-active .global-search-bar {
@@ -208,7 +216,12 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focu
   @apply text-lg;
 }
 
-.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
   @apply font-bold mb-4;
 }
 
@@ -244,7 +257,7 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focu
   @apply text-blue-600 hover:underline;
 }
 
-/* Custom Scrollbar for Search Results */
+/* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
@@ -268,4 +281,33 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focu
 
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgb(71, 85, 105);
+}
+
+/* Marquee Animation */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes marquee2 {
+  0% {
+    transform: translateX(100%);
+  }
+
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+
+.animate-marquee2 {
+  animation: marquee2 40s linear infinite;
 }

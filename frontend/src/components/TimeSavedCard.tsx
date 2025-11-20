@@ -98,18 +98,18 @@ const TimeSavedCard = () => {
     <section className="relative overflow-hidden rounded-3xl">
       {/* Liquid background blobs */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-12 -left-10 h-56 w-56 rounded-full bg-indigo-400/40 blur-3xl dark:bg-indigo-500/30" />
-        <div className="absolute -bottom-12 -right-10 h-60 w-60 rounded-full bg-sky-400/40 blur-3xl dark:bg-sky-500/30" />
+        <div className="absolute -top-12 -left-10 h-56 w-56 rounded-full bg-indigo-400/30 blur-3xl dark:bg-indigo-600/20" />
+        <div className="absolute -bottom-12 -right-10 h-60 w-60 rounded-full bg-sky-400/30 blur-3xl dark:bg-sky-600/20" />
       </div>
 
       {/* Glass card with liquid effect */}
-      <div className="relative rounded-3xl border border-white/30 bg-white/15 p-6 shadow-2xl backdrop-blur-2xl transition-colors dark:border-white/10 dark:bg-white/5">
+      <div className="relative rounded-3xl border border-white/40 bg-white/20 p-6 shadow-2xl backdrop-blur-xl transition-colors dark:border-white/10 dark:bg-black/40 dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
         {/* Liquid glass gradient overlays */}
-        <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-white/30 via-transparent to-transparent" />
-        <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-tl from-indigo-500/10 via-sky-500/5 to-purple-500/10" />
-        
+        <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-white/40 via-transparent to-transparent dark:from-white/5 dark:to-transparent" />
+        <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-tl from-indigo-500/10 via-sky-500/5 to-purple-500/10 dark:from-indigo-500/20 dark:via-transparent dark:to-purple-900/20" />
+
         {/* Inner glossy ring */}
-        <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/40 dark:ring-white/20" />
+        <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/50 dark:ring-white/10" />
 
         {/* Moving sheen */}
         <motion.div
@@ -117,7 +117,7 @@ const TimeSavedCard = () => {
           initial={{ x: "-100%" }}
           animate={{ x: "100%" }}
           transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
-          className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-white/0 via-white/30 to-white/0"
+          className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-white/0 via-white/20 to-white/0 dark:via-white/5"
         />
 
         <motion.div
@@ -126,15 +126,15 @@ const TimeSavedCard = () => {
           transition={{ duration: 0.25, ease: "easeOut" }}
           className="relative z-10 flex flex-col items-center text-center"
         >
-          <Clock size={48} className="mb-3 opacity-90" />
-          <h3 className="mb-1 text-2xl font-semibold tracking-tight">You've Saved</h3>
-          <p className="text-4xl font-extrabold tracking-tight text-indigo-600 drop-shadow-sm dark:text-indigo-400">
+          <Clock size={48} className="mb-3 opacity-90 text-indigo-600 dark:text-indigo-400" />
+          <h3 className="mb-1 text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">You've Saved</h3>
+          <p className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 drop-shadow-sm">
             {formattedTime}
           </p>
           <div className="mt-3">
             <Tooltip content={tooltipContent}>
               <button
-                className="text-sm opacity-80 transition hover:opacity-100 hover:underline"
+                className="text-sm opacity-70 transition hover:opacity-100 hover:underline text-gray-700 dark:text-gray-300"
                 aria-label="How is this calculated?"
               >
                 How is this calculated?

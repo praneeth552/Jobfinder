@@ -1,100 +1,94 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { Menu, X } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
-import { useTheme } from "@/context/ThemeContext";
+import { useRouter } from "next/navigation";
 
 interface NavbarProps {
-  onGetStarted: (x: number, y: number) => void;
+  onGetStarted: () => void;
 }
 
-const buttonTexts = ["Got Ideas?", "Collaborate?"];
-
 export default function Navbar({ onGetStarted }: NavbarProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
   const [isOverDarkSection, setIsOverDarkSection] = useState(false);
   const [textIndex, setTextIndex] = useState(0);
+  const buttonTexts = ["Got Ideas?", "Collaborate?"];
   const router = useRouter();
-  const { theme } = useTheme();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setHasScrolled(window.scrollY > 20);
+
+      // Check if over dark sections (Contact or Footer)
+      const contactSection = document.getElementById("contact-section");
+      const footerSection = document.querySelector("footer");
+
+      let isDark = false;
+      const scrollPosition = window.scrollY + 100; // Offset for navbar height
+
+      if (contactSection) {
+        const { offsetTop, offsetHeight } = contactSection;
+        if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+          isDark = true;
+        }
+      }
+
+      if (footerSection && !isDark) {
+        const { offsetTop } = footerSection;
+        if (scrollPosition >= offsetTop) {
+          isDark = true;
+        }
+      }
+
+      setIsOverDarkSection(isDark);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTextIndex((prevIndex) => (prevIndex + 1) % buttonTexts.length);
+      setTextIndex((prev) => (prev + 1) % buttonTexts.length);
     }, 3000);
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setHasScrolled(window.scrollY > 10);
-    };
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const isIntersecting = entries.some(entry => entry.isIntersecting);
-        setIsOverDarkSection(isIntersecting);
-      },
-      { rootMargin: "-50% 0px -50% 0px" }
-    );
-
-    const contactSection = document.getElementById("contact-section");
-    const footerSection = document.querySelector("footer");
-
-    if (contactSection) observer.observe(contactSection);
-    if (footerSection) observer.observe(footerSection);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (contactSection) observer.unobserve(contactSection);
-      if (footerSection) observer.unobserve(footerSection);
-    };
-  }, []);
-
-  // Lock body scroll when menu is open
-  useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isMenuOpen]);
-
   const handleSignInClick = () => {
-    router.push("/signin");
-    setIsMenuOpen(false);
+    router.push('/signin');
   };
-  
-  const handleCollaborateClick = () => {
-    const contactSection = document.getElementById("contact-section");
+
+  const handleCollaborateClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const contactSection = document.getElementById('contact-section');
     if (contactSection) {
-      contactSection.scrollIntoView({ behavior: "smooth" });
+      contactSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      router.push('/contact');
     }
-    setIsMenuOpen(false);
+    setIsMobileMenuOpen(false);
   };
 
   const navVariants = {
     initial: { y: -100, opacity: 0 },
-    animate: { y: 0, opacity: 1 },
-    transition: { duration: 0.8, ease: [0.6, 0.05, -0.01, 0.9] },
+    animate: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.5, ease: "easeOut" }
+    }
   };
 
   const slideVariants = {
-    enter: { opacity: 0, y: 10 },
-    center: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -10 },
+    enter: { y: 20, opacity: 0 },
+    center: { y: 0, opacity: 1 },
+    exit: { y: -20, opacity: 0 },
   };
 
-  // Liquid morph menu variants
+  // Liquid morph menu variants for premium mobile menu
   const menuVariants = {
     closed: {
       clipPath: "circle(0% at calc(100% - 40px) 40px)",
@@ -140,120 +134,137 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
   };
 
   const getTextColor = () => {
-    if (theme === 'dark') return 'text-white';
-    if (isOverDarkSection) return 'text-white';
-    return 'text-black';
-  };
-
-  const getHoverColor = () => {
-    return 'hover:text-[--primary]';
+    if (isOverDarkSection) return "text-white";
+    return "text-[--foreground]";
   };
 
   return (
     <>
-      <motion.nav
-        variants={navVariants}
-        initial="initial"
-        animate="animate"
-        className={`fixed top-4 left-4 right-4 max-w-6xl mx-auto flex justify-between items-center px-4 sm:px-8 py-3 z-50 transition-all duration-300 rounded-2xl bg-[--card-background]/70 backdrop-blur-lg
-          ${hasScrolled ? "border border-[--border] shadow-lg" : "border border-transparent"}`}
-      >
-        <Link href="/workflow">
-          <motion.div
-            className={`text-2xl font-bold cursor-pointer transition-colors ${getTextColor()} ${getHoverColor()}`}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            TackleIt
-          </motion.div>
-        </Link>
+      <div className="fixed top-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
+        <motion.nav
+          variants={navVariants as any}
+          initial="initial"
+          animate="animate"
+          className={`pointer-events-auto w-[95%] max-w-5xl flex justify-between items-center px-6 py-3 transition-all duration-500 rounded-full
+            ${hasScrolled
+              ? isOverDarkSection
+                ? "bg-black/60 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]"
+                : "bg-white/80 dark:bg-black/60 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
+              : "bg-white/50 dark:bg-black/20 backdrop-blur-md border border-white/10"}`}
+        >
+          <Link href="/">
+            <motion.div
+              className={`text-2xl font-bold cursor-pointer flex items-center gap-2 ${getTextColor()}`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[--primary] to-purple-500">TackleIt</span>
+            </motion.div>
+          </Link>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center space-x-4">
-          <ThemeToggle />
-          <motion.button
-            onClick={() => router.push('/pricing')}
-            className={`font-semibold px-2 transition-colors ${getTextColor()} ${getHoverColor()}`}
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Pricing
-          </motion.button>
-          <motion.button
-            onClick={handleSignInClick}
-            className={`font-semibold px-2 transition-colors ${getTextColor()} ${getHoverColor()}`}
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Sign In
-          </motion.button>
-          <motion.button
-            onClick={handleCollaborateClick}
-            className="relative submit-button-swipe font-semibold h-10 w-40 flex items-center justify-center"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={textIndex}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.3 }}
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center gap-8">
+            {/* Links removed as per request */}
+          </div>
+
+          <div className="hidden md:flex items-center gap-2">
+            <div className="flex items-center bg-white/5 rounded-full p-1 border border-white/10 backdrop-blur-sm mr-2">
+              <ThemeToggle />
+            </div>
+
+            <div className="flex items-center gap-1 bg-white/5 rounded-full p-1.5 border border-white/10 backdrop-blur-md">
+              <motion.button
+                onClick={() => router.push('/pricing')}
+                className={`relative px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 overflow-hidden group ${getTextColor()}`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                {buttonTexts[textIndex]}
-              </motion.span>
-            </AnimatePresence>
-          </motion.button>
-          <motion.button
-            onClick={() => onGetStarted(0, 0)}
-            className="submit-button-swipe font-semibold"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Get Started
-          </motion.button>
-        </div>
+                <span className="relative z-10 group-hover:text-white transition-colors">Pricing</span>
+                <div className="absolute inset-0 bg-[--primary] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full" />
+              </motion.button>
 
-        {/* Mobile Menu Button */}
-        <div className="md:hidden flex items-center space-x-4">
-          <ThemeToggle />
-          <motion.button 
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="relative z-[60]"
-            whileTap={{ scale: 0.9 }}
-          >
-            <AnimatePresence mode="wait">
-              {isMenuOpen ? (
-                <motion.div
-                  key="close"
-                  initial={{ rotate: -90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 90, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <X size={28} className={theme === 'dark' ? 'text-white' : 'text-gray-900'} />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="menu"
-                  initial={{ rotate: 90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: -90, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Menu size={28} className={`${getTextColor()}`} />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.button>
-        </div>
-      </motion.nav>
+              <motion.button
+                onClick={handleSignInClick}
+                className={`relative px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 overflow-hidden group ${getTextColor()}`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span className="relative z-10 group-hover:text-white transition-colors">Sign In</span>
+                <div className="absolute inset-0 bg-[--primary] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full" />
+              </motion.button>
+
+              <motion.button
+                onClick={handleCollaborateClick}
+                className={`relative px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 overflow-hidden group w-32 flex justify-center ${getTextColor()}`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span className="relative z-10 group-hover:text-white transition-colors">
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={textIndex}
+                      variants={slideVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{ duration: 0.3 }}
+                      className="block"
+                    >
+                      {buttonTexts[textIndex]}
+                    </motion.span>
+                  </AnimatePresence>
+                </span>
+                <div className="absolute inset-0 bg-[--primary] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full" />
+              </motion.button>
+            </div>
+
+            <motion.button
+              onClick={onGetStarted}
+              className="ml-2 px-6 py-2.5 bg-[--foreground] text-[--background] rounded-full font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 border border-transparent hover:border-[--primary]/50"
+            >
+              Get Started
+            </motion.button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center gap-4">
+            <ThemeToggle />
+            <motion.button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="relative z-[60]"
+              whileTap={{ scale: 0.9 }}
+            >
+              <AnimatePresence mode="wait">
+                {isMobileMenuOpen ? (
+                  <motion.div
+                    key="close"
+                    initial={{ rotate: -90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 90, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <X size={28} className={getTextColor()} />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="menu"
+                    initial={{ rotate: 90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: -90, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Menu size={28} className={getTextColor()} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.button>
+          </div>
+        </motion.nav>
+      </div>
 
       {/* Liquid Morph Mobile Menu */}
       <AnimatePresence>
-        {isMenuOpen && (
+        {isMobileMenuOpen && (
           <motion.div
             initial="closed"
             animate="open"
@@ -261,9 +272,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
             variants={menuVariants as any}
             className="fixed inset-0 z-40 md:hidden"
             style={{
-              background: theme === 'dark' 
-                ? 'linear-gradient(135deg, rgba(15, 15, 35, 0.98) 0%, rgba(30, 30, 60, 0.98) 100%)'
-                : 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 245, 250, 0.98) 100%)',
+              background: 'linear-gradient(135deg, var(--background) 0%, var(--secondary) 100%)',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
             }}
@@ -271,15 +280,16 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
             {/* Decorative gradient orbs */}
             <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[--primary] rounded-full opacity-10 blur-3xl" />
             <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[--primary] rounded-full opacity-10 blur-3xl" />
-            
+
             <div className="flex flex-col items-center justify-center h-full px-8 space-y-8">
               {/* Menu Items */}
               <motion.div variants={menuItemVariants as any} className="w-full">
-                <motion.button 
-                  onClick={() => router.push('/pricing')} 
-                  className={`w-full text-3xl font-bold py-4 rounded-2xl transition-all ${
-                    theme === 'dark' ? 'text-white hover:bg-white/10' : 'text-gray-900 hover:bg-gray-900/5'
-                  }`}
+                <motion.button
+                  onClick={() => {
+                    router.push('/pricing');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full text-3xl font-bold py-4 rounded-2xl transition-all text-[--foreground] hover:bg-[--primary]/10"
                   whileHover={{ scale: 1.05, x: 10 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -288,11 +298,12 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
               </motion.div>
 
               <motion.div variants={menuItemVariants as any} className="w-full">
-                <motion.button 
-                  onClick={handleSignInClick} 
-                  className={`w-full text-3xl font-bold py-4 rounded-2xl transition-all ${
-                    theme === 'dark' ? 'text-white hover:bg-white/10' : 'text-gray-900 hover:bg-gray-900/5'
-                  }`}
+                <motion.button
+                  onClick={() => {
+                    handleSignInClick();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full text-3xl font-bold py-4 rounded-2xl transition-all text-[--foreground] hover:bg-[--primary]/10"
                   whileHover={{ scale: 1.05, x: 10 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -301,11 +312,9 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
               </motion.div>
 
               <motion.div variants={menuItemVariants as any} className="w-full">
-                <motion.button 
-                  onClick={handleCollaborateClick} 
-                  className={`w-full text-3xl font-bold py-4 rounded-2xl transition-all ${
-                    theme === 'dark' ? 'text-white hover:bg-white/10' : 'text-gray-900 hover:bg-gray-900/5'
-                  }`}
+                <motion.button
+                  onClick={handleCollaborateClick}
+                  className="w-full text-3xl font-bold py-4 rounded-2xl transition-all text-[--foreground] hover:bg-[--primary]/10"
                   whileHover={{ scale: 1.05, x: 10 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -314,10 +323,10 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
               </motion.div>
 
               <motion.div variants={menuItemVariants as any} className="w-full pt-4">
-                <motion.button 
+                <motion.button
                   onClick={() => {
-                    onGetStarted(0, 0);
-                    setIsMenuOpen(false);
+                    onGetStarted();
+                    setIsMobileMenuOpen(false);
                   }}
                   className="w-full submit-button-swipe font-bold text-xl py-5 rounded-2xl shadow-2xl"
                   whileHover={{ scale: 1.05 }}
@@ -328,13 +337,11 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
               </motion.div>
 
               {/* Footer text */}
-              <motion.div 
+              <motion.div
                 variants={menuItemVariants as any}
-                className={`absolute bottom-12 text-center ${
-                  theme === 'dark' ? 'text-white/40' : 'text-gray-600/60'
-                }`}
+                className="absolute bottom-20 text-center text-[--foreground]/40"
               >
-                <p className="text-sm font-medium -mt-10">TackleIt © 2025</p>
+                <p className="text-sm font-medium">TackleIt © 2025</p>
               </motion.div>
             </div>
           </motion.div>

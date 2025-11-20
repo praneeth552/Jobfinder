@@ -37,7 +37,7 @@ export default function HomeClient() {
         const response = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}/warmup`
         );
-        
+
       } catch (error) {
         console.error("Backend warm-up failed:", error);
       }
