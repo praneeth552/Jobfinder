@@ -120,7 +120,7 @@ const PrivacyPolicy = () => {
                           <li key={idx} className="flex gap-3">
                             <span className="text-indigo-500 dark:text-indigo-400">•</span>
                             <div>
-                              {bullet.label && <strong className="text-gray-900 dark:text-white">{bullet.label}</strong>} {bullet.text}
+                              {'label' in bullet && <strong className="text-gray-900 dark:text-white">{bullet.label}</strong>} {bullet.text}
                             </div>
                           </li>
                         ))}
