@@ -1,6 +1,6 @@
 'use client';
 
-import { Mail, Linkedin, Github } from "lucide-react";
+import { Mail, Linkedin, Github, Globe } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
@@ -24,6 +24,11 @@ const NewFooter = () => {
       name: "GitHub",
       icon: <Github />,
       url: "https://github.com/praneeth552",
+    },
+    {
+      name: "Portfolio",
+      icon: <Globe />,
+      url: "https://portfolio-b7wrc4qu6-praneeth552s-projects.vercel.app/",
     },
   ];
 
