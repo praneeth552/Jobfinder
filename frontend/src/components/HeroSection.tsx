@@ -54,7 +54,7 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
         className="relative z-10 max-w-5xl mx-auto"
       >
         {/* Badge */}
-        <motion.div variants={itemVariants} className="mb-8 flex justify-center">
+        <motion.div variants={itemVariants} className="mb-4 md:mb-8 flex justify-center">
           <div className="px-4 py-1.5 rounded-full border border-[--primary]/20 bg-[--primary]/5 backdrop-blur-sm text-sm font-medium text-[--primary]">
             ✨ The Future of Job Search is Here
           </div>
@@ -63,7 +63,7 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
         {/* Heading */}
         <motion.h1
           variants={itemVariants}
-          className="text-6xl md:text-8xl font-bold tracking-tight mb-8 text-[--foreground] leading-[1.1]"
+          className="text-5xl md:text-8xl font-bold tracking-tight mb-4 md:mb-8 text-[--foreground] leading-[1.1]"
         >
           Jobs tailored for{" "}
           {/* Text with pop-in + idle float (fixed: no 3-keyframe spring) */}
@@ -102,7 +102,7 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
         {/* Subtext */}
         <motion.p
           variants={itemVariants}
-          className="text-xl md:text-2xl text-[--foreground]/70 max-w-2xl mx-auto mb-12 leading-relaxed"
+          className="text-xl md:text-2xl text-[--foreground]/70 max-w-2xl mx-auto mb-8 md:mb-12 leading-relaxed"
         >
           Stop wasting hours on job boards. Get AI-matched jobs from real company
           websites, organized in your Google Sheets—automatically.
@@ -132,7 +132,37 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
               </svg>
             </span>
           </motion.button>
+
+          {/* Try Demo Button - Identical "Cool" Style with Blue Theme */}
+          <motion.button
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.location.href = '/dashboard?demo=true';
+              }
+            }}
+            className="group relative px-12 py-6 bg-purple-600 dark:bg-purple-600 text-white rounded-[2.5rem] font-bold text-xl overflow-hidden transition-all duration-500 hover:scale-105 hover:shadow-[0_20px_50px_-12px_rgba(147,51,234,0.5)]"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay" />
+
+            {/* Liquid Shine Effect */}
+            <div className="absolute -inset-full top-0 block h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-40 group-hover:animate-[shine_1.5s_ease-in-out_infinite]" />
+
+            <span className="relative z-10 flex items-center gap-3">
+              Try Demo
+              <span className="text-sm bg-white/20 px-3 py-1 rounded-full font-medium border border-white/20">Preview</span>
+            </span>
+          </motion.button>
         </motion.div>
+
+        <motion.p
+          variants={itemVariants}
+          className="mt-4 text-sm text-[--foreground]/50 font-medium"
+        >
+          * Signup required to view details, apply & get personalized match scores
+        </motion.p>
       </motion.div>
 
       {/* Scroll Indicator */}

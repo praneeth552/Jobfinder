@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -43,6 +43,7 @@ const PasswordCriteria = ({ criteria }: { criteria: { [key: string]: boolean } }
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [form, setForm] = useState({
     name: "",
@@ -55,6 +56,13 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [redirectPath, setRedirectPath] = useState("/dashboard");
+
+  useEffect(() => {
+    const fromDemo = searchParams.get("from") === "demo";
+    if (fromDemo) {
+      setRedirectPath("/preferences?new_user=true&from=demo");
+    }
+  }, [searchParams]);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -68,7 +76,7 @@ export default function SignupPage() {
   });
 
   const disposableEmailDomains = [
-    '10minutemail.com', 'temp-mail.org', 'guerrillamail.com', 'mailinator.com', 
+    '10minutemail.com', 'temp-mail.org', 'guerrillamail.com', 'mailinator.com',
     'getnada.com', 'throwawaymail.com', 'yopmail.com', 'maildrop.cc'
   ];
 
@@ -147,7 +155,7 @@ export default function SignupPage() {
       validateField(name, value);
     } else if (name === 'email') {
       // Clear previous email error and start typing
-      setErrors(prev => ({...prev, email: ''}))
+      setErrors(prev => ({ ...prev, email: '' }))
       setIsTyping(true);
       validateField(name, value);
     }
@@ -164,8 +172,8 @@ export default function SignupPage() {
     validateField('email', form.email);
 
     if (errors.name || errors.email || !form.name || !form.email) {
-        toast.error("Please fix the errors before submitting.");
-        return;
+      toast.error("Please fix the errors before submitting.");
+      return;
     }
 
     setLoading(true);
@@ -291,7 +299,7 @@ export default function SignupPage() {
                   {errors.email === "EMAIL_TAKEN" ? (
                     <span>
                       Email already registered.{" "}
-                      <button 
+                      <button
                         type="button"
                         onClick={() => router.push(`/signin?email=${encodeURIComponent(form.email)}`)}
                         className="font-semibold text-purple-600 hover:underline"

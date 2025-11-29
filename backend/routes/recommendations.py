@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Response
+from fastapi import APIRouter, HTTPException, Depends, Request, BackgroundTasks, Response
 from bson import ObjectId
 from database import db
 from models import RecommendedJob
@@ -10,7 +10,8 @@ import json
 import uuid
 import asyncio
 from services.google_sheets import write_to_sheet
-from utils import get_current_user, is_pro_user
+from utils import is_pro_user
+from dependencies import get_current_user, limiter
 
 # --- Load Environment ---
 load_dotenv()
@@ -229,3 +230,56 @@ async def get_recommendation_status(task_id: str, current_user: dict = Depends(g
         "result": task.get("result"),
         "error": task.get("error")
     }
+@router.post("/recommendations/demo")
+@limiter.limit("2/day")
+async def generate_demo_recommendations(request: Request):
+    """
+    Generate demo recommendations without authentication.
+    Returns random jobs from database for guest users to preview the platform.
+    No user preferences needed - purely for demonstration purposes.
+    """
+    try:
+        # Get 10 random active jobs from database
+        pipeline = [
+            {"$match": {"is_active": True}},
+            {"$sample": {"size": 10}}
+        ]
+        
+        demo_jobs_cursor = jobs_collection.aggregate(pipeline)
+        demo_jobs = await demo_jobs_cursor.to_list(10)
+        
+        if not demo_jobs:
+            # Fallback: if no jobs with is_active, just get any 10 jobs
+            demo_jobs = await jobs_collection.find().limit(10).to_list(10)
+        
+        # Format jobs to match expected structure
+        recommendations = []
+        for idx, job in enumerate(demo_jobs):
+            # Remove MongoDB _id for clean response
+            if "_id" in job:
+                del job["_id"]
+            
+            recommendations.append({
+                "job_details": {
+                    "title": job.get("title", "Software Engineer"),
+                    "company": job.get("company", "Tech Company"),
+                    "location": job.get("location", "Remote"),
+                    "job_url": job.get("job_url", "#"),
+                    "match_score": 85,  # Fixed demo score
+                    "reason": "Sample job recommendation for demo purposes. Sign up to get personalized matches!"
+                },
+                "status": "recommended"
+            })
+        
+        return {
+            "recommendations": recommendations,
+            "is_demo": True,
+            "count": len(recommendations),
+            "message": "Demo recommendations generated successfully"
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate demo recommendations: {str(e)}"
+        )

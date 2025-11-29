@@ -63,11 +63,14 @@ export default function DashboardClient() {
   const [wiggleTokensKey, setWiggleTokensKey] = useState(0);
   const [wiggleProfileKey, setWiggleProfileKey] = useState(0);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false); // Feedback modal state
+  const [isDemoMode, setIsDemoMode] = useState(false);
+  const [demoJobs, setDemoJobs] = useState<JobApplication[]>([]);
 
 
   const router = useRouter();
   const searchParams = useSearchParams();
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const hasShownDemoToast = useRef(false);
 
   const token = typeof window !== "undefined" ? Cookies.get("token") : null;
   const userId = typeof window !== "undefined" ? Cookies.get("user_id") : null;
@@ -103,6 +106,27 @@ export default function DashboardClient() {
   useEffect(() => {
     setIsUserLoading(true);
     setIsClient(true);
+
+    // Check for demo mode
+    const isDemo = searchParams.get("demo") === "true";
+
+    if (isDemo) {
+      setIsDemoMode(true);
+      setUserName("Demo Account");
+      setUserEmail("demo@tackleit.xyz");
+      setUserPlan("free");
+      setIsUserLoading(false);
+      setIsLoading(false);
+
+      // Show welcome toast for demo users
+      // Show welcome toast for demo users
+      if (!hasShownDemoToast.current) {
+        hasShownDemoToast.current = true;
+        toast.success("Welcome to Demo Mode! Feel free to explore.", { icon: "👋" });
+      }
+      return;
+    }
+
     setUserPlan((plan as "free" | "pro") || "free");
     const upgradeSuccess = searchParams.get("upgrade_success");
     if (upgradeSuccess === "true") {
@@ -124,6 +148,11 @@ export default function DashboardClient() {
         finally { setIsUserLoading(false); }
       } else {
         setIsUserLoading(false);
+        // Redirect to signin if not authenticated and not in demo mode
+        if (!token && !isDemo) {
+          // Optional: router.push("/signin"); 
+          // Keeping existing behavior of just showing empty state or loading
+        }
       }
     };
     fetchUser();
@@ -222,7 +251,8 @@ export default function DashboardClient() {
   }, [router]);
 
   const handleCardAction = async (job: JobApplication, status: 'saved' | 'applied') => {
-    setCardActionLoading(prev => ({ ...prev, [job.id]: true }));
+    const loadingKey = `${status}-${job.id}`;
+    setCardActionLoading(prev => ({ ...prev, [loadingKey]: true }));
     const oldJobs = [...jobApplications];
     setJobApplications(prev => prev.map(j => j.id === job.id ? { ...j, status } : j));
     try {
@@ -234,7 +264,7 @@ export default function DashboardClient() {
       console.error("Failed to update job status:", error);
       toast.error("Failed to update job status.");
     } finally {
-      setCardActionLoading(prev => ({ ...prev, [job.id]: false }));
+      setCardActionLoading(prev => ({ ...prev, [loadingKey]: false }));
     }
   };
 
@@ -347,8 +377,50 @@ export default function DashboardClient() {
     }, 5000); // Poll every 5 seconds
   }, [token, fetchAllJobs]);
 
+  const generateDemoRecommendations = async () => {
+    setIsGenerating(true);
+    toast.success("Generating sample recommendations...");
+
+    try {
+      const { data } = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/recommendations/demo`
+      );
+
+      // Transform demo jobs to match dashboard format
+      const jobApps = data.recommendations.map((rec: any, index: number) => ({
+        ...rec.job_details,
+        id: `demo-${index}`,
+        status: "recommended"
+      }));
+
+      setJobApplications(jobApps);
+      toast.success(`Found ${jobApps.length} matching opportunities!`);
+
+      // Show feedback modal after successful generation (simulated)
+      setTimeout(() => {
+        setShowFeedbackModal(true);
+      }, 1000);
+
+    } catch (error: any) {
+      console.error("Demo generation error:", error);
+      if (error.response?.status === 429) {
+        toast.error("Demo quota exhausted. Please sign in to continue.", { duration: 5000 });
+      } else {
+        toast.error("Failed to generate demo jobs");
+      }
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const confirmGenerateRecommendations = async () => {
     setIsConfirmationModalOpen(false);
+
+    if (isDemoMode) {
+      generateDemoRecommendations();
+      return;
+    }
+
     if (!userId || !token) {
       setError("User not authenticated. Please sign in again.");
       return;
@@ -618,9 +690,11 @@ export default function DashboardClient() {
           </div>
 
           {/* Time Saved Card */}
-          <div className="mb-8 max-w-md mx-auto">
-            <TimeSavedCard />
-          </div>
+          {!isDemoMode && (
+            <div className="mb-8 max-w-md mx-auto">
+              <TimeSavedCard />
+            </div>
+          )}
 
           <DndContext
             sensors={useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))}
@@ -669,9 +743,10 @@ export default function DashboardClient() {
                         userPlan={userPlan}
                         onSave={() => handleCardAction(job, 'saved')}
                         onApply={() => handleCardAction(job, 'applied')}
-                        isSaving={cardActionLoading[job.id]}
-                        isApplying={cardActionLoading[job.id]}
+                        isSaving={cardActionLoading[`saved-${job.id}`]}
+                        isApplying={cardActionLoading[`applied-${job.id}`]}
                         variants={cardVariants}
+                        isDemoMode={isDemoMode}
                       />
                     ))}
                   </motion.div>

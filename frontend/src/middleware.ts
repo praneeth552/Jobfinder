@@ -26,11 +26,14 @@ export function middleware(request: NextRequest) {
   }
 
   // If trying to access a protected route without a valid token, redirect to signin
-  if (isProtectedRoute && !isTokenValid) {
+  // UNLESS it's a demo access
+  const isDemo = request.nextUrl.searchParams.get('demo') === 'true';
+
+  if (isProtectedRoute && !isTokenValid && !isDemo) {
     const response = NextResponse.redirect(new URL('/signin', request.url));
     // Clear the invalid cookie
     if (token) {
-        response.cookies.delete('token');
+      response.cookies.delete('token');
     }
     return response;
   }

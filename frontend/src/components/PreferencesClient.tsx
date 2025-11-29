@@ -171,7 +171,7 @@ export default function PreferencesClient() {
           if (data.next_resume_upload_allowed_at) {
             const nextUploadTimestamp = new Date(data.next_resume_upload_allowed_at).getTime();
             setNextResumeUploadAllowedAt(nextUploadTimestamp);
-            
+
             if (Date.now() < nextUploadTimestamp) {
               setIsResumeUploadAllowed(false);
               const nextDate = new Date(nextUploadTimestamp);
@@ -314,8 +314,23 @@ export default function PreferencesClient() {
     try {
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/preferences`, preferences, { headers: { Authorization: `Bearer ${Cookies.get("token")}` } });
       toast.success("Preferences saved successfully!", { id: toastId });
-      if (isNewUser) setShowWelcome(true);
-      else router.push("/dashboard");
+      toast.success("Preferences saved successfully!", { id: toastId });
+
+      // Check for demo intent job
+      const intentJob = typeof window !== 'undefined' ? sessionStorage.getItem('demo_intent_job') : null;
+      const intentAction = typeof window !== 'undefined' ? sessionStorage.getItem('demo_intent_action') : null;
+
+      if (isNewUser) {
+        setShowWelcome(true);
+      } else if (intentJob && intentAction === 'view_job') {
+        const job = JSON.parse(intentJob);
+        sessionStorage.removeItem('demo_intent_job');
+        sessionStorage.removeItem('demo_intent_action');
+        if (job.job_url) window.open(job.job_url, '_blank');
+        router.push("/dashboard");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err) {
       let errorMsg = "Failed to save preferences.";
       if (axios.isAxiosError(err) && err.response?.data?.detail) {
@@ -331,6 +346,18 @@ export default function PreferencesClient() {
 
   const handleWelcomeAnimationComplete = () => {
     setIsRedirecting(true);
+
+    // Check for demo intent job
+    const intentJob = sessionStorage.getItem('demo_intent_job');
+    const intentAction = sessionStorage.getItem('demo_intent_action');
+
+    if (intentJob && intentAction === 'view_job') {
+      const job = JSON.parse(intentJob);
+      sessionStorage.removeItem('demo_intent_job');
+      sessionStorage.removeItem('demo_intent_action');
+      if (job.job_url) window.open(job.job_url, '_blank');
+    }
+
     router.push("/dashboard");
   };
 
@@ -424,38 +451,38 @@ export default function PreferencesClient() {
               <div className="flex flex-wrap gap-2">
                 {ROLES.map(r => <SelectionPill key={r} label={r} isSelected={preferences.role.includes(r)} onClick={() => handleMultiSelect('role', r, 3)} />)}
                 {preferences.role.filter(r => !ROLES.includes(r)).map(r => (
-                    <SelectionPill key={r} label={r} isSelected={true} onClick={() => handleMultiSelect('role', r, 3)} />
+                  <SelectionPill key={r} label={r} isSelected={true} onClick={() => handleMultiSelect('role', r, 3)} />
                 ))}
               </div>
               <div className="w-full mt-4 flex gap-2">
-                  <input
-                    type="text"
-                    value={customRole}
-                    onChange={(e) => setCustomRole(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        if (customRole && !preferences.role.includes(customRole)) {
-                          handleMultiSelect('role', customRole, 3);
-                          setCustomRole("");
-                        }
-                      }
-                    }}
-                    placeholder="Add a custom role"
-                    className="px-4 py-2.5 rounded-xl border border-white/30 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 flex-grow"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
+                <input
+                  type="text"
+                  value={customRole}
+                  onChange={(e) => setCustomRole(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
                       if (customRole && !preferences.role.includes(customRole)) {
                         handleMultiSelect('role', customRole, 3);
                         setCustomRole("");
                       }
-                    }}
-                    className="submit-button-swipe bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full"
-                  >
-                    Add
-                  </button>
+                    }
+                  }}
+                  placeholder="Add a custom role"
+                  className="px-4 py-2.5 rounded-xl border border-white/30 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 flex-grow"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (customRole && !preferences.role.includes(customRole)) {
+                      handleMultiSelect('role', customRole, 3);
+                      setCustomRole("");
+                    }
+                  }}
+                  className="submit-button-swipe bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full"
+                >
+                  Add
+                </button>
               </div>
             </PreferenceCard>
 
