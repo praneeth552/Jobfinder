@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
@@ -16,8 +16,18 @@ import TechStack from "@/components/TechStack";
 import "@/components/TechStack.css";
 import axios from "axios";
 import LoadingSpinner from "./LoadingSpinner";
+import dynamic from "next/dynamic";
 
-const SignupPage = lazy(() => import("@/components/SignupPage"));
+// New landing page components
+import WorkflowShowcase from "@/components/WorkflowShowcase";
+import ArchitectureSection from "@/components/ArchitectureSection";
+import PrivacyTrustSection from "@/components/PrivacyTrustSection";
+import SocialProofSection from "@/components/SocialProofSection";
+import ProofOfResultsSection from "@/components/ProofOfResultsSection";
+
+const SignupPage = dynamic(() => import("@/components/SignupPage"), {
+  ssr: false,
+});
 
 export default function HomeClient() {
   const [loadingFinished, setLoadingFinished] = useState(false);
@@ -87,9 +97,14 @@ export default function HomeClient() {
             <Navbar onGetStarted={handleGetStarted} />
             <HeroSection onGetStarted={handleGetStarted} />
             <IntroductionSection />
+            <PrivacyTrustSection />
+            <WorkflowShowcase />
             <FeaturesSection />
+            <SocialProofSection />
+            <ProofOfResultsSection />
             <RewardingSection />
             <TechStack />
+            <ArchitectureSection />
             <ProblemSolutionSection />
             <ContactForm />
             <NewFooter />

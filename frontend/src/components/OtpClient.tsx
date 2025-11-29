@@ -58,10 +58,29 @@ const OtpClient = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-otp`, { email, otp });
-            toast.success("Verification successful! Please sign in.");
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-otp`, { email, otp });
+
+            // Backend now returns access_token and user info
+            const { access_token, user_id, is_first_time_user } = response.data;
+
+            // Store auth credentials in both localStorage and cookies for consistency
+            localStorage.setItem("token", access_token);
+            localStorage.setItem("user_id", user_id);
+
+            // Also set cookies (matches Google signup flow)
+            const Cookies = (await import("js-cookie")).default;
+            Cookies.set("token", access_token, { expires: 1 });
+            Cookies.set("user_id", user_id, { expires: 1 });
+
+            toast.success("Verification successful!");
             sessionStorage.removeItem('otp_verification_pending');
-            router.replace("/signin");
+
+            // Redirect based on whether it's a first-time user
+            if (is_first_time_user) {
+                router.replace("/preferences?new_user=true");
+            } else {
+                router.replace("/dashboard");
+            }
         } catch (error: unknown) {
             let errorMessage = "An unexpected error occurred.";
             if (error && typeof error === "object" && "response" in error) {
@@ -82,51 +101,51 @@ const OtpClient = () => {
 
     return (
         <>
-        <SimpleNavbar />
-        <main className="flex flex-col items-center justify-center min-h-screen px-4 relative animated-gradient-bg">
-            <div className="w-full max-w-md p-8 space-y-6 bg-[--card-background] rounded-2xl shadow-2xl">
-                <h2 className="text-3xl font-bold text-center text-[--foreground]">Enter OTP</h2>
-                <p className="text-center text-[--foreground]/70">
-                    An OTP has been sent to your email address: <strong className="text-[--foreground]">{email}</strong>
-                </p>
-                <form className="space-y-6" onSubmit={handleSubmit}>
-                    <div>
-                        <label htmlFor="otp" className="block text-sm font-medium text-[--foreground]/80">
-                            One-Time Password
-                        </label>
-                        <input
-                            id="otp"
-                            name="otp"
-                            type="text"
-                            required
-                            className="w-full px-4 py-3 mt-1 border border-[--border] rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[--primary] sm:text-sm bg-transparent text-[--foreground]"
-                            value={otp}
-                            onChange={(e) => setOtp(e.target.value)}
-                        />
-                    </div>
-                    <div>
+            <SimpleNavbar />
+            <main className="flex flex-col items-center justify-center min-h-screen px-4 relative animated-gradient-bg">
+                <div className="w-full max-w-md p-8 space-y-6 bg-[--card-background] rounded-2xl shadow-2xl">
+                    <h2 className="text-3xl font-bold text-center text-[--foreground]">Enter OTP</h2>
+                    <p className="text-center text-[--foreground]/70">
+                        An OTP has been sent to your email address: <strong className="text-[--foreground]">{email}</strong>
+                    </p>
+                    <form className="space-y-6" onSubmit={handleSubmit}>
+                        <div>
+                            <label htmlFor="otp" className="block text-sm font-medium text-[--foreground]/80">
+                                One-Time Password
+                            </label>
+                            <input
+                                id="otp"
+                                name="otp"
+                                type="text"
+                                required
+                                className="w-full px-4 py-3 mt-1 border border-[--border] rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[--primary] sm:text-sm bg-transparent text-[--foreground]"
+                                value={otp}
+                                onChange={(e) => setOtp(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <LoadingButton
+                                type="submit"
+                                isLoading={loading}
+                                className="w-full bg-[--primary] text-white px-4 py-3 rounded-2xl font-semibold hover:bg-[--primary]/90 transition"
+                                disabled={loading}
+                            >
+                                Verify OTP
+                            </LoadingButton>
+                        </div>
+                    </form>
+                    <div className="text-center mt-4">
                         <LoadingButton
-                            type="submit"
-                            isLoading={loading}
-                            className="w-full bg-[--primary] text-white px-4 py-3 rounded-2xl font-semibold hover:bg-[--primary]/90 transition"
-                            disabled={loading}
+                            onClick={handleResendOtp}
+                            isLoading={resendLoading}
+                            disabled={resendCooldown > 0 || resendLoading}
+                            className="text-sm text-[--primary] hover:underline disabled:text-gray-500 disabled:cursor-not-allowed"
                         >
-                            Verify OTP
+                            {resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : "Resend OTP"}
                         </LoadingButton>
                     </div>
-                </form>
-                <div className="text-center mt-4">
-                    <LoadingButton
-                        onClick={handleResendOtp}
-                        isLoading={resendLoading}
-                        disabled={resendCooldown > 0 || resendLoading}
-                        className="text-sm text-[--primary] hover:underline disabled:text-gray-500 disabled:cursor-not-allowed"
-                    >
-                        {resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : "Resend OTP"}
-                    </LoadingButton>
                 </div>
-            </div>
-        </main>
+            </main>
         </>
     );
 };

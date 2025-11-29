@@ -58,29 +58,37 @@ export default function SimpleNavbar() {
         variants={navVariants as any}
         initial="initial"
         animate="animate"
-        className={`pointer-events-auto w-[95%] max-w-5xl flex justify-between items-center px-6 py-3 transition-all duration-500 rounded-full
+        className={`pointer-events-auto w-[95%] max-w-5xl flex justify-between items-center px-3 md:px-6 py-2 md:py-3 transition-all duration-500 rounded-full
           ${hasScrolled
             ? "bg-white/80 dark:bg-black/60 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
             : "bg-white/50 dark:bg-black/20 backdrop-blur-md border border-white/10"}`}
       >
-        <Link href="/">
-          <motion.div
-            className="text-2xl font-bold cursor-pointer flex items-center gap-2 text-[--foreground]"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[--primary] to-purple-500">TackleIt</span>
-          </motion.div>
+        <Link
+          href="/"
+          className="flex items-center gap-1.5 md:gap-2 flex-shrink-0"
+        >
+          <span className="text-lg md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[--primary] to-purple-500 hover:scale-105 transition-transform">
+            TackleIt
+          </span>
+
+          {/* Early Access Badge - Compact on mobile */}
+          <span className="inline-flex items-center px-1.5 md:px-2.5 py-0.5 md:py-1 text-[7px] md:text-[10px] font-semibold 
+                         uppercase tracking-wide rounded-full 
+                         bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 
+                         text-[--primary] border border-[--primary]/20
+                         shadow-sm shadow-[--primary]/10 whitespace-nowrap">
+            Early
+          </span>
         </Link>
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center bg-white/5 rounded-full p-1 border border-white/10 backdrop-blur-sm">
+        <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
+          <div className="flex items-center bg-white/5 rounded-full p-0.5 md:p-1 border border-white/10 backdrop-blur-sm">
             <ThemeToggle />
           </div>
 
           <motion.button
             onClick={handleCollaborateClick}
-            className="relative px-6 py-2.5 bg-[--primary] text-white rounded-full font-semibold text-sm shadow-lg shadow-[--primary]/25 hover:shadow-xl hover:shadow-[--primary]/40 transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden group w-[160px] flex justify-center"
+            className="relative px-3 md:px-6 py-1.5 md:py-2.5 bg-[--primary] text-white rounded-full font-semibold text-[10px] md:text-sm shadow-lg shadow-[--primary]/25 hover:shadow-xl hover:shadow-[--primary]/40 transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden group w-[100px] md:w-[160px] flex justify-center"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >

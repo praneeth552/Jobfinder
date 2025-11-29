@@ -104,6 +104,12 @@ This project is built with a modern, robust, and scalable tech stack, deployed e
 
 For a more visual understanding of the project's complete end-to-end architecture, please visit the **/workflow** page on the live site.
 
+### Architecture Diagram
+
+![Tackleit Architecture](./Gemini_Generated_Image_mpyuxympyuxympyu.png)
+
+The diagram above illustrates the complete end-to-end architecture of Tackleit, showcasing how the frontend, backend, AI services, database, and deployment infrastructure work together to deliver personalized job recommendations.
+
 ---
 
 ## 📂 Project Structure

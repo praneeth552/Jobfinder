@@ -154,11 +154,20 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
         >
           <Link href="/workflow">
             <motion.div
-              className={`text-2xl font-bold cursor-pointer flex items-center gap-2 ${getTextColor()}`}
+              className={`text-2xl font-bold cursor-pointer flex items-center gap-3 ${getTextColor()}`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-[--primary] to-purple-500">TackleIt</span>
+
+              {/* Early Access Badge - Visible on all screen sizes */}
+              <span className="inline-block px-2 md:px-2.5 py-0.5 md:py-1 text-[8px] md:text-[10px] font-semibold 
+                             uppercase tracking-wide rounded-full 
+                             bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 
+                             text-[--primary] dark:text-purple-400 border border-[--primary]/20
+                             shadow-sm shadow-[--primary]/10">
+                Early Access
+              </span>
             </motion.div>
           </Link>
 

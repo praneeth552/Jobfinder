@@ -20,6 +20,7 @@ import TimeRemainingButton from "./TimeRemainingButton";
 import TimeRemainingSkeleton from "./TimeRemainingSkeleton";
 import GeminiIcon from "./GeminiIcon";
 import TimeSavedCard from "./TimeSavedCard"; // Import TimeSavedCard
+import FeedbackModal from "./FeedbackModal"; // Import FeedbackModal for testing
 
 interface JobApplication {
   id: string;
@@ -61,6 +62,7 @@ export default function DashboardClient() {
   const [wiggleSheetsKey, setWiggleSheetsKey] = useState(0);
   const [wiggleTokensKey, setWiggleTokensKey] = useState(0);
   const [wiggleProfileKey, setWiggleProfileKey] = useState(0);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false); // Feedback modal state
 
 
   const router = useRouter();
@@ -323,6 +325,11 @@ export default function DashboardClient() {
           if (userData.next_generation_allowed_at) {
             setNextGenerationAllowedAt(new Date(userData.next_generation_allowed_at).getTime());
           }
+
+          // Show feedback modal after successful generation
+          setTimeout(() => {
+            setShowFeedbackModal(true);
+          }, 1000); // Small delay to let user see the success message
         } else if (task.status === 'failed') {
           if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
           setIsGenerating(false);
@@ -375,6 +382,25 @@ export default function DashboardClient() {
   };
 
   // --- All other handlers like handleSheetToggle, handleLogout, etc. remain the same ---
+
+  const handleFeedbackSubmit = async (rating: number, comment?: string) => {
+    try {
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/feedback`,
+        {
+          rating,
+          comment,
+          trigger: "manual"
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success("Thank you for your feedback!");
+      setShowFeedbackModal(false);
+    } catch (error) {
+      console.error("Failed to submit feedback:", error);
+      toast.error("Failed to submit feedback. Please try again.");
+    }
+  };
 
   const handleGenerateRecommendations = () => {
     if (!!timeRemaining) {
@@ -660,6 +686,15 @@ export default function DashboardClient() {
           </DndContext>
         </div>
       </motion.div>
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        isOpen={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+        onSubmit={handleFeedbackSubmit}
+        trigger="job_generation"
+      />
+
       <ConfirmationModal
         isOpen={isConfirmationModalOpen}
         onClose={() => setIsConfirmationModalOpen(false)}

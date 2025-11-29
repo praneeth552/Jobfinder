@@ -104,8 +104,8 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
           variants={itemVariants}
           className="text-xl md:text-2xl text-[--foreground]/70 max-w-2xl mx-auto mb-12 leading-relaxed"
         >
-          Discover curated job opportunities analyzed for your skills and goals,
-          organized seamlessly into your Google Sheets.
+          Stop wasting hours on job boards. Get AI-matched jobs from real company
+          websites, organized in your Google Sheets—automatically.
         </motion.p>
 
         {/* Buttons */}

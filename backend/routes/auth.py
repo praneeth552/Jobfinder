@@ -198,10 +198,20 @@ async def verify_otp(request: Request, data: VerifyOTP):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create Razorpay customer: {str(e)}")
 
-    await users_collection.insert_one(user_dict)
+    result = await users_collection.insert_one(user_dict)
     await temp_users_collection.delete_one({"email": data.email})
     
-    return {"message": "User created successfully. Please log in."}
+    # Create access token and return user info like login endpoint
+    token = create_access_token({"email": user_dict["email"]})
+    
+    return {
+        "message": "User created successfully.",
+        "access_token": token,
+        "token_type": "bearer",
+        "is_first_time_user": True,
+        "user_id": str(result.inserted_id),
+        "plan_type": "free"
+    }
 
 
 class ResendOtp(BaseModel):

@@ -64,13 +64,21 @@ async def save_job_application(
         # Update existing application
         user_model.job_applications[existing_app_index].status = job_to_save.status
         
-        # Calculate time saved for status change
+        # Calculate time saved for status change (including REVERSE transitions)
         if old_status == JobApplicationStatus.recommended and job_to_save.status == JobApplicationStatus.saved:
-            time_to_add += 1
+            time_to_add += 1  # Forward: recommended → saved
         elif old_status == JobApplicationStatus.recommended and job_to_save.status == JobApplicationStatus.applied:
-            time_to_add += 3
+            time_to_add += 3  # Forward: recommended → applied
         elif old_status == JobApplicationStatus.saved and job_to_save.status == JobApplicationStatus.applied:
-            time_to_add += 2 # 3 (applied) - 1 (saved)
+            time_to_add += 2  # Forward: saved → applied (3 - 1)
+        
+        # REVERSE transitions (subtract time)
+        elif old_status == JobApplicationStatus.saved and job_to_save.status == JobApplicationStatus.recommended:
+            time_to_add -= 1  # Reverse: saved → recommended (undo the 1 min)
+        elif old_status == JobApplicationStatus.applied and job_to_save.status == JobApplicationStatus.recommended:
+            time_to_add -= 3  # Reverse: applied → recommended (undo the 3 min)
+        elif old_status == JobApplicationStatus.applied and job_to_save.status == JobApplicationStatus.saved:
+            time_to_add -= 2  # Reverse: applied → saved (undo 2 min difference)
     else:
         # Add new application
         new_job_application = JobApplication(
@@ -87,7 +95,7 @@ async def save_job_application(
 
     # Update the user document in MongoDB
     update_fields = {"job_applications": [app.dict() for app in user_model.job_applications]}
-    if time_to_add > 0:
+    if time_to_add != 0:  # Only update if there's a change (can be negative now)
         update_fields["time_saved_minutes"] = user_model.time_saved_minutes + time_to_add
 
     await db.users.update_one(
@@ -109,23 +117,47 @@ async def move_to_recommendations(
     job_to_move: RecommendedJob,
     current_user: User = Depends(get_current_user)
 ):
-    user_id = current_user["_id"]
-
-    # Correctly update the status of the job within the user's job_applications array
-    result = await db.users.update_one(
-        {
-            "_id": ObjectId(user_id),
-            "job_applications.job_details.job_url": job_to_move.job_url
-        },
-        {
-            "$set": { "job_applications.$.status": "recommended" }
-        }
-    )
-
-    if result.modified_count == 0:
-        # This might happen if the job is not found, which would be unexpected
-        # but we can handle it gracefully.
+    user_id = str(current_user["_id"])
+    
+    # Fetch the full user document to get current time_saved_minutes and job_applications
+    user_doc = await db.users.find_one({"_id": ObjectId(user_id)})
+    if not user_doc:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Convert user_doc to a Pydantic User model instance
+    user_model = User(**user_doc)
+    
+    # Find the job in job_applications to get its current status
+    old_status = None
+    job_index = -1
+    for i, app in enumerate(user_model.job_applications):
+        if app.job_details.job_url == job_to_move.job_url:
+            old_status = app.status
+            job_index = i
+            break
+    
+    if job_index == -1:
         raise HTTPException(status_code=404, detail="Job application not found in user profile.")
+    
+    # Calculate time to subtract based on old status
+    time_to_subtract = 0
+    if old_status == JobApplicationStatus.saved:
+        time_to_subtract = 1  # Reverse: saved → recommended (undo the 1 min)
+    elif old_status == JobApplicationStatus.applied:
+        time_to_subtract = 3  # Reverse: applied → recommended (undo the 3 min)
+    
+    # Update the job status
+    user_model.job_applications[job_index].status = JobApplicationStatus.recommended
+    
+    # Update in MongoDB
+    update_fields = {"job_applications": [app.dict() for app in user_model.job_applications]}
+    if time_to_subtract > 0:
+        update_fields["time_saved_minutes"] = max(0, user_model.time_saved_minutes - time_to_subtract)
+    
+    await db.users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": update_fields}
+    )
 
     return {"message": "Job moved to recommendations successfully"}
 
