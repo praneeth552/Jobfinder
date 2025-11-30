@@ -18,7 +18,9 @@ from routes import (
     payment,
     webhooks,
     applications,
-    search
+    applications,
+    search,
+    feedback
 )
 from dotenv import load_dotenv
 from mangum import Mangum
@@ -70,6 +72,7 @@ app.include_router(contact.router, tags=["Contact"])
 app.include_router(payment.router, prefix="/payment", tags=["Payment"])  # ✅ Payment router
 app.include_router(webhooks.router, prefix="/webhooks", tags=["Webhooks"])
 app.include_router(search.router, prefix="/search", tags=["Search"])
+app.include_router(feedback.router, prefix="/api", tags=["Feedback"])
 
 
 @app.get("/warmup")
