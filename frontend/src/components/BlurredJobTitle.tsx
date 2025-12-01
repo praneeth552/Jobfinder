@@ -5,15 +5,15 @@ interface BlurredJobTitleProps {
 
 export default function BlurredJobTitle({ title, isDemo }: BlurredJobTitleProps) {
     if (!isDemo) {
-        return <h3 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h3>;
+        return <div className="text-xl font-bold text-gray-900 dark:text-white">{title}</div>;
     }
 
     return (
         <div className="relative group">
             {/* Blurred title - actual text for screen readers but visually blurred */}
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white blur-md select-none pointer-events-none transition-all">
+            <div className="text-xl font-bold text-gray-900 dark:text-white blur-md select-none pointer-events-none transition-all">
                 {title}
-            </h3>
+            </div>
 
             {/* Overlay badge */}
             <div className="absolute inset-0 flex items-center justify-center opacity-100 group-hover:opacity-90 transition-opacity">

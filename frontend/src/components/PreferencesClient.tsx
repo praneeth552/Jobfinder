@@ -33,6 +33,10 @@ const SALARY_RANGES = ["0-5 LPA", "5-10 LPA", "10-20 LPA", "20-30 LPA", "30-50 L
 const COMPANY_SIZES = ["Startup (1-50)", "Mid-Size (51-500)", "Large (500+)"];
 const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship"];
 const WORK_ARRANGEMENTS = ["On-site", "Hybrid", "Remote"];
+
+// NEW CONSTANTS for enhanced role matching
+const SENIORITY_LEVELS = ["Junior (0-2 years)", "Mid-Level (2-5 years)", "Senior (5-10 years)", "Staff/Principal (10+ years)", "Architect/Tech Lead", "Individual Contributor (Any level)"];
+const ROLE_TYPES = ["Individual Contributor", "Management/Leadership", "Open to Both"];
 const WebFrontend = ["HTML5", "CSS3", "JavaScript", "TypeScript", "React", "Angular", "Vue.js", "Next.js", "Svelte", "jQuery", "Bootstrap", "Tailwind CSS", "Sass", "Less", "Redux", "MobX", "GraphQL", "Apollo Client", "Webpack", "Vite", "Babel"];
 const WebBackend = ["Node.js", "Express.js", "Python", "Django", "Flask", "FastAPI", "Java", "Spring Boot", "C#", ".NET", "Ruby", "Ruby on Rails", "PHP", "Laravel", "Go", "Rust", "Elixir", "Phoenix"];
 const Databases = ["MySQL", "PostgreSQL", "Microsoft SQL Server", "SQLite", "MongoDB", "Redis", "Cassandra", "MariaDB", "Firebase", "Supabase", "Prisma", "SQLAlchemy", "Oracle"];
@@ -144,7 +148,21 @@ export default function PreferencesClient() {
   const searchParams = useSearchParams();
   const isNewUser = searchParams.get("new_user") === "true";
 
-  const [preferences, setPreferences] = useState({ role: [] as string[], location: [] as string[], tech_stack: [] as string[], experience_level: "", desired_salary: "", company_size: [] as string[], job_type: [] as string[], work_arrangement: [] as string[] });
+  const [preferences, setPreferences] = useState({
+    role: [] as string[],
+    location: [] as string[],
+    tech_stack: [] as string[],
+    experience_level: "",
+    desired_salary: "",
+    company_size: [] as string[],
+    job_type: [] as string[],
+    work_arrangement: [] as string[],
+    // NEW FIELDS for enhanced role matching
+    seniority_level: "",
+    role_type: "",
+    exclude_keywords: [] as string[],
+    must_have_keywords: [] as string[]
+  });
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isParsing, setIsParsing] = useState(false);
@@ -204,7 +222,20 @@ export default function PreferencesClient() {
       if (token) {
         try {
           const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/preferences`, { headers: { Authorization: `Bearer ${token}` } });
-          if (data && Object.keys(data).length > 0) setPreferences({ role: data.role || [], location: data.location || [], tech_stack: data.tech_stack || [], experience_level: data.experience_level || "", desired_salary: data.desired_salary || "", company_size: data.company_size || [], job_type: data.job_type || [], work_arrangement: data.work_arrangement || [] });
+          if (data && Object.keys(data).length > 0) setPreferences({
+            role: data.role || [],
+            location: data.location || [],
+            tech_stack: data.tech_stack || [],
+            experience_level: data.experience_level || "",
+            desired_salary: data.desired_salary || "",
+            company_size: data.company_size || [],
+            job_type: data.job_type || [],
+            work_arrangement: data.work_arrangement || [],
+            seniority_level: data.seniority_level || "",
+            role_type: data.role_type || "",
+            exclude_keywords: data.exclude_keywords || [],
+            must_have_keywords: data.must_have_keywords || []
+          });
         } catch { toast.error("Could not load your saved preferences."); }
       }
       setLoading(false);
@@ -517,6 +548,67 @@ export default function PreferencesClient() {
                 {WORK_ARRANGEMENTS.map(arr => <SelectionPill key={arr} label={arr} isSelected={preferences.work_arrangement.includes(arr)} onClick={() => handleMultiSelect('work_arrangement', arr, 2)} />)}
               </PreferenceCard>
             </div>
+
+            {/* NEW PREFERENCE FIELDS for Enhanced Role Matching */}
+            <PreferenceCard
+              title="What's your target seniority level?"
+              description="Help us match you with jobs at the right career stage."
+            >
+              {SENIORITY_LEVELS.map(level => (
+                <SelectionPill
+                  key={level}
+                  label={level}
+                  isSelected={preferences.seniority_level === level}
+                  onClick={() => handleSingleSelect('seniority_level', level)}
+                />
+              ))}
+            </PreferenceCard>
+
+            <PreferenceCard
+              title="What's your career track preference?"
+              description="Are you looking for Individual Contributor (IC) or Management roles?"
+            >
+              {ROLE_TYPES.map(type => (
+                <SelectionPill
+                  key={type}
+                  label={type}
+                  isSelected={preferences.role_type === type}
+                  onClick={() => handleSingleSelect('role_type', type)}
+                />
+              ))}
+            </PreferenceCard>
+
+            <PreferenceCard
+              title="Exclude Keywords (Optional)"
+              description="Jobs containing these keywords will be filtered out. Separate with commas."
+            >
+              <input
+                type="text"
+                value={preferences.exclude_keywords.join(", ")}
+                onChange={(e) => {
+                  const keywords = e.target.value.split(",").map(k => k.trim()).filter(k => k.length > 0);
+                  setPreferences(p => ({ ...p, exclude_keywords: keywords }));
+                }}
+                placeholder="e.g., Manager, Team Lead, Director"
+                className="w-full p-3 rounded-lg border border-[--border] bg-white dark:bg-slate-800 focus:ring-2 focus:ring-[--primary] focus:border-[--primary]"
+              />
+            </PreferenceCard>
+
+            <PreferenceCard
+              title="Must-Have Keywords (Optional)"
+              description="Prioritize jobs containing these keywords. Separate with commas."
+            >
+              <input
+                type="text"
+                value={preferences.must_have_keywords.join(", ")}
+                onChange={(e) => {
+                  const keywords = e.target.value.split(",").map(k => k.trim()).filter(k => k.length > 0);
+                  setPreferences(p => ({ ...p, must_have_keywords: keywords }));
+                }}
+                placeholder="e.g., Architect, Principal, Staff Engineer"
+                className="w-full p-3 rounded-lg border border-[--border] bg-white dark:bg-slate-800 focus:ring-2 focus:ring-[--primary] focus:border-[--primary]"
+              />
+            </PreferenceCard>
 
             <div className="lg:col-span-2 flex justify-center mt-4 p-6">
               <LoadingButton type="submit" isLoading={isSubmitting} className="submit-button-swipe w-full max-w-xs" disabled={isSubmitting}>

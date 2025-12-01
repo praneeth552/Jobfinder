@@ -24,6 +24,7 @@ import ArchitectureSection from "@/components/ArchitectureSection";
 import PrivacyTrustSection from "@/components/PrivacyTrustSection";
 import SocialProofSection from "@/components/SocialProofSection";
 import ProofOfResultsSection from "@/components/ProofOfResultsSection";
+import VersionHistory from "@/components/VersionHistory";
 
 const SignupPage = dynamic(() => import("@/components/SignupPage"), {
   ssr: false,
@@ -106,6 +107,7 @@ export default function HomeClient() {
             <TechStack />
             <ArchitectureSection />
             <ProblemSolutionSection />
+            <VersionHistory />
             <ContactForm />
             <NewFooter />
           </motion.div>

@@ -49,29 +49,48 @@ def build_prompt(user_profile, jobs):
         if "description" in job and job["description"]:
             job["description"] = job["description"][:300] + "..."
     return f"""
-Analyze the user profile and job listings. Return ONLY a JSON array of the top 5-8 best matches.
+You are an expert job matching AI. Your goal is to find the BEST matches for this candidate.
 
-USER PROFILE:
+**CRITICAL MATCHING RULES:**
+1. **Seniority Level Match (+40 points)**: If user specifies a seniority level (Junior, Mid, Senior, Architect, etc.), ONLY recommend jobs at that level. Reject jobs clearly above or below.
+2. **Role Type Match (+30 points)**: If user prefers "Individual Contributor" roles, AVOID management/leadership positions. If they want "Management", prioritize leadership roles.
+3. **Keyword Filtering**:
+   - EXCLUDE: Automatically reject any job containing excluded keywords
+   - MUST HAVE: Highly prioritize jobs containing must-have keywords (+20 points)
+4. **Tech Stack Match (+20 points)**: Significant overlap in required technologies.
+5. **Location Match (+10 points)**: Matches user's preferred locations.
+
+**USER PROFILE:**
 {user_profile}
 
-AVAILABLE JOBS:
+**AVAILABLE JOBS:**
 {json.dumps([
-    {
-        "title": job.get("title"), "company": job.get("company"), "location": job.get("location"),
-        "description": job.get("description", "No description"), "job_url": job.get("job_url"),
-    } for job in jobs
+    {{
+        "title": job.get("title"), 
+        "company": job.get("company"), 
+        "location": job.get("location"),
+        "description": job.get("description", "No description"), 
+        "job_url": job.get("job_url"),
+    }} for job in jobs
 ], indent=2)}
 
-Return this exact JSON structure with 5-8 jobs:
+**OUTPUT FORMAT:**
+Return ONLY a JSON array of the top 5-8 jobs that match the user's seniority and role type:
 [
   {{
-    "title": "Job Title", "company": "Company Name", "location": "Location",
-    "match_score": 85, "reason": "One concise sentence explaining the match",
+    "title": "Job Title",
+    "company": "Company Name",
+    "location": "Location",
+    "match_score": 85,
+    "reason": "Brief explanation focusing on seniority/role type match",
     "job_url": "https://example.com/job"
   }}
 ]
 
-Important: Keep reasons under 30 words each. Return ONLY the JSON array.
+IMPORTANT:
+- Quality over quantity: Only include jobs that truly match seniority and role type
+- Keep reasons under 30 words
+- Return ONLY the JSON array, no other text
 """
 
 # --- Background Task ---
@@ -103,6 +122,16 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
             if preferences.get("company_size"): user_profile_parts.append(f"Company Size: {', '.join(preferences['company_size'])}")
             if preferences.get("job_type"): user_profile_parts.append(f"Job Type: {', '.join(preferences['job_type'])}")
             if preferences.get("work_arrangement"): user_profile_parts.append(f"Work: {', '.join(preferences['work_arrangement'])}")
+            
+            # NEW FIELDS for enhanced role matching
+            if preferences.get("seniority_level"): 
+                user_profile_parts.append(f"**CRITICAL** Seniority Level: {preferences['seniority_level']}")
+            if preferences.get("role_type"): 
+                user_profile_parts.append(f"**CRITICAL** Role Type Preference: {preferences['role_type']}")
+            if preferences.get("exclude_keywords"): 
+                user_profile_parts.append(f"EXCLUDE jobs containing: {', '.join(preferences['exclude_keywords'])}")
+            if preferences.get("must_have_keywords"): 
+                user_profile_parts.append(f"PRIORITIZE jobs containing: {', '.join(preferences['must_have_keywords'])}")
 
         if not user_profile_parts:
             raise Exception("User has no resume data or preferences set.")

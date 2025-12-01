@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, LogOut, Settings, Loader, CreditCard, Bookmark, Check, Star, UserRoundCog, SlidersHorizontal } from 'lucide-react';
+import { User, LogOut, Settings, Loader, CreditCard, Bookmark, Check, Star, UserRoundCog, SlidersHorizontal, RotateCcw } from 'lucide-react';
 
 interface UserProfileProps {
   userPlan: 'free' | 'pro';
@@ -231,6 +231,32 @@ const UserProfile = ({
                   >
                     <CreditCard size={16} />
                     <span>Manage Subscription</span>
+                  </motion.button>
+                </li>
+                <li className="px-2">
+                  <motion.button
+                    onClick={async () => {
+                      setIsLoading('replay-tour');
+                      try {
+                        const token = document.cookie.split('token=')[1]?.split(';')[0];
+                        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/onboarding/reset`, {
+                          method: 'POST',
+                          headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        // Clear session storage for onboarding
+                        sessionStorage.removeItem(`onboarding_completed_${userEmail || ''}`);
+                        window.location.reload();
+                      } catch (error) {
+                        console.error('Error resetting tour:', error);
+                        setIsLoading(null);
+                      }
+                    }}
+                    className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors"
+                    whileHover={{ x: 5 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                  >
+                    {isLoading === 'replay-tour' ? <Loader size={16} className="animate-spin" /> : <RotateCcw size={16} />}
+                    <span>{isLoading === 'replay-tour' ? 'Restarting...' : 'Replay Tour'}</span>
                   </motion.button>
                 </li>
                 <div className="my-2 h-px bg-gray-200 dark:bg-slate-700" />

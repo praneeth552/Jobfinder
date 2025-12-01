@@ -17,8 +17,8 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 def scrape_infosys():
     logging.info("Fetching Infosys job listings from API.")
 
-    # Infosys jobs API URL
-    INFOSYS_API_URL = "https://intapgateway.infosysapps.com/careersci/search/intapjbsrch/getCareerSearchJobs?sourceId=1,21&searchText=ALL"
+    # Infosys jobs API URL - filtering for tech/engineering roles
+    INFOSYS_API_URL = "https://intapgateway.infosysapps.com/careersci/search/intapjbsrch/getCareerSearchJobs?sourceId=1,21&searchText=software%20OR%20architect%20OR%20engineer%20OR%20developer%20OR%20technical%20OR%20senior%20OR%20principal"
 
     # Headers to mimic browser request
     HEADERS = {

@@ -32,7 +32,7 @@ def scrape_intel():
         "appliedFacets": {},
         "limit": 20,
         "offset": 0,
-        "searchText": "software"
+        "searchText": "software OR architect OR engineer OR developer OR technical OR principal OR senior"  # Broader tech roles
     }
 
     try:

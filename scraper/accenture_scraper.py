@@ -34,7 +34,7 @@ HEADERS = {
 PAYLOAD = {
     'startIndex': '0',
     'maxResultSize': '20',
-    'jobKeyword': 'Software Engineer',
+    'jobKeyword': 'Software OR Architect OR Principal OR Senior OR Lead OR Engineer',  # Broader tech roles
     'jobCountry': 'India',
     'jobLanguage': 'en',
     'countrySite': 'in-en',

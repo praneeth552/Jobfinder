@@ -21,6 +21,8 @@ import TimeRemainingSkeleton from "./TimeRemainingSkeleton";
 import GeminiIcon from "./GeminiIcon";
 import TimeSavedCard from "./TimeSavedCard"; // Import TimeSavedCard
 import FeedbackModal from "./FeedbackModal"; // Import FeedbackModal for testing
+import OnboardingTour from "./OnboardingTour"; // Import OnboardingTour
+import ChangelogModal from "./ChangelogModal"; // Import ChangelogModal
 
 interface JobApplication {
   id: string;
@@ -491,6 +493,12 @@ export default function DashboardClient() {
 
   return (
     <>
+      {/* Onboarding Tour for new users */}
+      {!isDemoMode && <OnboardingTour />}
+
+      {/* Changelog Modal for version updates */}
+      {!isDemoMode && <ChangelogModal />}
+
       <SimpleNavbar />
       <div className="h-20" />
       <motion.div
@@ -526,7 +534,7 @@ export default function DashboardClient() {
               }}
             >
               <HeaderButton
-                id="generate"
+                id="get-personalized-jobs-btn"
                 icon={isGenerating ? <LoadingSpinner /> : <GeminiIcon />}
                 expandedContent={
                   <span className="whitespace-nowrap text-sm font-semibold">Get Personalized Jobs</span>

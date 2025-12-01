@@ -17,6 +17,12 @@ class UserPreferences(BaseModel):
     company_size: Optional[List[str]] = None
     job_type: Optional[List[str]] = None
     work_arrangement: Optional[List[str]] = None
+    
+    # NEW FIELDS for better role matching
+    seniority_level: Optional[str] = None  # "Junior", "Mid-Level", "Senior", "Architect", etc.
+    role_type: Optional[str] = None  # "Individual Contributor", "Management", "Both"
+    exclude_keywords: Optional[List[str]] = None  # Keywords to filter out (e.g., "Manager" for pure IC)
+    must_have_keywords: Optional[List[str]] = None  # Keywords that must be present (e.g., "Architect")
 
     @model_validator(mode="after")
     def validate_max_lengths(self):
@@ -32,6 +38,10 @@ class UserPreferences(BaseModel):
             raise ValueError("You can select up to 2 job types only.")
         if self.work_arrangement and len(self.work_arrangement) > 2:
             raise ValueError("You can select up to 2 work arrangements only.")
+        if self.exclude_keywords and len(self.exclude_keywords) > 10:
+            raise ValueError("You can select up to 10 exclude keywords only.")
+        if self.must_have_keywords and len(self.must_have_keywords) > 10:
+            raise ValueError("You can select up to 10 must-have keywords only.")
         return self
 
 
@@ -83,6 +93,13 @@ class User(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     deletion_requested_at: Optional[datetime] = None
+    
+    # Onboarding tracking
+    onboarding_completed: bool = False
+    onboarding_completed_at: Optional[datetime] = None
+    
+    # Version/Changelog tracking
+    last_seen_version: Optional[str] = None  # e.g., "2.1"
 
 
 class UserLogin(BaseModel):
