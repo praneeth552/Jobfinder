@@ -27,7 +27,7 @@ PAYLOAD = {
     "appliedFacets": {},
     "limit": 20,
     "offset": 0,
-    "searchText": "software OR architect OR principal OR senior OR lead OR engineer"  # Broader search for tech roles including architect
+    "searchText": "software engineer" # Changed from empty to get more relevant jobs
 }
 
 def clean_html(raw_html: str) -> str:

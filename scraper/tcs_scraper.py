@@ -22,7 +22,7 @@ HEADERS = {
     "Origin": "https://ibegin.tcsapps.com",
     "Referer": "https://ibegin.tcsapps.com/candidate/"
 }
-PAYLOAD = {"jobCity":"","jobFunction":"","jobExperience":"","jobSkill":None,"pageNumber":"1","userText":"software OR architect OR developer OR engineer OR technical OR senior OR principal","jobTitleOrder":None,"jobCityOrder":None,"jobFunctionOrder":None,"jobExperienceOrder":None,"applyByOrder":None,"regular":True,"walkin":True}  # Broader tech roles
+PAYLOAD = {"jobCity":"","jobFunction":"","jobExperience":"","jobSkill":None,"pageNumber":"1","userText":"developer","jobTitleOrder":None,"jobCityOrder":None,"jobFunctionOrder":None,"jobExperienceOrder":None,"applyByOrder":None,"regular":True,"walkin":True}
 
 def fetch_tcs_jobs() -> List[Dict]:
     logging.info("Fetching TCS job listings from API...")
