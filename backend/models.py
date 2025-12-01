@@ -145,6 +145,8 @@ class UserProfileResponse(BaseModel):
     created_at: datetime
     next_generation_allowed_at: Optional[datetime] = None
     next_resume_upload_allowed_at: Optional[datetime] = None
+    onboarding_completed: bool = False
+    last_seen_version: Optional[str] = None
 
     class Config:
         populate_by_name = True
