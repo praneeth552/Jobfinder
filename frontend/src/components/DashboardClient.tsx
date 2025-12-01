@@ -534,7 +534,7 @@ export default function DashboardClient() {
               }}
             >
               <HeaderButton
-                id="get-personalized-jobs-btn"
+                id="generate"
                 icon={isGenerating ? <LoadingSpinner /> : <GeminiIcon />}
                 expandedContent={
                   <span className="whitespace-nowrap text-sm font-semibold">Get Personalized Jobs</span>

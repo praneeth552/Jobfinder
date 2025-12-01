@@ -30,6 +30,10 @@ Tackleit is packed with features designed for a modern, efficient, and personali
 -   **📊 Google Sheets Export (Pro Feature)**: Pro users can instantly export their curated job lists to a Google Sheet in their personal Google Drive, saving hours of manual data entry.
 -   **🎤 Enhanced UX with Speech-to-Text**: The contact form features a speech-to-text option for the message field, allowing for easier and more accessible communication.
 -   **📬 Automated Notifications**: Receive automated email confirmations for significant actions, such as when a Pro user updates their preferences, ensuring you're always in the loop.
+-   **🎯 Enhanced Role Matching**: Go beyond basic titles. Specify your **seniority level** (e.g., Senior, Principal) and **role type** (Individual Contributor vs. Management) for precision matching.
+-   **🔍 Smart Job Filtering**: Fine-tune your search by **excluding keywords** (e.g., "Manager" if you want pure coding roles) and defining **must-have terms**.
+-   **✨ Interactive Onboarding**: New users are greeted with a guided tour to quickly get acquainted with the platform's powerful features.
+-   **📜 Changelog & Version History**: Stay updated with a built-in changelog system that highlights new features and improvements with every release.
 
 ---
 
