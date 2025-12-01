@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from database import db
 from dependencies import get_current_user
-from utils import is_pro_user
+from utils import is_pro_user, create_access_token
 from email_utils import send_pro_welcome_email, send_account_deletion_email
 from models import UserDataResponse, UserProfileResponse, DeleteAccountResponse, ResumeDataResponse, UserStatsResponse
 from bson import ObjectId
