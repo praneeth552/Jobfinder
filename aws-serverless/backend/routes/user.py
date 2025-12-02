@@ -163,7 +163,7 @@ async def get_user_job_applications(current_user: dict = Depends(get_current_use
 
 @router.get("/me/data", response_model=UserDataResponse, status_code=status.HTTP_200_OK)
 async def get_user_data(current_user: dict = Depends(get_current_user)):
-    user_id = current_user.get("_id")
+    user_id = current_user.get("_id")  # Already a string from dependencies.py
     user = await users_collection.find_one({"_id": ObjectId(user_id)})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
