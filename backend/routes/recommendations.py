@@ -48,6 +48,17 @@ def build_prompt(user_profile, jobs):
     for job in jobs:
         if "description" in job and job["description"]:
             job["description"] = job["description"][:300] + "..."
+    jobs_data = [
+        {
+            "title": job.get("title"), 
+            "company": str(job.get("company", "")),  # Ensure company is string
+            "location": job.get("location"),
+            "description": job.get("description", "No description"), 
+            "job_url": job.get("job_url"),
+        } for job in jobs
+    ]
+    jobs_json = json.dumps(jobs_data, indent=2)
+
     return f"""
 You are an expert job matching AI. Your goal is to find the BEST matches for this candidate.
 
@@ -64,15 +75,7 @@ You are an expert job matching AI. Your goal is to find the BEST matches for thi
 {user_profile}
 
 **AVAILABLE JOBS:**
-{json.dumps([
-    {{
-        "title": job.get("title"), 
-        "company": job.get("company"), 
-        "location": job.get("location"),
-        "description": job.get("description", "No description"), 
-        "job_url": job.get("job_url"),
-    }} for job in jobs
-], indent=2)}
+{jobs_json}
 
 **OUTPUT FORMAT:**
 Return ONLY a JSON array of the top 5-8 jobs that match the user's seniority and role type:
@@ -95,6 +98,7 @@ IMPORTANT:
 
 # --- Background Task ---
 async def _run_recommendation_generation(user_id: str, task_id: str):
+    print(f"DEBUG: Starting recommendation generation v3 for task {task_id}")
     await tasks_collection.update_one({"_id": task_id}, {"$set": {"status": "running", "updated_at": datetime.utcnow()}})
     try:
         user_object_id = ObjectId(user_id)
@@ -172,7 +176,17 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
         recommended_jobs = [RecommendedJob(**job) for job in recommended_jobs_data]
 
         # Calculate time saved for this batch
-        unique_companies = set(job.company for job in recommended_jobs)
+        # Calculate time saved for this batch
+        # Ensure company is a string (AI sometimes returns dict/object)
+        unique_companies = set()
+        for job in recommended_jobs:
+            try:
+                val = job.company
+                if isinstance(val, dict):
+                    val = str(val)
+                unique_companies.add(str(val))
+            except Exception:
+                continue
         search_time_saved = len(unique_companies) * 5
         evaluation_time_saved = len(recommended_jobs) * 6
         total_batch_time_saved = search_time_saved + evaluation_time_saved
@@ -199,6 +213,8 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
         )
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         print(f"❌ ERROR in background task {task_id} for user {user_id}: {e}")
         await tasks_collection.update_one(
             {"_id": task_id},

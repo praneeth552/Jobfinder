@@ -248,7 +248,8 @@ export default function PreferencesClient() {
       const list = (prev[field] as string[]) || [];
       if (list.includes(value)) return { ...prev, [field]: list.filter(item => item !== value) };
       if (list.length < max) return { ...prev, [field]: [...list, value] };
-      toast.error(`You can select up to ${max} items.`);
+      // Schedule toast outside of render using setTimeout
+      setTimeout(() => toast.error(`You can select up to ${max} items.`), 0);
       return prev;
     });
   };

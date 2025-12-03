@@ -17,13 +17,13 @@ interface VersionRelease {
 
 const VERSIONS: VersionRelease[] = [
     {
-        version: "2.1",
-        date: "December 1, 2025",
+        version: "2.1.1",
+        date: "December 3, 2025",
         entries: [
-            { category: "feature", title: "Enhanced role matching with seniority level and role type preferences" },
-            { category: "feature", title: "Smart job filtering with exclude/must-have keywords" },
-            { category: "feature", title: "Interactive onboarding tour for new users" },
-            { category: "improvement", title: "Improved AI match scoring algorithm with weighted priorities" },
+            { category: "feature", title: "Auto-Generation for New Users - Get recommendations automatically after onboarding" },
+            { category: "feature", title: "Global Animation Toggle - Choose between instant loads or smooth animations" },
+            { category: "improvement", title: "Secure Dashboard Access - Authentication required for enhanced security" },
+            { category: "improvement", title: "Updated Workflow Architecture - All 12 steps accurately documented with visual flow" },
         ],
     },
     {
@@ -50,10 +50,10 @@ const VERSIONS: VersionRelease[] = [
 
 export default function VersionHistory() {
     const { animationsEnabled } = useAnimations();
-    const [activeVersion, setActiveVersion] = useState("2.1");
+    const [activeVersion, setActiveVersion] = useState("2.1.1");
     const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
-        "2.1-feature": true,
-        "2.1-improvement": false, // Explicitly set to collapsed
+        "2.1.1-feature": true,
+        "2.1.1-improvement": false, // Explicitly set to collapsed
         "2.0-feature": false,
         "2.0-improvement": false,
         "1.5-feature": false,

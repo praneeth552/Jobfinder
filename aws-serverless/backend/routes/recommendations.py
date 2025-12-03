@@ -48,6 +48,17 @@ def build_prompt(user_profile, jobs):
     for job in jobs:
         if "description" in job and job["description"]:
             job["description"] = job["description"][:300] + "..."
+    jobs_data = [
+        {
+            "title": job.get("title"),
+            "company": str(job.get("company", "")),  # Ensure company is string
+            "location": job.get("location"),
+            "description": job.get("description", "No description"),
+            "job_url": job.get("job_url"),
+        } for job in jobs
+    ]
+    jobs_json = json.dumps(jobs_data, indent=2)
+
     return f"""
 Analyze the user profile and job listings. Return ONLY a JSON array of the top 5-8 best matches.
 
@@ -55,12 +66,7 @@ USER PROFILE:
 {user_profile}
 
 AVAILABLE JOBS:
-{json.dumps([
-    {
-        "title": job.get("title"), "company": job.get("company"), "location": job.get("location"),
-        "description": job.get("description", "No description"), "job_url": job.get("job_url"),
-    } for job in jobs
-], indent=2)}
+{jobs_json}
 
 Return this exact JSON structure with 5-8 jobs:
 [
@@ -143,7 +149,16 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
         recommended_jobs = [RecommendedJob(**job) for job in recommended_jobs_data]
 
         # Calculate time saved for this batch
-        unique_companies = set(job.company for job in recommended_jobs)
+        # Ensure company is a string (AI sometimes returns dict/object)
+        unique_companies = set()
+        for job in recommended_jobs:
+            try:
+                val = job.company
+                if isinstance(val, dict):
+                    val = str(val)
+                unique_companies.add(str(val))
+            except Exception:
+                continue
         search_time_saved = len(unique_companies) * 5
         evaluation_time_saved = len(recommended_jobs) * 6
         total_batch_time_saved = search_time_saved + evaluation_time_saved

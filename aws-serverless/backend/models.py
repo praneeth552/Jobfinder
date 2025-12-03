@@ -66,6 +66,15 @@ class RecommendedJob(BaseModel):
     job_url: Optional[str] = None
     status: Optional[JobApplicationStatus] = None
 
+    @field_validator('company', 'title', 'location', mode='before')
+    @classmethod
+    def ensure_string_fields(cls, v):
+        """Ensure text fields are strings (AI sometimes returns dict/object)"""
+        if isinstance(v, dict):
+            # If it's a dict, try to extract a reasonable string value
+            return str(v.get('name', v.get('value', str(v))))
+        return str(v) if v is not None else ""
+
 class JobApplication(BaseModel):
     job_details: RecommendedJob
     status: JobApplicationStatus

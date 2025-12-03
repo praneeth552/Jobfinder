@@ -6,8 +6,8 @@ import { X, Check, Sparkles } from "lucide-react";
 import axios from "axios";
 import Cookies from "js-cookie";
 
-const CURRENT_VERSION = "2.1";
-const RELEASE_DATE = "December 1, 2025";
+const CURRENT_VERSION = "2.1.1";
+const RELEASE_DATE = "December 3, 2025";
 
 interface ChangelogItem {
     title: string;
@@ -17,27 +17,27 @@ interface ChangelogItem {
 
 const CHANGELOG_V2_1: ChangelogItem[] = [
     {
-        title: "Enhanced Role Matching",
+        title: "Auto-Generation for New Users",
         description:
-            "Select your seniority level (Junior/Senior/Architect) and role type (IC vs Management) for more accurate job recommendations.",
+            "New users automatically get their first job recommendations after completing onboarding—zero clicks needed! Just set preferences and go.",
         type: "feature",
     },
     {
-        title: "Smart Job Filtering",
+        title: "Global Animation Toggle",
         description:
-            "Exclude unwanted job types with keywords (e.g., 'Manager') and prioritize specific roles (e.g., 'Principal Engineer').",
+            "Choose your experience: instant page loads or delightful Framer Motion animations. Find the toggle in the navbar for a customized UX.",
         type: "feature",
     },
     {
-        title: "Interactive Onboarding",
+        title: "Secure Dashboard Access",
         description:
-            "New users now get a guided tour to help them discover all features quickly.",
-        type: "feature",
+            "Dashboard now requires authentication. Access via sign-in or try our demo mode—no more unauthorized access.",
+        type: "improvement",
     },
     {
-        title: "Improved Match Scoring",
+        title: "Updated Workflow Architecture",
         description:
-            "Our AI now weights seniority (+40 pts) and role type (+30 pts) more heavily for better job relevance.",
+            "Our workflow page now accurately shows all 12 steps of the user journey, from signup to deployment, with proper visual flow.",
         type: "improvement",
     },
 ];
