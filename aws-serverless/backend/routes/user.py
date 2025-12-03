@@ -47,7 +47,8 @@ async def upgrade_to_pro(current_user: dict = Depends(get_current_user)):
                 "plan_type": "pro",
                 "plan_status": "active",
                 "subscription_valid_until": datetime.fromtimestamp(subscription["end_at"]),
-            }
+            },
+            "$inc": {"loyalty_coins": 10}
         },
     )
 
@@ -276,15 +277,17 @@ async def reset_onboarding(current_user: dict = Depends(get_current_user)):
 
 
 @router.post("/changelog/seen", status_code=status.HTTP_200_OK)
-async def mark_changelog_seen(current_user: dict = Depends(get_current_user)):
-    """Mark that user has seen the latest changelog (v2.1)"""
+async def mark_changelog_seen(request: dict, current_user: dict = Depends(get_current_user)):
+    """Mark that user has seen a specific changelog version"""
     user_id = current_user.get("_id")
+    version = request.get("version", "2.1.1")
     
     await users_collection.update_one(
         {"_id": ObjectId(user_id)},
-        {"$set": {"last_seen_version": "2.1"}}
+        {"$set": {"last_seen_version": version}}
     )
-    return {"message": "Changelog marked as seen"}
+    
+    return {"message": "Changelog marked as seen", "version": version}
 
 
 @router.post("/preferences/animations", status_code=status.HTTP_200_OK)

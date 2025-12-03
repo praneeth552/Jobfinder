@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 export default function SimpleNavbar() {
   const [hasScrolled, setHasScrolled] = useState(false);
   const [textIndex, setTextIndex] = useState(0);
-  const buttonTexts = ["Got Ideas?", "Collaborate?"];
+  const buttonTexts = ["Got Ideas?", "Collaborate?", "Feedback?"];
   const router = useRouter();
 
   useEffect(() => {

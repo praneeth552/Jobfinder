@@ -27,7 +27,7 @@ export default function ArchitectureSection() {
                     initial={animationsEnabled ? { opacity: 0, scale: 0.95 } : { opacity: 1, scale: 1 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    transition={{ duration: animationsEnabled ? 0.7 : 0, delay: animationsEnabled ? 0.2 : 0 }}
+                    transition={{ duration: 0.7, delay: 0.2 }}
                     className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/20 dark:border-gray-700 bg-white/5 dark:bg-black/20 backdrop-blur-sm p-4 md:p-8"
                 >
                     <div className="relative w-full">

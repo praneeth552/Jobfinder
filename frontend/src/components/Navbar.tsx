@@ -18,7 +18,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
   const [hasScrolled, setHasScrolled] = useState(false);
   const [isOverDarkSection, setIsOverDarkSection] = useState(false);
   const [textIndex, setTextIndex] = useState(0);
-  const buttonTexts = ["Got Ideas?", "Collaborate?"];
+  const buttonTexts = ["Got Ideas?", "Collaborate?", "Feedback?"];
   const router = useRouter();
 
   useEffect(() => {

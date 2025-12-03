@@ -98,7 +98,7 @@ export default function ChangelogModal() {
 
             await axios.post(
                 `${process.env.NEXT_PUBLIC_API_URL}/user/changelog/seen`,
-                {},
+                { version: CURRENT_VERSION },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 

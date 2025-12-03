@@ -42,6 +42,7 @@ async def razorpay_webhook(request: Request):
                 {
                     "$set": {
                         "plan_status": "active",
+                        "plan_type": "pro",
                         "subscription_status": SubscriptionStatus.active,
                         "subscription_valid_until": new_valid_until,
                         "updated_at": datetime.utcnow()
