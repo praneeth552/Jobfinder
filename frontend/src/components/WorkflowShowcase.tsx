@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
 import { FileUp, Sliders, Sparkles, Sheet } from "lucide-react";
+import { useAnimations } from "@/context/AnimationContext";
 
 const steps = [
     {
@@ -37,6 +38,7 @@ const steps = [
 ];
 
 export default function WorkflowShowcase() {
+    const { animationsEnabled } = useAnimations();
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -52,9 +54,9 @@ export default function WorkflowShowcase() {
             <div className="relative max-w-6xl mx-auto">
                 {/* Header */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ duration: 0.6 }}
+                    initial={animationsEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
+                    animate={isInView && animationsEnabled ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+                    transition={{ duration: animationsEnabled ? 0.6 : 0 }}
                     className="text-center mb-16"
                 >
                     <div className="inline-block px-4 py-1.5 rounded-full border border-[--primary]/20 bg-[--primary]/5 backdrop-blur-sm text-sm font-medium text-[--primary] mb-4">
@@ -73,9 +75,9 @@ export default function WorkflowShowcase() {
                     {steps.map((step, index) => (
                         <motion.div
                             key={index}
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={isInView ? { opacity: 1, y: 0 } : {}}
-                            transition={{ duration: 0.5, delay: index * 0.1 }}
+                            initial={animationsEnabled ? { opacity: 0, y: 30 } : { opacity: 1, y: 0 }}
+                            animate={isInView && animationsEnabled ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+                            transition={{ duration: animationsEnabled ? 0.5 : 0, delay: animationsEnabled ? index * 0.1 : 0 }}
                             className="relative group"
                         >
                             {/* Card */}
@@ -117,9 +119,9 @@ export default function WorkflowShowcase() {
 
                 {/* CTA */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ duration: 0.6, delay: 0.5 }}
+                    initial={animationsEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
+                    animate={isInView && animationsEnabled ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+                    transition={{ duration: animationsEnabled ? 0.6 : 0, delay: animationsEnabled ? 0.5 : 0 }}
                     className="text-center mt-12"
                 >
                     <p className="text-[--foreground]/60 text-sm">

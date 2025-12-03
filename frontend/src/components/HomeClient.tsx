@@ -17,6 +17,7 @@ import "@/components/TechStack.css";
 import axios from "axios";
 import LoadingSpinner from "./LoadingSpinner";
 import dynamic from "next/dynamic";
+import { useAnimations } from "@/context/AnimationContext";
 
 // New landing page components
 import WorkflowShowcase from "@/components/WorkflowShowcase";
@@ -31,6 +32,7 @@ const SignupPage = dynamic(() => import("@/components/SignupPage"), {
 });
 
 export default function HomeClient() {
+  const { animationsEnabled } = useAnimations();
   const [loadingFinished, setLoadingFinished] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
 
@@ -93,7 +95,7 @@ export default function HomeClient() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: animationsEnabled ? 0.5 : 0 }}
           >
             <Navbar onGetStarted={handleGetStarted} />
             <HeroSection onGetStarted={handleGetStarted} />
@@ -117,10 +119,10 @@ export default function HomeClient() {
       <AnimatePresence>
         {showSignup && (
           <motion.div
-            initial={{ opacity: 0, y: "100vh" }}
+            initial={animationsEnabled ? { opacity: 0, y: "100vh" } : { opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: "100vh" }}
-            transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
+            exit={animationsEnabled ? { opacity: 0, y: "100vh" } : { opacity: 0, y: 0 }}
+            transition={{ duration: animationsEnabled ? 0.8 : 0, ease: [0.76, 0, 0.24, 1] }}
             className="fixed top-0 left-0 w-full h-full z-50 flex items-center justify-center"
           >
             <Suspense fallback={<LoadingSpinner />}>

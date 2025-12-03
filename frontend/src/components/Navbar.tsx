@@ -11,6 +11,8 @@ interface NavbarProps {
   onGetStarted: () => void;
 }
 
+import AnimationToggle from "./AnimationToggle";
+
 export default function Navbar({ onGetStarted }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
@@ -162,7 +164,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
 
               {/* Early Access Badge - Visible on all screen sizes */}
               <span className="inline-block px-2 md:px-2.5 py-0.5 md:py-1 text-[8px] md:text-[10px] font-semibold 
-                             uppercase tracking-wide rounded-full 
+                             uppercase tracking-wide rounded-full whitespace-nowrap
                              bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 
                              text-[--primary] dark:text-purple-400 border border-[--primary]/20
                              shadow-sm shadow-[--primary]/10">
@@ -176,31 +178,28 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
             {/* Links removed as per request */}
           </div>
 
-          <div className="hidden md:flex items-center gap-2">
-            <div className="flex items-center bg-white/5 rounded-full p-1 border border-white/10 backdrop-blur-sm mr-2">
+          <div className="hidden md:flex items-center gap-3">
+            <div className="flex items-center gap-1 bg-white/5 rounded-full p-1 border border-white/10 backdrop-blur-sm">
               <ThemeToggle />
             </div>
+            <AnimationToggle />
 
-            <div className="flex items-center gap-1 bg-white/5 rounded-full p-1.5 border border-white/10 backdrop-blur-md">
-              <motion.button
+            <div className="flex items-center gap-2 bg-white/5 rounded-full p-1.5 border border-white/10 backdrop-blur-md">
+              <button
                 onClick={() => router.push('/pricing')}
-                className={`relative px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 overflow-hidden group ${getTextColor()}`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                className={`relative px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 overflow-hidden group hover:scale-105 active:scale-95 ${getTextColor()}`}
               >
-                <span className="relative z-10 group-hover:text-white transition-colors">Pricing</span>
-                <div className="absolute inset-0 bg-[--primary] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full" />
-              </motion.button>
+                <span className="relative z-10 font-semibold">Pricing</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-400/10 dark:to-purple-400/10 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300" />
+              </button>
 
-              <motion.button
+              <button
                 onClick={handleSignInClick}
-                className={`relative px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 overflow-hidden group ${getTextColor()}`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                className={`relative px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 overflow-hidden group hover:scale-105 active:scale-95 ${getTextColor()}`}
               >
-                <span className="relative z-10 group-hover:text-white transition-colors">Sign In</span>
-                <div className="absolute inset-0 bg-[--primary] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full" />
-              </motion.button>
+                <span className="relative z-10 font-semibold">Sign in</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-400/10 dark:to-purple-400/10 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300" />
+              </button>
 
               <motion.button
                 onClick={handleCollaborateClick}
@@ -236,7 +235,8 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center gap-4">
+          <div className="md:hidden flex items-center gap-2">
+            <AnimationToggle />
             <ThemeToggle />
             <motion.button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

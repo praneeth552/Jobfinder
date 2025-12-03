@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { Mic } from 'lucide-react';
 import LoadingButton from "./LoadingButton";
+import { useAnimations } from "@/context/AnimationContext";
 
 interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
@@ -28,6 +29,7 @@ declare global {
 }
 
 const ContactForm = () => {
+  const { animationsEnabled } = useAnimations();
   const [formData, setFormData] = useState({ name: "", email: "", interest: "Suggest a feature", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -114,10 +116,10 @@ const ContactForm = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={animationsEnabled ? { opacity: 0, y: 30 } : { opacity: 1, y: 0 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: animationsEnabled ? 0.8 : 0, ease: "easeOut" }}
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">Let's Collaborate</h2>
@@ -129,10 +131,10 @@ const ContactForm = () => {
         <div className="max-w-2xl mx-auto">
           <motion.form
             onSubmit={handleSubmit}
-            initial={{ opacity: 0, y: 20 }}
+            initial={animationsEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            transition={{ duration: animationsEnabled ? 0.8 : 0, delay: animationsEnabled ? 0.2 : 0, ease: "easeOut" }}
             className="bg-white/5 backdrop-blur-xl p-8 md:p-10 rounded-[2rem] border border-white/10 shadow-2xl space-y-6"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

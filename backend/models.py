@@ -100,6 +100,9 @@ class User(BaseModel):
     
     # Version/Changelog tracking
     last_seen_version: Optional[str] = None  # e.g., "2.1"
+    
+    # UI Preferences
+    animations_enabled: bool = True  # Default to enabled for existing users
 
 
 class UserLogin(BaseModel):

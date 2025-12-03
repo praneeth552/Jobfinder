@@ -117,6 +117,9 @@ const structuredData = {
   }
 };
 
+import { AnimationProvider } from "@/context/AnimationContext";
+import BodyWrapper from "@/components/BodyWrapper";
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={inter.variable}>
@@ -128,16 +131,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             __html: JSON.stringify(structuredData)
           }}
         />
-        
+
         {/* Additional Meta Tags */}
         <meta name="theme-color" content="#6366f1" />
         <meta name="msapplication-TileColor" content="#6366f1" />
-        
-        
+
+
         {/* Preconnect for performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        
+
         {/* Canonical URL */}
         <link rel="canonical" href="https://www.tackleit.xyz" />
       </head>
@@ -146,21 +149,25 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ""}
         >
           <ThemeProvider>
-            <AuthProvider>
-              <AuthInitializer />
-              <Toaster
-                position="top-center"
-                toastOptions={{ style: { zIndex: 9999 } }}
-              />
-              <QueryProvider>
-                <AppContent>{children}</AppContent>
-              </QueryProvider>
-            </AuthProvider>
+            <AnimationProvider>
+              <BodyWrapper>
+                <AuthProvider>
+                  <AuthInitializer />
+                  <Toaster
+                    position="top-center"
+                    toastOptions={{ style: { zIndex: 9999 } }}
+                  />
+                  <QueryProvider>
+                    <AppContent>{children}</AppContent>
+                  </QueryProvider>
+                </AuthProvider>
+              </BodyWrapper>
+            </AnimationProvider>
           </ThemeProvider>
         </GoogleOAuthProvider>
 
         {/* External script for particles */}
-        <Script 
+        <Script
           src="https://cdn.jsdelivr.net/npm/tsparticles-all@3/tsparticles.all.bundle.min.js"
           strategy="afterInteractive"
         />

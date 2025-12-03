@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
 import SimpleNavbar from '@/components/SimpleNavbar';
 import ConfirmationModal from '@/components/ConfirmationModal';
+import { useAnimations } from '@/context/AnimationContext';
 
 export default function SigninPage() {
   return (
@@ -24,6 +25,7 @@ export default function SigninPage() {
 }
 
 function SigninForm() {
+  const { animationsEnabled } = useAnimations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { fetchUser } = useAuth();
@@ -55,7 +57,7 @@ function SigninForm() {
     Cookies.set("user_id", data.user_id, { expires: 1 });
     Cookies.set("plan_type", data.plan_type || "free", { expires: 1 });
     await fetchUser();
-    
+
     // Check if there's a redirect parameter, otherwise use default logic
     const redirectFromQuery = searchParams.get('redirect');
     if (redirectFromQuery) {
@@ -63,7 +65,7 @@ function SigninForm() {
     } else {
       setRedirectPath(data.is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
     }
-    
+
     toast.success("Sign-in successful!");
     setIsSuccess(true);
   };
@@ -166,21 +168,29 @@ function SigninForm() {
     }
   };
 
-  const pageVariants = {
+  // Conditional page variants based on animation toggle
+  const pageVariants = animationsEnabled ? {
     initial: { opacity: 0, x: "100vw" },
     in: { opacity: 1, x: 0 },
     out: { opacity: 0, x: "-100vw" },
+  } : {
+    initial: { opacity: 1, x: 0 },
+    in: { opacity: 1, x: 0 },
+    out: { opacity: 1, x: 0 },
   };
 
   const pageTransition = {
     type: "tween" as const,
     ease: "anticipate" as const,
-    duration: 0.5,
+    duration: animationsEnabled ? 0.5 : 0,
   };
 
-  const formVariants = {
+  const formVariants = animationsEnabled ? {
     visible: { opacity: 1, transition: { duration: 0.2 } },
     hidden: { opacity: 0, transition: { duration: 0.2 } },
+  } : {
+    visible: { opacity: 1 },
+    hidden: { opacity: 1 },
   };
 
   return (
@@ -253,8 +263,8 @@ function SigninForm() {
                   </div>
 
                   <div className="text-right text-sm">
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={handleForgotPasswordClick}
                       className="font-semibold text-purple-600 hover:underline"
                     >

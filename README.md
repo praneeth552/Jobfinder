@@ -18,7 +18,7 @@ It's a well-known principle in product design that most users give you **~30–9
 
 Tackleit is packed with features designed for a modern, efficient, and personalized job hunt:
 
--   **🤖 Hyper-Personalized Recommendations**: At its core, the platform leverages a sophisticated AI model that analyzes both a user's detailed, manually-entered preferences and the parsed contents of their uploaded resume to deliver hyper-personalized job recommendations. This dual-analysis approach ensures maximum relevance.
+-   **🤖 Hyper-Personalized Recommendations**:At its core, the platform leverages a sophisticated AI model that analyzes both a user's detailed, manually-entered preferences and the parsed contents of their uploaded resume to deliver hyper-personalized job recommendations. This dual-analysis approach ensures maximum relevance.
 -   **📄 Intelligent Resume Parsing**: Instantly parse your resume (CV) to automatically fill out your skills, roles, and experience, saving you time and effort.
 -   **💸 Freemium Model**: A flexible two-tier system designed to suit your needs.
     -   **Free Plan**: Get monthly AI job recommendations and resume parsing.
@@ -33,6 +33,8 @@ Tackleit is packed with features designed for a modern, efficient, and personali
 -   **🎯 Enhanced Role Matching**: Go beyond basic titles. Specify your **seniority level** (e.g., Senior, Principal) and **role type** (Individual Contributor vs. Management) for precision matching.
 -   **🔍 Smart Job Filtering**: Fine-tune your search by **excluding keywords** (e.g., "Manager" if you want pure coding roles) and defining **must-have terms**.
 -   **✨ Interactive Onboarding**: New users are greeted with a guided tour to quickly get acquainted with the platform's powerful features.
+-   **🚀 Auto-Generation for New Users**: After completing (or skipping) the onboarding tour, new users automatically receive their first batch of personalized job recommendations—no manual button clicking required! This eliminates confusion and gets users engaged immediately.
+-   **🎨 Global Animation Toggle**: Take full control of your browsing experience with a one-click animation toggle in the navbar. Disable all animations for instant page loads and better accessibility, or keep them enabled for a delightful, modern UI experience.
 -   **📜 Changelog & Version History**: Stay updated with a built-in changelog system that highlights new features and improvements with every release.
 
 ---

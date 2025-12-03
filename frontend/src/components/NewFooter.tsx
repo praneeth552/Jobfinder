@@ -3,8 +3,10 @@
 import { Mail, Linkedin, Github, Globe } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useAnimations } from "@/context/AnimationContext";
 
 const NewFooter = () => {
+  const { animationsEnabled } = useAnimations();
   const myName = "Kotyada Sai Praneeth";
   const myEmail = "saipraneeth2525@gmail.com";
   const currentYear = new Date().getFullYear();
@@ -34,8 +36,8 @@ const NewFooter = () => {
 
   const FooterLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
     <motion.li
-      whileHover={{ x: 4 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      whileHover={animationsEnabled ? { x: 4 } : {}}
+      transition={{ type: "spring", stiffness: animationsEnabled ? 300 : 0, damping: animationsEnabled ? 20 : 0 }}
     >
       <Link
         href={href}

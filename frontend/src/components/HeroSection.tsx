@@ -2,12 +2,14 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { useAnimations } from "@/context/AnimationContext";
 
 interface HeroSectionProps {
   onGetStarted: () => void;
 }
 
 export default function HeroSection({ onGetStarted }: HeroSectionProps) {
+  const { animationsEnabled } = useAnimations();
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -17,15 +19,19 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const opacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
 
-  const containerVariants = {
+  // Conditional animation variants
+  const containerVariants = animationsEnabled ? {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: { staggerChildren: 0.2, delayChildren: 0.3 },
     },
+  } : {
+    hidden: { opacity: 1 },
+    visible: { opacity: 1 },
   };
 
-  const itemVariants = {
+  const itemVariants = animationsEnabled ? {
     hidden: { opacity: 0, y: 30, filter: "blur(10px)" },
     visible: {
       opacity: 1,
@@ -33,6 +39,9 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
       filter: "blur(0px)",
       transition: { duration: 0.8, ease: [0.2, 0.65, 0.3, 0.9] as [number, number, number, number] },
     },
+  } : {
+    hidden: { opacity: 1, y: 0, filter: "blur(0px)" },
+    visible: { opacity: 1, y: 0, filter: "blur(0px)" },
   };
 
   return (
@@ -47,7 +56,7 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
       </div>
 
       <motion.div
-        style={{ y, opacity }}
+        style={animationsEnabled ? { y, opacity } : {}}
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -66,31 +75,26 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
           className="text-5xl md:text-8xl font-bold tracking-tight mb-4 md:mb-8 text-[--foreground] leading-[1.1]"
         >
           Jobs tailored for{" "}
-          {/* Text with pop-in + idle float (fixed: no 3-keyframe spring) */}
+          {/* Text with conditional animation */}
           <motion.span
             className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[--primary] to-purple-600 relative z-10 leading-none select-text"
-            initial={{ scale: 0.85, y: 6, opacity: 0 }}
-            animate={{
-              // scale is a single target (spring) -> no array keyframes
+            initial={animationsEnabled ? { scale: 0.85, y: 6, opacity: 0 } : { scale: 1, y: 0, opacity: 1 }}
+            animate={animationsEnabled ? {
               scale: 1,
-              // y uses keyframes (tween) for the looping float
               y: [0, -3, 0],
               opacity: 1,
-            }}
-            transition={{
-              // spring for the entrance scale
+            } : { scale: 1, y: 0, opacity: 1 }}
+            transition={animationsEnabled ? {
               scale: { type: "spring", stiffness: 220, damping: 18 },
-              // keyframes (tween) for idle float - supports 3+ values
               y: {
                 duration: 4,
                 repeat: Infinity,
                 repeatType: "loop",
                 ease: "easeInOut",
               },
-              // fade-in timing
               opacity: { duration: 0.5 },
-            }}
-            whileHover={{ scale: 1.06, y: -2 }}
+            } : { duration: 0 }}
+            whileHover={animationsEnabled ? { scale: 1.06, y: -2 } : {}}
             aria-label="you"
           >
             you

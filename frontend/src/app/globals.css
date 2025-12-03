@@ -311,3 +311,24 @@ textarea {
 .animate-marquee2 {
   animation: marquee2 40s linear infinite;
 }
+
+/* ====================================
+   ANIMATION TOGGLE: Disable ALL animations when user preference is set
+   ==================================== */
+html[data-animations="disabled"] *,
+html[data-animations="disabled"] *::before,
+html[data-animations="disabled"] *::after {
+  /* Disable ALL CSS animations */
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  
+  /* Make transitions instant */
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
+
+/* Keep essential transitions for accessibility (focus states, etc.) */
+html[data-animations="disabled"] *:focus,
+html[data-animations="disabled"] *:focus-visible {
+  transition: outline 0.15s ease !important;
+}

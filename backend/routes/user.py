@@ -400,3 +400,20 @@ async def mark_changelog_seen(current_user: dict = Depends(get_current_user)):
     )
     
     return {"message": "Changelog marked as seen", "version": "2.1"}
+
+
+@router.post("/preferences/animations", status_code=status.HTTP_200_OK)
+async def update_animation_preference(
+    request: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update user's animation preference"""
+    user_id = current_user.get("_id")
+    enabled = request.get("enabled", True)
+    
+    await users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"animations_enabled": enabled}}
+    )
+    
+    return {"message": "Animation preference updated", "enabled": enabled}

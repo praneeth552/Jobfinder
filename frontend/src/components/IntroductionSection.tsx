@@ -1,15 +1,18 @@
 import { motion } from "framer-motion";
+import { useAnimations } from "@/context/AnimationContext";
 
 export default function IntroductionSection() {
+  const { animationsEnabled } = useAnimations();
+
   return (
     <section className="flex flex-col items-center justify-center py-32 px-4 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[--primary]/5 to-transparent pointer-events-none" />
 
       <motion.div
-        initial={{ opacity: 0, y: 40 }}
+        initial={animationsEnabled ? { opacity: 0, y: 40 } : { opacity: 1, y: 0 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        transition={{ duration: animationsEnabled ? 0.8 : 0, ease: "easeOut" }}
         className="max-w-4xl mx-auto text-center relative z-10"
       >
         <h3 className="text-4xl md:text-5xl font-bold mb-8 text-[--foreground]">

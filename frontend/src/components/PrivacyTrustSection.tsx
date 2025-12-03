@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Shield, Lock, Eye, UserX, Clock, CheckCircle2 } from "lucide-react";
+import { useAnimations } from "@/context/AnimationContext";
 
 const privacyFeatures = [
     {
@@ -54,6 +55,7 @@ const accountLifecycle = [
 ];
 
 export default function PrivacyTrustSection() {
+    const { animationsEnabled } = useAnimations();
     return (
         <section className="py-20 px-4 relative overflow-hidden">
             {/* Background decorations */}
@@ -63,10 +65,10 @@ export default function PrivacyTrustSection() {
             <div className="max-w-7xl mx-auto relative">
                 {/* Header */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={animationsEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.6 }}
+                    transition={{ duration: animationsEnabled ? 0.6 : 0 }}
                     className="text-center mb-16"
                 >
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-blue-500/20 bg-blue-500/5 backdrop-blur-sm text-sm font-medium text-blue-600 dark:text-blue-400 mb-4">
@@ -89,10 +91,10 @@ export default function PrivacyTrustSection() {
                     {privacyFeatures.map((feature, index) => (
                         <motion.div
                             key={index}
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={animationsEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: index * 0.1 }}
+                            transition={{ duration: animationsEnabled ? 0.5 : 0, delay: animationsEnabled ? index * 0.1 : 0 }}
                             className="p-6 rounded-2xl bg-white/50 dark:bg-black/30 border border-white/20 dark:border-gray-700 backdrop-blur-sm hover:shadow-xl transition-all duration-300 hover:scale-105"
                         >
                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-4">
@@ -110,10 +112,10 @@ export default function PrivacyTrustSection() {
 
                 {/* Account Lifecycle */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={animationsEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.6 }}
+                    transition={{ duration: animationsEnabled ? 0.6 : 0 }}
                     className="mb-16"
                 >
                     <h3 className="text-3xl font-bold text-center mb-12">
@@ -123,10 +125,10 @@ export default function PrivacyTrustSection() {
                         {accountLifecycle.map((phase, index) => (
                             <motion.div
                                 key={index}
-                                initial={{ opacity: 0, scale: 0.9 }}
+                                initial={animationsEnabled ? { opacity: 0, scale: 0.9 } : { opacity: 1, scale: 1 }}
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
-                                transition={{ duration: 0.5, delay: index * 0.15 }}
+                                transition={{ duration: animationsEnabled ? 0.5 : 0, delay: animationsEnabled ? index * 0.15 : 0 }}
                                 className="relative"
                             >
                                 <div className="p-6 rounded-2xl bg-white/50 dark:bg-black/30 border border-white/20 dark:border-gray-700 backdrop-blur-sm h-full">
@@ -152,10 +154,10 @@ export default function PrivacyTrustSection() {
 
                 {/* Deletion Process Highlight */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={animationsEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
+                    transition={{ duration: animationsEnabled ? 0.6 : 0, delay: animationsEnabled ? 0.3 : 0 }}
                     className="p-8 rounded-3xl bg-gradient-to-br from-red-500/10 to-orange-500/10 border border-red-500/20 dark:border-red-500/30 backdrop-blur-sm"
                 >
                     <div className="flex items-start gap-6">
@@ -210,10 +212,10 @@ export default function PrivacyTrustSection() {
 
                 {/* What We Store */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={animationsEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.4 }}
+                    transition={{ duration: animationsEnabled ? 0.6 : 0, delay: animationsEnabled ? 0.4 : 0 }}
                     className="mt-16 p-8 rounded-3xl bg-white/30 dark:bg-black/20 border border-white/20 dark:border-gray-700 backdrop-blur-sm"
                 >
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">

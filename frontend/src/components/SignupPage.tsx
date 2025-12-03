@@ -12,6 +12,7 @@ import { Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import SimpleNavbar from "./SimpleNavbar";
+import { useAnimations } from "@/context/AnimationContext";
 
 const PasswordCriteria = ({ criteria }: { criteria: { [key: string]: boolean } }) => {
   const criteriaText: { [key: string]: string } = {
@@ -42,6 +43,7 @@ const PasswordCriteria = ({ criteria }: { criteria: { [key: string]: boolean } }
 };
 
 export default function SignupPage() {
+  const { animationsEnabled } = useAnimations();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -358,10 +360,10 @@ export default function SignupPage() {
               <AnimatePresence>
                 {isPasswordFocused && (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
+                    initial={animationsEnabled ? { opacity: 0, height: 0 } : { opacity: 1, height: "auto" }}
                     animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    exit={animationsEnabled ? { opacity: 0, height: 0 } : { opacity: 1, height: "auto" }}
+                    transition={{ duration: animationsEnabled ? 0.3 : 0, ease: "easeInOut" }}
                   >
                     <PasswordCriteria criteria={passwordCriteria} />
                   </motion.div>

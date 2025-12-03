@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
+import { useAnimations } from "@/context/AnimationContext";
 
 interface ChangelogEntry {
     category: "feature" | "improvement" | "fix";
@@ -48,6 +49,7 @@ const VERSIONS: VersionRelease[] = [
 ];
 
 export default function VersionHistory() {
+    const { animationsEnabled } = useAnimations();
     const [activeVersion, setActiveVersion] = useState("2.1");
     const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
         "2.1-feature": true,
@@ -98,9 +100,10 @@ export default function VersionHistory() {
             <div className="container mx-auto max-w-7xl">
                 {/* Header */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={animationsEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
+                    transition={{ duration: animationsEnabled ? 0.6 : 0 }}
                     className="mb-16 text-center lg:text-left"
                 >
                     <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-3">
@@ -161,10 +164,10 @@ export default function VersionHistory() {
                                 <motion.div
                                     key={release.version}
                                     id={`v${release.version}`}
-                                    initial={{ opacity: 0, y: 20 }}
+                                    initial={animationsEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true, margin: "-100px" }}
-                                    transition={{ delay: index * 0.1 }}
+                                    transition={{ delay: animationsEnabled ? index * 0.1 : 0, duration: animationsEnabled ? 0.6 : 0 }}
                                     onViewportEnter={() => setActiveVersion(release.version)}
                                     className="scroll-mt-24"
                                 >

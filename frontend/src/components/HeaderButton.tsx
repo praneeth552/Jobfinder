@@ -3,6 +3,7 @@
 import { useEffect, useRef, useLayoutEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
+import { useAnimations } from '@/context/AnimationContext';
 
 interface HeaderButtonProps {
   id: string;
@@ -29,6 +30,7 @@ const HeaderButton: React.FC<HeaderButtonProps> = ({
   shouldTriggerWiggle = true,
   autoCollapse = true,
 }) => {
+  const { animationsEnabled } = useAnimations();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [contentWidth, setContentWidth] = useState(0);
@@ -85,11 +87,11 @@ const HeaderButton: React.FC<HeaderButtonProps> = ({
       }}
       transition={{
         type: 'tween',
-        duration: 0.4,
+        duration: animationsEnabled ? 0.4 : 0,
         ease: 'circOut',
       }}
-      whileTap={{ scale: 0.96 }}
-      whileHover={{
+      whileTap={{ scale: animationsEnabled ? 0.96 : 1 }}
+      whileHover={animationsEnabled ? {
         scale: 1.05,
         boxShadow: "0 0 12px rgba(100, 180, 255, 0.4)",
         transition: {
@@ -100,7 +102,7 @@ const HeaderButton: React.FC<HeaderButtonProps> = ({
             ease: "easeInOut",
           },
         },
-      }}
+      } : {}}
       layout={false}
       style={{
         willChange: 'auto',
@@ -118,7 +120,7 @@ const HeaderButton: React.FC<HeaderButtonProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
+            transition={{ duration: animationsEnabled ? 0.15 : 0 }}
             className="flex items-center gap-3 px-4 whitespace-nowrap relative z-10"
             style={{ overflow: 'visible' }}
           >
@@ -130,7 +132,7 @@ const HeaderButton: React.FC<HeaderButtonProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
+            transition={{ duration: animationsEnabled ? 0.15 : 0 }}
             className="flex items-center justify-center w-12 h-12"
           >
             {icon}

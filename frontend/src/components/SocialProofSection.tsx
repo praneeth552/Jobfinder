@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
+import { useAnimations } from "@/context/AnimationContext";
 import { Database, Zap, Shield, Code2 } from "lucide-react";
 
 const metrics = [
@@ -41,6 +42,7 @@ const techStack = [
 ];
 
 export default function SocialProofSection() {
+    const { animationsEnabled } = useAnimations();
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -56,9 +58,9 @@ export default function SocialProofSection() {
             <div className="relative max-w-6xl mx-auto">
                 {/* Header */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ duration: 0.6 }}
+                    initial={animationsEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
+                    animate={isInView && animationsEnabled ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+                    transition={{ duration: animationsEnabled ? 0.6 : 0 }}
                     className="text-center mb-16"
                 >
                     <div className="inline-block px-4 py-1.5 rounded-full border border-[--primary]/20 bg-[--primary]/5 backdrop-blur-sm text-sm font-medium text-[--primary] mb-4">
@@ -77,9 +79,9 @@ export default function SocialProofSection() {
                     {metrics.map((metric, index) => (
                         <motion.div
                             key={index}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={isInView ? { opacity: 1, scale: 1 } : {}}
-                            transition={{ duration: 0.5, delay: index * 0.1 }}
+                            initial={animationsEnabled ? { opacity: 0, scale: 0.9 } : { opacity: 1, scale: 1 }}
+                            animate={isInView && animationsEnabled ? { opacity: 1, scale: 1 } : { opacity: 1, scale: 1 }}
+                            transition={{ duration: animationsEnabled ? 0.5 : 0, delay: animationsEnabled ? index * 0.1 : 0 }}
                             className="p-6 rounded-2xl bg-white/50 dark:bg-black/30 border border-white/20 dark:border-white/10 backdrop-blur-xl text-center hover:scale-105 transition-transform"
                         >
                             <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-r from-[--primary] to-purple-600 flex items-center justify-center">
@@ -100,9 +102,9 @@ export default function SocialProofSection() {
 
                 {/* Process Breakdown */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ duration: 0.6, delay: 0.4 }}
+                    initial={animationsEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
+                    animate={isInView && animationsEnabled ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+                    transition={{ duration: animationsEnabled ? 0.6 : 0, delay: animationsEnabled ? 0.4 : 0 }}
                     className="p-8 rounded-3xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-white/20 dark:border-white/10 backdrop-blur-xl mb-16"
                 >
                     <h3 className="text-2xl font-bold text-[--foreground] mb-6 text-center">
@@ -150,9 +152,9 @@ export default function SocialProofSection() {
 
                 {/* Tech Stack */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ duration: 0.6, delay: 0.6 }}
+                    initial={animationsEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
+                    animate={isInView && animationsEnabled ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+                    transition={{ duration: animationsEnabled ? 0.6 : 0, delay: animationsEnabled ? 0.6 : 0 }}
                     className="text-center"
                 >
                     <p className="text-sm font-semibold text-[--foreground]/60 mb-4 uppercase tracking-wide">
@@ -162,9 +164,9 @@ export default function SocialProofSection() {
                         {techStack.map((tech, index) => (
                             <motion.div
                                 key={index}
-                                initial={{ opacity: 0, scale: 0 }}
-                                animate={isInView ? { opacity: 1, scale: 1 } : {}}
-                                transition={{ duration: 0.3, delay: 0.7 + index * 0.05 }}
+                                initial={animationsEnabled ? { opacity: 0, scale: 0 } : { opacity: 1, scale: 1 }}
+                                animate={isInView && animationsEnabled ? { opacity: 1, scale: 1 } : { opacity: 1, scale: 1 }}
+                                transition={{ duration: animationsEnabled ? 0.3 : 0, delay: animationsEnabled ? 0.7 + index * 0.05 : 0 }}
                                 className={`px-4 py-2 rounded-full bg-gradient-to-r ${tech.color} text-white font-semibold text-sm shadow-lg`}
                             >
                                 {tech.name}

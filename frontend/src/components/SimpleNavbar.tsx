@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
+import AnimationToggle from "./AnimationToggle";
 import { useRouter } from "next/navigation";
 
 export default function SimpleNavbar() {
@@ -58,39 +59,46 @@ export default function SimpleNavbar() {
         variants={navVariants as any}
         initial="initial"
         animate="animate"
-        className={`pointer-events-auto w-[95%] max-w-5xl flex justify-between items-center px-6 py-3 transition-all duration-500 rounded-full
+        className={`pointer-events-auto w-[95%] max-w-5xl flex justify-between items-center px-3 md:px-6 py-2 md:py-3 transition-all duration-500 rounded-full
           ${hasScrolled
             ? "bg-white/80 dark:bg-black/60 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
             : "bg-white/50 dark:bg-black/20 backdrop-blur-md border border-white/10"}`}
       >
         <Link
           href="/"
-          className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[--primary] to-purple-500 hover:scale-105 transition-transform flex items-center gap-3"
+          className="flex items-center gap-1.5 md:gap-2 flex-shrink-0"
         >
-          TackleIt
+          <span className="text-lg md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[--primary] to-purple-500 hover:scale-105 transition-transform">
+            TackleIt
+          </span>
 
-          {/* Early Access Badge */}
-          <span className="hidden md:inline-block px-2.5 py-1 text-[10px] font-semibold 
+          {/* Early Access Badge - Compact on mobile */}
+          <span className="inline-flex items-center px-1.5 md:px-2.5 py-0.5 md:py-1 text-[7px] md:text-[10px] font-semibold 
                          uppercase tracking-wide rounded-full 
                          bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 
                          text-[--primary] border border-[--primary]/20
-                         shadow-sm shadow-[--primary]/10">
-            Early Access
+                         shadow-sm shadow-[--primary]/10 whitespace-nowrap">
+            Early
           </span>
         </Link>
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center bg-white/5 rounded-full p-1 border border-white/10 backdrop-blur-sm">
+        <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1 bg-white/5 rounded-full p-0.5 md:p-1 border border-white/10 backdrop-blur-sm">
             <ThemeToggle />
           </div>
+          <AnimationToggle />
 
           <motion.button
             onClick={handleCollaborateClick}
-            className="relative px-6 py-2.5 bg-[--primary] text-white rounded-full font-semibold text-sm shadow-lg shadow-[--primary]/25 hover:shadow-xl hover:shadow-[--primary]/40 transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden group w-[160px] flex justify-center"
+            className="relative px-3 py-1.5 md:px-6 md:py-2.5 bg-[--primary] text-white rounded-full font-semibold text-xs md:text-sm shadow-lg shadow-[--primary]/25 hover:shadow-xl hover:shadow-[--primary]/40 transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden group flex justify-center whitespace-nowrap w-auto md:w-[160px]"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <span className="relative z-10 flex items-center justify-center gap-2 w-full">
+            {/* Mobile: Simple static text */}
+            <span className="md:hidden relative z-10 font-bold">Collab?</span>
+
+            {/* Desktop: Animated text with fixed container */}
+            <span className="hidden md:block relative z-10 font-bold w-full">
               <AnimatePresence mode="wait">
                 <motion.span
                   key={textIndex}
@@ -99,15 +107,19 @@ export default function SimpleNavbar() {
                   animate="center"
                   exit="exit"
                   transition={{ duration: 0.3 }}
-                  className="block whitespace-nowrap absolute"
+                  className="block whitespace-nowrap"
                 >
                   {buttonTexts[textIndex]}
                 </motion.span>
               </AnimatePresence>
-              {/* Invisible text to maintain height */}
-              <span className="invisible">Collaborate?</span>
             </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20"
+              initial={{ x: '-100%' }}
+              whileHover={{ x: '100%' }}
+              transition={{ duration: 0.6 }}
+            />
           </motion.button>
         </div>
       </motion.nav>

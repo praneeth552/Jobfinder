@@ -15,7 +15,7 @@ import JobCard from "./JobCard";
 import DropZone from "./DropZone";
 import ConfirmationModal from "./ConfirmationModal";
 import HeaderButton from "./HeaderButton";
-import { Coins, User, Briefcase, LogOut, Settings, Gem, Star, Sheet } from 'lucide-react';
+import { Coins, User, Briefcase, LogOut, Settings, Gem, Star, Sheet, Sparkles } from 'lucide-react';
 import TimeRemainingButton from "./TimeRemainingButton";
 import TimeRemainingSkeleton from "./TimeRemainingSkeleton";
 import GeminiIcon from "./GeminiIcon";
@@ -23,6 +23,7 @@ import TimeSavedCard from "./TimeSavedCard"; // Import TimeSavedCard
 import FeedbackModal from "./FeedbackModal"; // Import FeedbackModal for testing
 import OnboardingTour from "./OnboardingTour"; // Import OnboardingTour
 import ChangelogModal from "./ChangelogModal"; // Import ChangelogModal
+import { useAnimations } from "@/context/AnimationContext";
 
 interface JobApplication {
   id: string;
@@ -35,12 +36,18 @@ interface JobApplication {
   job_url?: string;
 }
 
-const cardVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 100, damping: 10 } },
-};
-
 export default function DashboardClient() {
+  const { animationsEnabled } = useAnimations();
+
+  // Dynamic card variants based on animation preference
+  const cardVariants = {
+    hidden: { y: animationsEnabled ? 20 : 0, opacity: animationsEnabled ? 0 : 1 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: animationsEnabled ? { type: "spring", stiffness: 100, damping: 10 } : { duration: 0 }
+    },
+  };
   const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
   const [isLoading, setIsLoading] = useState(true); // For initial page load
   const [isGenerating, setIsGenerating] = useState(false); // For background task
@@ -57,7 +64,7 @@ export default function DashboardClient() {
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [cardActionLoading, setCardActionLoading] = useState<{ [key: string]: boolean }>({});
   const [loyaltyCoins, setLoyaltyCoins] = useState(0);
-  const [expandedButton, setExpandedButton] = useState<string>('');
+  const [expandedButton, setExpandedButton] = useState<string>(''); // Auto-expands when dashboard is empty
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isUserLoading, setIsUserLoading] = useState(true);
@@ -65,6 +72,9 @@ export default function DashboardClient() {
   const [wiggleTokensKey, setWiggleTokensKey] = useState(0);
   const [wiggleProfileKey, setWiggleProfileKey] = useState(0);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false); // Feedback modal state
+
+  // REMOVED: Auto-expand feature - let the pulsing red dot do the job instead
+  // Users will see the red dot and click to expand themselves
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [demoJobs, setDemoJobs] = useState<JobApplication[]>([]);
 
@@ -121,11 +131,16 @@ export default function DashboardClient() {
       setIsLoading(false);
 
       // Show welcome toast for demo users
-      // Show welcome toast for demo users
       if (!hasShownDemoToast.current) {
         hasShownDemoToast.current = true;
         toast.success("Welcome to Demo Mode! Feel free to explore.", { icon: "👋" });
       }
+      return;
+    }
+
+    // If not in demo mode and no token, redirect to signin
+    if (!token) {
+      router.push("/signin");
       return;
     }
 
@@ -146,15 +161,16 @@ export default function DashboardClient() {
           setAuthType(data.auth_type || "standard");
           setUserName(data.name || '');
           setUserEmail(data.email || null);
-        } catch (error) { console.error("Failed to fetch user data", error); }
-        finally { setIsUserLoading(false); }
-      } else {
-        setIsUserLoading(false);
-        // Redirect to signin if not authenticated and not in demo mode
-        if (!token && !isDemo) {
-          // Optional: router.push("/signin"); 
-          // Keeping existing behavior of just showing empty state or loading
+        } catch (error) {
+          console.error("Failed to fetch user data", error);
+          // If token is invalid, redirect to signin
+          if (axios.isAxiosError(error) && error.response?.status === 401) {
+            Cookies.remove("token");
+            Cookies.remove("user_id");
+            router.push("/signin");
+          }
         }
+        finally { setIsUserLoading(false); }
       }
     };
     fetchUser();
@@ -167,6 +183,41 @@ export default function DashboardClient() {
       }
     };
   }, [plan, searchParams, router, fetchAllJobs, token]);
+
+  // Listen for tour completion and auto-trigger generation for new users
+  useEffect(() => {
+    const handleTourCompleted = () => {
+      // Only auto-trigger for new users (no existing jobs)
+      const isNewUser = jobApplications.length === 0;
+      const hasAutoGenerated = sessionStorage.getItem('auto-generated-jobs') === 'true';
+
+      if (isNewUser && !hasAutoGenerated && !isGenerating) {
+        console.log('[Auto-Generation] Triggering for new user after tour completion');
+
+        // Set flag to prevent double-generation
+        sessionStorage.setItem('auto-generated-jobs', 'true');
+
+        // Show encouraging toast
+        toast.success("🎉 Let's find your perfect jobs!", { duration: 2000 });
+
+        // Auto-trigger generation after a short delay for smooth UX
+        setTimeout(() => {
+          if (isDemoMode) {
+            generateDemoRecommendations();
+          } else {
+            // Skip confirmation modal and generate directly
+            confirmGenerateRecommendations();
+          }
+        }, 800); // Small delay for smooth transition
+      }
+    };
+
+    window.addEventListener('tour-completed', handleTourCompleted);
+
+    return () => {
+      window.removeEventListener('tour-completed', handleTourCompleted);
+    };
+  }, [jobApplications.length, isGenerating, isDemoMode]);
 
   useEffect(() => {
     const fetchSheetStatus = async () => {
@@ -533,19 +584,35 @@ export default function DashboardClient() {
                 isolation: 'isolate'
               }}
             >
-              <HeaderButton
-                id="generate"
-                icon={isGenerating ? <LoadingSpinner /> : <GeminiIcon />}
-                expandedContent={
-                  <span className="whitespace-nowrap text-sm font-semibold">Get Personalized Jobs</span>
-                }
-                onClick={handleGenerateRecommendations}
-                isExpanded={expandedButton === 'generate'}
-                onExpand={handleExpandButton}
-                ariaLabel="Get Personalized Jobs"
-                className={isUserLoading || isRateLimited || isGenerating ? "opacity-60 cursor-not-allowed" : ""}
-                shouldTriggerWiggle={true}
-              />
+              {/* Get Personalized Jobs Button with PURPLE DOT */}
+              <div className="relative inline-block">
+                {/* Pulsing indicator for new users with empty dashboard */}
+                {!isGenerating && jobApplications.length === 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 z-50">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-500 opacity-100"></span>
+                    <span className="relative inline-flex rounded-full h-4 w-4 bg-gradient-to-br from-purple-500 via-violet-500 to-indigo-500 border-2 border-white dark:border-slate-900 shadow-lg"></span>
+                  </span>
+                )}
+
+                <HeaderButton
+                  id="generate"
+                  icon={<div className="relative">{isGenerating ? <LoadingSpinner /> : <GeminiIcon />}</div>}
+                  expandedContent={
+                    <span className="flex items-center gap-2 whitespace-nowrap text-sm font-semibold">
+                      <span>Get Personalized Jobs</span>
+                      <span className="px-2 py-0.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs rounded-full font-bold animate-pulse">
+                        ✨ AI
+                      </span>
+                    </span>
+                  }
+                  onClick={handleGenerateRecommendations}
+                  isExpanded={expandedButton === 'generate'}
+                  onExpand={handleExpandButton}
+                  ariaLabel="Get Personalized Jobs - AI Powered"
+                  className={isUserLoading || isRateLimited || isGenerating ? "opacity-60 cursor-not-allowed" : ""}
+                  shouldTriggerWiggle={true}
+                />
+              </div>
 
               {isClient && userPlan === "pro" && (
                 <motion.div

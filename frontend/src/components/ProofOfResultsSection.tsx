@@ -1,11 +1,13 @@
 "use client";
 
+import { useRef } from "react";
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef } from "react";
+import { useAnimations } from "@/context/AnimationContext";
 import { X, Check, Clock, Target } from "lucide-react";
 
 export default function ProofOfResultsSection() {
+    const { animationsEnabled } = useAnimations();
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -17,9 +19,9 @@ export default function ProofOfResultsSection() {
             <div className="relative max-w-6xl mx-auto">
                 {/* Header */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ duration: 0.6 }}
+                    initial={animationsEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
+                    animate={isInView && animationsEnabled ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+                    transition={{ duration: animationsEnabled ? 0.6 : 0 }}
                     className="text-center mb-16"
                 >
                     <div className="inline-block px-4 py-1.5 rounded-full border border-[--primary]/20 bg-[--primary]/5 backdrop-blur-sm text-sm font-medium text-[--primary] mb-4">
@@ -37,9 +39,9 @@ export default function ProofOfResultsSection() {
                 <div className="grid md:grid-cols-2 gap-8 mb-16">
                     {/* Before */}
                     <motion.div
-                        initial={{ opacity: 0, x: -30 }}
-                        animate={isInView ? { opacity: 1, x: 0 } : {}}
-                        transition={{ duration: 0.6, delay: 0.2 }}
+                        initial={animationsEnabled ? { opacity: 0, x: -30 } : { opacity: 1, x: 0 }}
+                        animate={isInView && animationsEnabled ? { opacity: 1, x: 0 } : { opacity: 1, x: 0 }}
+                        transition={{ duration: animationsEnabled ? 0.6 : 0, delay: animationsEnabled ? 0.2 : 0 }}
                         className="p-8 rounded-3xl bg-gradient-to-br from-red-500/10 to-orange-500/10 border border-red-500/20 dark:border-red-500/20"
                     >
                         <div className="flex items-center gap-3 mb-6">
@@ -81,9 +83,9 @@ export default function ProofOfResultsSection() {
 
                     {/* After */}
                     <motion.div
-                        initial={{ opacity: 0, x: 30 }}
-                        animate={isInView ? { opacity: 1, x: 0 } : {}}
-                        transition={{ duration: 0.6, delay: 0.4 }}
+                        initial={animationsEnabled ? { opacity: 0, x: 30 } : { opacity: 1, x: 0 }}
+                        animate={isInView && animationsEnabled ? { opacity: 1, x: 0 } : { opacity: 1, x: 0 }}
+                        transition={{ duration: animationsEnabled ? 0.6 : 0, delay: animationsEnabled ? 0.4 : 0 }}
                         className="p-8 rounded-3xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 dark:border-green-500/20"
                     >
                         <div className="flex items-center gap-3 mb-6">
@@ -126,9 +128,9 @@ export default function ProofOfResultsSection() {
 
                 {/* Bottom Highlight */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ duration: 0.6, delay: 0.6 }}
+                    initial={animationsEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
+                    animate={isInView && animationsEnabled ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+                    transition={{ duration: animationsEnabled ? 0.6 : 0, delay: animationsEnabled ? 0.6 : 0 }}
                     className="text-center p-8 rounded-2xl bg-gradient-to-r from-[--primary]/10 to-purple-500/10 border border-[--primary]/20"
                 >
                     <Target className="w-12 h-12 mx-auto mb-4 text-[--primary]" />

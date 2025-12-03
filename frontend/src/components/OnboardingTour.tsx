@@ -107,9 +107,14 @@ export default function OnboardingTour() {
             const sessionKey = `onboarding_completed_${userResponse.data.email}`;
             sessionStorage.setItem(sessionKey, "true");
             setIsVisible(false);
+
+            // Dispatch event to trigger auto-generation for new users
+            window.dispatchEvent(new CustomEvent('tour-completed'));
         } catch (error) {
             console.error("Error skipping onboarding:", error);
             setIsVisible(false);
+            // Still dispatch event even if there's an error
+            window.dispatchEvent(new CustomEvent('tour-completed'));
         }
     };
 
@@ -134,10 +139,15 @@ export default function OnboardingTour() {
             sessionStorage.setItem(sessionKey, "true");
             toast.success("Welcome aboard! 🎉", { duration: 3000 });
             setIsVisible(false);
+
+            // Dispatch event to trigger auto-generation for new users
+            window.dispatchEvent(new CustomEvent('tour-completed'));
         } catch (error) {
             console.error("Error completing onboarding:", error);
             toast.success("Welcome aboard! 🎉", { duration: 3000 });
             setIsVisible(false);
+            // Still dispatch event even if there's an error
+            window.dispatchEvent(new CustomEvent('tour-completed'));
         }
     };
 

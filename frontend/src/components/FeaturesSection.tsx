@@ -3,6 +3,7 @@
 import { Globe, BrainCircuit, FileText, Bell, User, FileUp, Star, Zap, ShieldCheck } from "lucide-react";
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import { MouseEvent } from "react";
+import { useAnimations } from "@/context/AnimationContext";
 
 const features = [
   {
@@ -44,6 +45,7 @@ const features = [
 ];
 
 function FeatureCard({ feature }: { feature: typeof features[0] }) {
+  const { animationsEnabled } = useAnimations();
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
@@ -57,11 +59,11 @@ function FeatureCard({ feature }: { feature: typeof features[0] }) {
     <motion.div
       className={`group relative border border-[--border] bg-[--card-background] overflow-hidden rounded-3xl p-8 transition-colors hover:border-[--primary]/50 ${feature.className}`}
       onMouseMove={handleMouseMove}
-      whileHover={{ y: -5 }}
-      initial={{ opacity: 0, y: 20 }}
+      whileHover={animationsEnabled ? { y: -5 } : {}}
+      initial={animationsEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: animationsEnabled ? 0.5 : 0 }}
     >
       <motion.div
         className="pointer-events-none absolute -inset-px opacity-0 transition duration-300 group-hover:opacity-100"
@@ -87,13 +89,16 @@ function FeatureCard({ feature }: { feature: typeof features[0] }) {
 }
 
 export default function FeaturesSection() {
+  const { animationsEnabled } = useAnimations();
+
   return (
     <section className="py-24 px-4">
       <div className="max-w-6xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={animationsEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
+          transition={{ duration: animationsEnabled ? 0.6 : 0 }}
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[--foreground]">
