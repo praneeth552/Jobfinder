@@ -1,46 +1,54 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  useState,
+  useEffect,
+  type MouseEvent as ReactMouseEvent,
+} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import ThemeToggle from "./ThemeToggle";
 import { useRouter } from "next/navigation";
+
+import ThemeToggle from "./ThemeToggle";
+import AnimationToggle from "./AnimationToggle";
 
 interface NavbarProps {
   onGetStarted: () => void;
 }
-
-import AnimationToggle from "./AnimationToggle";
 
 export default function Navbar({ onGetStarted }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
   const [isOverDarkSection, setIsOverDarkSection] = useState(false);
   const [textIndex, setTextIndex] = useState(0);
+
   const buttonTexts = ["Got Ideas?", "Collaborate?", "Feedback?"];
   const router = useRouter();
 
+  // Scroll listener: shadow + dark-section detection
   useEffect(() => {
     const handleScroll = () => {
       setHasScrolled(window.scrollY > 20);
 
-      // Check if over dark sections (Contact or Footer)
       const contactSection = document.getElementById("contact-section");
       const footerSection = document.querySelector("footer");
 
+      const scrollPosition = window.scrollY + 100; // offset roughly equal to navbar height
       let isDark = false;
-      const scrollPosition = window.scrollY + 100; // Offset for navbar height
 
       if (contactSection) {
         const { offsetTop, offsetHeight } = contactSection;
-        if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+        if (
+          scrollPosition >= offsetTop &&
+          scrollPosition < offsetTop + offsetHeight
+        ) {
           isDark = true;
         }
       }
 
       if (footerSection && !isDark) {
-        const { offsetTop } = footerSection;
+        const { offsetTop } = footerSection as HTMLElement;
         if (scrollPosition >= offsetTop) {
           isDark = true;
         }
@@ -49,28 +57,33 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
       setIsOverDarkSection(isDark);
     };
 
+    handleScroll(); // run once on mount
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Rotating CTA text
   useEffect(() => {
     const interval = setInterval(() => {
       setTextIndex((prev) => (prev + 1) % buttonTexts.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [buttonTexts.length]);
 
   const handleSignInClick = () => {
-    router.push('/signin');
+    router.push("/signin");
   };
 
-  const handleCollaborateClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const contactSection = document.getElementById('contact-section');
+  const handleCollaborateClick = (
+    e?: ReactMouseEvent<HTMLButtonElement | HTMLDivElement>
+  ) => {
+    if (e) e.preventDefault();
+
+    const contactSection = document.getElementById("contact-section");
     if (contactSection) {
-      contactSection.scrollIntoView({ behavior: 'smooth' });
+      contactSection.scrollIntoView({ behavior: "smooth", block: "start" });
     } else {
-      router.push('/contact');
+      router.push("/contact");
     }
     setIsMobileMenuOpen(false);
   };
@@ -80,8 +93,8 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
     animate: {
       y: 0,
       opacity: 1,
-      transition: { duration: 0.5, ease: "easeOut" }
-    }
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
   };
 
   const slideVariants = {
@@ -90,7 +103,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
     exit: { y: -20, opacity: 0 },
   };
 
-  // Liquid morph menu variants for premium mobile menu
+  // Liquid morph menu variants for mobile
   const menuVariants = {
     closed: {
       clipPath: "circle(0% at calc(100% - 40px) 40px)",
@@ -100,7 +113,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
         ease: [0.76, 0, 0.24, 1],
         staggerChildren: 0.05,
         staggerDirection: -1,
-      }
+      },
     },
     open: {
       clipPath: "circle(150% at calc(100% - 40px) 40px)",
@@ -110,8 +123,8 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
         ease: [0.76, 0, 0.24, 1],
         staggerChildren: 0.1,
         delayChildren: 0.2,
-      }
-    }
+      },
+    },
   };
 
   const menuItemVariants = {
@@ -121,8 +134,8 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
       filter: "blur(10px)",
       transition: {
         duration: 0.4,
-        ease: [0.76, 0, 0.24, 1]
-      }
+        ease: [0.76, 0, 0.24, 1],
+      },
     },
     open: {
       opacity: 1,
@@ -130,9 +143,9 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
       filter: "blur(0px)",
       transition: {
         duration: 0.5,
-        ease: [0.76, 0, 0.24, 1]
-      }
-    }
+        ease: [0.76, 0, 0.24, 1],
+      },
+    },
   };
 
   const getTextColor = () => {
@@ -140,74 +153,87 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
     return "text-[--foreground]";
   };
 
+  const getIconColorClass = () => {
+    if (isOverDarkSection) return "text-white";
+    return "text-[--foreground]";
+  };
+
   return (
     <>
-      <div className="fixed top-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
+      {/* Floating pill navbar */}
+      <header className="fixed inset-x-0 top-0 z-50 flex justify-center pointer-events-none">
         <motion.nav
           variants={navVariants as any}
           initial="initial"
           animate="animate"
-          className={`pointer-events-auto w-[95%] max-w-5xl flex justify-between items-center px-6 py-3 transition-all duration-500 rounded-full
+          className={`pointer-events-auto mt-4 w-[95%] max-w-5xl flex items-center justify-between px-6 py-3 rounded-full transition-all duration-500
             ${hasScrolled
               ? isOverDarkSection
-                ? "bg-black/60 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]"
-                : "bg-white/80 dark:bg-black/60 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
-              : "bg-white/50 dark:bg-black/20 backdrop-blur-md border border-white/10"}`}
+                ? "bg-black/60 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.37)]"
+                : "bg-white/80 dark:bg-black/60 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(31,38,135,0.37)]"
+              : "bg-white/50 dark:bg-black/20 backdrop-blur-md border border-white/10"
+            }`}
         >
+          {/* Logo + badge */}
           <Link href="/workflow">
             <motion.div
-              className={`text-2xl font-bold cursor-pointer flex items-center gap-3 ${getTextColor()}`}
+              className={`flex cursor-pointer items-center gap-3 text-2xl font-bold ${getTextColor()}`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[--primary] to-purple-500">TackleIt</span>
-
-              {/* Early Access Badge - Visible on all screen sizes */}
-              <span className="inline-block px-2 md:px-2.5 py-0.5 md:py-1 text-[8px] md:text-[10px] font-semibold 
-                             uppercase tracking-wide rounded-full whitespace-nowrap
-                             bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 
-                             text-[--primary] dark:text-purple-400 border border-[--primary]/20
-                             shadow-sm shadow-[--primary]/10">
+              <span className="bg-gradient-to-r from-[--primary] to-purple-500 bg-clip-text text-transparent">
+                TackleIt
+              </span>
+              <span
+                className="inline-block whitespace-nowrap rounded-full border border-[--primary]/20
+                           bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10
+                           px-2 md:px-2.5 py-0.5 md:py-1 text-[8px] md:text-[10px] font-semibold
+                           uppercase tracking-wide text-[--primary] shadow-sm shadow-[--primary]/10
+                           dark:text-purple-400"
+              >
                 Early Access
               </span>
             </motion.div>
           </Link>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center gap-8">
-            {/* Links removed as per request */}
-          </div>
-
-          <div className="hidden md:flex items-center gap-3">
-            <div className="flex items-center gap-1 bg-white/5 rounded-full p-1 border border-white/10 backdrop-blur-sm">
+          {/* Desktop actions */}
+          <div className="hidden items-center gap-3 md:flex">
+            <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1 backdrop-blur-sm">
               <ThemeToggle />
             </div>
-            <AnimationToggle />
 
-            <div className="flex items-center gap-2 bg-white/5 rounded-full p-1.5 border border-white/10 backdrop-blur-md">
+            <AnimationToggle isOverDarkSection={isOverDarkSection} />
+
+            {/* Pricing / Sign in / Collaborate */}
+            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 p-1.5 backdrop-blur-md">
               <button
-                onClick={() => router.push('/pricing')}
-                className={`relative px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 overflow-hidden group hover:scale-105 active:scale-95 ${getTextColor()}`}
+                onClick={() => router.push("/pricing")}
+                className={`group relative overflow-hidden rounded-full px-5 py-2 text-sm font-medium
+                            transition-all duration-300 hover:scale-105 active:scale-95 ${getTextColor()}`}
               >
                 <span className="relative z-10 font-semibold">Pricing</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-400/10 dark:to-purple-400/10 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300" />
+                <div className="absolute inset-0 translate-x-[-100%] bg-gradient-to-r from-blue-500/10 to-purple-500/10
+                                transition-transform duration-300 group-hover:translate-x-0 dark:from-blue-400/10 dark:to-purple-400/10" />
               </button>
 
               <button
                 onClick={handleSignInClick}
-                className={`relative px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 overflow-hidden group hover:scale-105 active:scale-95 ${getTextColor()}`}
+                className={`group relative overflow-hidden rounded-full px-5 py-2 text-sm font-medium
+                            transition-all duration-300 hover:scale-105 active:scale-95 ${getTextColor()}`}
               >
                 <span className="relative z-10 font-semibold">Sign in</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-400/10 dark:to-purple-400/10 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300" />
+                <div className="absolute inset-0 translate-x-[-100%] bg-gradient-to-r from-blue-500/10 to-purple-500/10
+                                transition-transform duration-300 group-hover:translate-x-0 dark:from-blue-400/10 dark:to-purple-400/10" />
               </button>
 
               <motion.button
                 onClick={handleCollaborateClick}
-                className={`relative px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 overflow-hidden group w-32 flex justify-center ${getTextColor()}`}
+                className={`group relative flex w-32 justify-center overflow-hidden rounded-full px-5 py-2 text-sm
+                            font-medium transition-all duration-300 ${getTextColor()}`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <span className="relative z-10 group-hover:text-white transition-colors">
+                <span className="relative z-10 transition-colors group-hover:text-white">
                   <AnimatePresence mode="wait">
                     <motion.span
                       key={textIndex}
@@ -222,24 +248,27 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
                     </motion.span>
                   </AnimatePresence>
                 </span>
-                <div className="absolute inset-0 bg-[--primary] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full" />
+                <div className="absolute inset-0 rounded-full bg-[--primary] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               </motion.button>
             </div>
 
+            {/* Primary CTA */}
             <motion.button
               onClick={onGetStarted}
-              className="ml-2 px-6 py-2.5 bg-[--foreground] text-[--background] rounded-full font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 border border-transparent hover:border-[--primary]/50"
+              className="ml-2 rounded-full border border-transparent bg-[--foreground] px-6 py-2.5 text-sm font-semibold text-[--background]
+                         shadow-lg transition-all duration-300 hover:scale-105 hover:border-[--primary]/50 hover:shadow-xl active:scale-95"
+              whileTap={{ scale: 0.95 }}
             >
               Get Started
             </motion.button>
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center gap-2">
-            <AnimationToggle />
+          {/* Mobile menu trigger */}
+          <div className="flex items-center gap-2 md:hidden">
+            <AnimationToggle isOverDarkSection={isOverDarkSection} />
             <ThemeToggle />
             <motion.button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
               className="relative z-[60]"
               whileTap={{ scale: 0.9 }}
             >
@@ -252,7 +281,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
                     exit={{ rotate: 90, opacity: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <X size={28} className={getTextColor()} />
+                    <X size={28} className={getIconColorClass()} />
                   </motion.div>
                 ) : (
                   <motion.div
@@ -262,16 +291,16 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
                     exit={{ rotate: -90, opacity: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <Menu size={28} className={getTextColor()} />
+                    <Menu size={28} className={getIconColorClass()} />
                   </motion.div>
                 )}
               </AnimatePresence>
             </motion.button>
           </div>
         </motion.nav>
-      </div>
+      </header>
 
-      {/* Liquid Morph Mobile Menu */}
+      {/* Liquid morph mobile menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
@@ -281,24 +310,24 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
             variants={menuVariants as any}
             className="fixed inset-0 z-40 md:hidden"
             style={{
-              background: 'linear-gradient(135deg, var(--background) 0%, var(--secondary) 100%)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
+              background:
+                "linear-gradient(135deg, var(--background) 0%, var(--secondary) 100%)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
             }}
           >
             {/* Decorative gradient orbs */}
-            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[--primary] rounded-full opacity-10 blur-3xl" />
-            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[--primary] rounded-full opacity-10 blur-3xl" />
+            <div className="absolute left-1/4 top-1/4 h-64 w-64 rounded-full bg-[--primary] opacity-10 blur-3xl" />
+            <div className="absolute bottom-1/4 right-1/4 h-64 w-64 rounded-full bg-[--primary] opacity-10 blur-3xl" />
 
-            <div className="flex flex-col items-center justify-center h-full px-8 space-y-8">
-              {/* Menu Items */}
+            <div className="flex h-full flex-col items-center justify-center space-y-8 px-8">
               <motion.div variants={menuItemVariants as any} className="w-full">
                 <motion.button
                   onClick={() => {
-                    router.push('/pricing');
+                    router.push("/pricing");
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full text-3xl font-bold py-4 rounded-2xl transition-all text-[--foreground] hover:bg-[--primary]/10"
+                  className="w-full rounded-2xl py-4 text-3xl font-bold text-[--foreground] transition-all hover:bg-[--primary]/10"
                   whileHover={{ scale: 1.05, x: 10 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -312,7 +341,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
                     handleSignInClick();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full text-3xl font-bold py-4 rounded-2xl transition-all text-[--foreground] hover:bg-[--primary]/10"
+                  className="w-full rounded-2xl py-4 text-3xl font-bold text-[--foreground] transition-all hover:bg-[--primary]/10"
                   whileHover={{ scale: 1.05, x: 10 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -323,7 +352,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
               <motion.div variants={menuItemVariants as any} className="w-full">
                 <motion.button
                   onClick={handleCollaborateClick}
-                  className="w-full text-3xl font-bold py-4 rounded-2xl transition-all text-[--foreground] hover:bg-[--primary]/10"
+                  className="w-full rounded-2xl py-4 text-3xl font-bold text-[--foreground] transition-all hover:bg-[--primary]/10"
                   whileHover={{ scale: 1.05, x: 10 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -337,7 +366,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
                     onGetStarted();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full submit-button-swipe font-bold text-xl py-5 rounded-2xl shadow-2xl"
+                  className="submit-button-swipe w-full rounded-2xl py-5 text-xl font-bold shadow-2xl"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -345,7 +374,6 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
                 </motion.button>
               </motion.div>
 
-              {/* Footer text */}
               <motion.div
                 variants={menuItemVariants as any}
                 className="absolute bottom-20 text-center text-[--foreground]/40"

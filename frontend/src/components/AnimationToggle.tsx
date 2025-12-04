@@ -5,13 +5,22 @@ import { useAnimations } from "@/context/AnimationContext";
 import { Zap, ZapOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function AnimationToggle() {
+interface AnimationToggleProps {
+    isOverDarkSection?: boolean;
+}
+
+export default function AnimationToggle({ isOverDarkSection = false }: AnimationToggleProps) {
     const { animationsEnabled, toggleAnimations } = useAnimations();
     const [showTooltip, setShowTooltip] = useState(false);
 
     const tooltipText = animationsEnabled
         ? "Animations are ON"
         : "Animations are OFF";
+
+    const getTextColor = () => {
+        if (isOverDarkSection) return "text-white";
+        return "text-gray-800 dark:text-gray-200";
+    };
 
     return (
         <div
@@ -62,7 +71,7 @@ export default function AnimationToggle() {
                 </span>
 
                 {/* Label text - now INSIDE the button, hidden on small screens */}
-                <span className="hidden md:inline text-xs font-medium text-gray-800 dark:text-gray-200">
+                <span className={`hidden md:inline text-xs font-medium ${getTextColor()}`}>
                     Animations
                 </span>
             </button>

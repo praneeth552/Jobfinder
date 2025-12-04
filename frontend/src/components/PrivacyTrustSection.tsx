@@ -261,7 +261,7 @@ export default function PrivacyTrustSection() {
                     </div>
                     <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
                         View all your stored data anytime from{" "}
-                        <span className="font-semibold">Profile → Manage Your Data</span>
+                        <span className="font-semibold">Profile → Account Settings</span>
                     </p>
                 </motion.div>
             </div>

@@ -112,7 +112,7 @@ class User(BaseModel):
     last_seen_version: Optional[str] = None  # e.g., "2.1"
     
     # UI Preferences
-    animations_enabled: bool = True  # Default to enabled for existing users
+    animations_enabled: bool = False  # Default to disabled for better performance and accessibility
 
 
 class UserLogin(BaseModel):

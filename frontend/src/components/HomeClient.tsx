@@ -19,13 +19,13 @@ import LoadingSpinner from "./LoadingSpinner";
 import dynamic from "next/dynamic";
 import { useAnimations } from "@/context/AnimationContext";
 
-// New landing page components
-import WorkflowShowcase from "@/components/WorkflowShowcase";
-import ArchitectureSection from "@/components/ArchitectureSection";
-import PrivacyTrustSection from "@/components/PrivacyTrustSection";
-import SocialProofSection from "@/components/SocialProofSection";
-import ProofOfResultsSection from "@/components/ProofOfResultsSection";
-import VersionHistory from "@/components/VersionHistory";
+// New landing page teaser components
+import PrivacyTrustTeaser from "@/components/teasers/PrivacyTrustTeaser";
+import WorkflowTeaser from "@/components/teasers/WorkflowTeaser";
+import SocialProofTeaser from "@/components/teasers/SocialProofTeaser";
+import ProofOfResultsTeaser from "@/components/teasers/ProofOfResultsTeaser";
+import ArchitectureTeaser from "@/components/teasers/ArchitectureTeaser";
+import VersionHistoryTeaser from "@/components/teasers/VersionHistoryTeaser";
 
 const SignupPage = dynamic(() => import("@/components/SignupPage"), {
   ssr: false,
@@ -100,16 +100,16 @@ export default function HomeClient() {
             <Navbar onGetStarted={handleGetStarted} />
             <HeroSection onGetStarted={handleGetStarted} />
             <IntroductionSection />
-            <PrivacyTrustSection />
-            <WorkflowShowcase />
+            <PrivacyTrustTeaser />
+            <WorkflowTeaser />
             <FeaturesSection />
-            <SocialProofSection />
-            <ProofOfResultsSection />
+            <SocialProofTeaser />
+            <ProofOfResultsTeaser />
             <RewardingSection />
             <TechStack />
-            <ArchitectureSection />
+            <ArchitectureTeaser />
             <ProblemSolutionSection />
-            <VersionHistory />
+            <VersionHistoryTeaser />
             <ContactForm />
             <NewFooter />
           </motion.div>

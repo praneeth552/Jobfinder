@@ -41,12 +41,12 @@ const PublicPricingPage = () => {
       ) : (
         <XCircle className="text-red-400 flex-shrink-0" size={20} />
       )}
-      <span className="text-gray-300">{text}</span>
+      <span className="text-gray-700 dark:text-gray-300">{text}</span>
     </motion.li>
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-indigo-950 text-white relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950 text-gray-900 dark:text-white relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" />
@@ -70,13 +70,13 @@ const PublicPricingPage = () => {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-6"
             >
               <Sparkles className="text-indigo-400" size={18} />
-              <span className="text-sm text-indigo-300 font-medium">Simple, Transparent Pricing</span>
+              <span className="text-sm text-indigo-600 dark:text-indigo-300 font-medium">Simple, Transparent Pricing</span>
             </motion.div>
 
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-purple-200">
+            <h1 className="text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-indigo-700 to-purple-700 dark:from-white dark:via-indigo-200 dark:to-purple-200">
               Choose Your Plan
             </h1>
-            <p className="mt-4 text-xl text-gray-400 max-w-2xl mx-auto">
+            <p className="mt-4 text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Unlock your full potential with our Pro plan and accelerate your job search.
             </p>
           </motion.div>
@@ -92,19 +92,19 @@ const PublicPricingPage = () => {
               className="relative group"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-gray-800/50 to-gray-700/50 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300">
+              <div className="relative bg-gradient-to-br from-white to-gray-50 dark:from-gray-800/80 dark:to-gray-900/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-gray-200 dark:border-gray-700/50 hover:border-gray-300 dark:hover:border-gray-600/50 transition-all duration-300">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="p-2 rounded-lg bg-gray-700/50">
                     <Zap className="text-gray-400" size={24} />
                   </div>
-                  <h2 className="text-3xl font-bold text-gray-300">Free</h2>
+                  <h2 className="text-3xl font-bold text-gray-700 dark:text-gray-300">Free</h2>
                 </div>
 
                 <div className="mb-8">
                   <p className="text-5xl font-bold text-gray-400 mb-2">
                     <span className="text-4xl">₹</span>0
                   </p>
-                  <p className="text-gray-500">Per month · Forever free</p>
+                  <p className="text-gray-600 dark:text-gray-500">Per month · Forever free</p>
                 </div>
 
                 <p className="text-gray-500 mb-8 text-sm">Perfect for casual job seekers getting started</p>
@@ -119,7 +119,7 @@ const PublicPricingPage = () => {
                 </ul>
 
                 <div className="text-center pt-4">
-                  <div className="px-6 py-3 rounded-full font-semibold text-gray-500 border border-gray-700 cursor-not-allowed">
+                  <div className="px-6 py-3 rounded-full font-semibold text-gray-600 dark:text-gray-500 border border-gray-300 dark:border-gray-700 cursor-not-allowed">
                     Current Plan
                   </div>
                 </div>
@@ -145,22 +145,22 @@ const PublicPricingPage = () => {
                 </div>
               </div>
 
-              <div className="relative bg-gradient-to-br from-indigo-900/50 via-purple-900/50 to-indigo-900/50 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border-2 border-indigo-500/50 hover:border-indigo-400/70 transition-all duration-300">
+              <div className="relative bg-gradient-to-br from-indigo-50 via-purple-50 to-indigo-50 dark:from-indigo-900/50 dark:via-purple-900/50 dark:to-indigo-900/50 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border-2 border-indigo-400 dark:border-indigo-500/50 hover:border-indigo-500 dark:hover:border-indigo-400/70 transition-all duration-300">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500">
                     <Sparkles className="text-white" size={24} />
                   </div>
-                  <h2 className="text-3xl font-bold text-white">Pro</h2>
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Pro</h2>
                 </div>
 
                 <div className="mb-8">
                   <p className="text-5xl font-bold text-white mb-2">
                     <span className="text-4xl">₹</span>99
                   </p>
-                  <p className="text-indigo-300">Per month · Best value</p>
+                  <p className="text-indigo-700 dark:text-indigo-300">Per month · Best value</p>
                 </div>
 
-                <p className="text-indigo-200 mb-8 text-sm">For serious professionals ready to land their dream job</p>
+                <p className="text-indigo-800 dark:text-indigo-200 mb-8 text-sm">For serious professionals ready to land their dream job</p>
 
                 <ul className="space-y-4 mb-8">
                   <Feature text="Generate recommendations once a week" included={true} />
@@ -196,7 +196,7 @@ const PublicPricingPage = () => {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="mt-20 text-center max-w-2xl mx-auto"
           >
-            <p className="text-gray-400 text-base">
+            <p className="text-gray-600 dark:text-gray-400 text-base">
               Have questions or need help? Feel free to reach out at{' '}
               <a
                 href="mailto:saipraneeth2525@gmail.com"

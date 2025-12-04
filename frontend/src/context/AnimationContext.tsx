@@ -15,15 +15,15 @@ const AnimationContext = createContext<AnimationContextType | undefined>(undefin
 
 export function AnimationProvider({ children }: { children: React.ReactNode }) {
     const [animationsEnabled, setAnimationsEnabledState] = useState<boolean>(() => {
-        // Always default to TRUE (animations ON) for better UX
-        // Only disable if user has explicitly turned them off before
+        // Default to FALSE (animations OFF) for better initial performance
+        // Users can explicitly enable them via the navbar toggle
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('animationsEnabled');
-            // If nothing saved, default to true (ON)
-            // If saved as "false", respect that
-            return saved === 'false' ? false : true;
+            // If user has saved preference, respect it
+            // Otherwise default to false (OFF)
+            return saved === 'true' ? true : false;
         }
-        return true; // Default to animations ON
+        return false; // Default to animations OFF
     });
 
     // Sync with backend when animations setting changes

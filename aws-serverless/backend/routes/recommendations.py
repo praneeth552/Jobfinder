@@ -60,24 +60,129 @@ def build_prompt(user_profile, jobs):
     jobs_json = json.dumps(jobs_data, indent=2)
 
     return f"""
-Analyze the user profile and job listings. Return ONLY a JSON array of the top 5-8 best matches.
+You are an expert job-matching engine. Your ONLY job is to select the BEST jobs for this candidate from the given list.
 
-USER PROFILE:
+########################
+## INPUT: USER PROFILE
+########################
 {user_profile}
 
-AVAILABLE JOBS:
+########################
+## INPUT: AVAILABLE JOBS
+########################
 {jobs_json}
 
-Return this exact JSON structure with 5-8 jobs:
+########################
+## MATCHING STRATEGY
+########################
+
+### 1. EXPERIENCE LEVEL MATCHING (SMART & FLEXIBLE)
+**Core Principle**: Prioritize jobs at user's level, but include relevant stretch opportunities.
+
+**For Freshers / Interns / 0-1 Years:**
+- PRIMARY (70% of results): Internships, trainee, graduate, or entry-level roles (0-1 years)
+- STRETCH (30% of results): 1-2 year roles IF they have strong tech stack match (+15 skill overlap bonus)
+- EXCLUDE: Anything requiring 3+ years, or roles with "Senior", "Lead", "Staff" titles
+
+**For 1-3 Years Experience:**
+- PRIMARY (70%): Junior/Mid-level roles (1-3 years)
+- STRETCH (30%): Entry-level roles (if strong match) OR 3-4 year roles (if skills align)
+- EXCLUDE: Internships, trainee programs, and roles requiring 5+ years
+
+**For 3-7 Years Experience:**
+- PRIMARY (70%): Mid/Senior roles (3-7 years)
+- STRETCH (30%): 2-3 year roles (if strong match) OR 7-10 year roles (if skills align)
+- EXCLUDE: Internships, graduate programs, and roles requiring 10+ years
+
+**For 7+ Years Experience:**
+- PRIMARY (70%): Senior/Lead/Principal/Architect roles (7+ years)
+- STRETCH (30%): 5-7 year roles (if strong match) OR Staff/Principal roles (if skills align)
+- EXCLUDE: Internships, junior, and mid-level roles
+
+**Experience Level Indicators:**
+Look for these keywords in job titles/descriptions:
+- Entry: "Intern", "Trainee", "Graduate", "Junior", "Entry-level", "Associate"
+- Mid: "Mid-level", "Software Engineer", "Developer" (without Senior/Junior)
+- Senior: "Senior", "Lead", "Staff", "Principal", "Architect", "Manager"
+
+### 2. SCORING SYSTEM (0-100 points)
+**Experience Tier Match:**
+- PRIMARY tier match: +50 points (base)
+- STRETCH tier match: +35 points (conditional on strong skills)
+- Outside acceptable range: 0 points (reject)
+
+**Skills & Tech Stack:**
+- Strong overlap (60%+): +25 points
+- Moderate overlap (40-60%): +15 points
+- Weak overlap (<40%): +5 points
+
+**Must-Have Keywords:**
+- Contains all must-have keywords: +15 points
+- Missing some: +5 points
+
+**Location & Work Preferences:**
+- Exact location match OR Remote: +10 points
+- Nearby/Hybrid options: +5 points
+
+**Role Type & Seniority:**
+- Perfect alignment with preferences: +10 points
+
+**Company Diversity Bonus:**
+- First job from this company: +5 points
+- Already have 2+ from this company: -10 points
+
+**MINIMUM THRESHOLD:** Only include jobs scoring 65+ points
+
+### 3. KEYWORD FILTERING (HARD RULES)
+- **EXCLUDED keywords**: If job contains ANY excluded keyword → REJECT immediately
+- **MUST-HAVE keywords**: If missing → score penalty -20 points
+
+### 4. COMPANY DIVERSITY
+- Aim for 6-8 different companies in final results
+- Maximum 2 jobs from any single company
+- Prioritize diversity over flooding from one source
+
+########################
+## OUTPUT FORMAT (CRITICAL)
+########################
+Return ONLY a JSON array. No prose, no markdown, no backticks, no wrapper object.
+
+**Structure:**
 [
   {{
-    "title": "Job Title", "company": "Company Name", "location": "Location",
-    "match_score": 85, "reason": "One concise sentence explaining the match",
-    "job_url": "https://example.com/job"
+    "title": "Job Title",
+    "company": "Company Name",
+    "location": "City / Remote / Hybrid",
+    "match_score": 87,
+    "reason": "Brief explanation (<= 30 words) focusing on why it's a good match",
+    "job_url": "https://example.com/job-posting"
   }}
 ]
 
-Important: Keep reasons under 30 words each. Return ONLY the JSON array.
+**Requirements:**
+- Return 8-10 jobs (mix of PRIMARY and STRETCH tiers where applicable)
+- For freshers: ~7 internships/entry-level + ~3 1-year roles (if skills-qualified)
+- "match_score" must be integer 0-100
+- "reason" must be under 30 words
+- Sort by match_score descending
+- Never invent data - use only what's in the input
+
+########################
+## EXECUTION STEPS
+########################
+1. Parse user's experience level and preferences
+2. For each job, determine: PRIMARY tier, STRETCH tier, or REJECT
+3. Calculate match score using the scoring system above
+4. Apply keyword filters (EXCLUDE/MUST-HAVE)
+5. Select top 8-10 jobs, ensuring:
+   - ~70% PRIMARY tier + ~30% STRETCH tier
+   - Company diversity (max 2 per company)
+   - All score >= 65
+6. Sort by match_score (highest first)
+7. Output ONLY the JSON array
+
+IMPORTANT: Do NOT wrap the JSON in ```json or any markdown. Output MUST start with '[' and end with ']'.
+
 """
 
 # --- Background Task ---
