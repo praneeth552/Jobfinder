@@ -24,6 +24,8 @@ import FeedbackModal from "./FeedbackModal"; // Import FeedbackModal for testing
 import OnboardingTour from "./OnboardingTour"; // Import OnboardingTour
 import ChangelogModal from "./ChangelogModal"; // Import ChangelogModal
 import { useAnimations } from "@/context/AnimationContext";
+import { useFeedbackTriggers } from "@/hooks/useFeedbackTriggers";
+import OverallRating from "./OverallRating";
 
 interface JobApplication {
   id: string;
@@ -409,10 +411,7 @@ export default function DashboardClient() {
             setNextGenerationAllowedAt(new Date(userData.next_generation_allowed_at).getTime());
           }
 
-          // Show feedback modal after successful generation
-          setTimeout(() => {
-            setShowFeedbackModal(true);
-          }, 1000); // Small delay to let user see the success message
+          // Don't auto-show feedback modal - let smart triggers handle it
         } else if (task.status === 'failed') {
           if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
           setIsGenerating(false);
@@ -449,11 +448,7 @@ export default function DashboardClient() {
       setJobApplications(jobApps);
       toast.success(`Found ${jobApps.length} matching opportunities!`);
 
-      // Show feedback modal after successful generation (simulated)
-      setTimeout(() => {
-        setShowFeedbackModal(true);
-      }, 1000);
-
+      // Don't auto-show feedback modal for demo mode
     } catch (error: any) {
       console.error("Demo generation error:", error);
       if (error.response?.status === 429) {
@@ -510,17 +505,20 @@ export default function DashboardClient() {
 
   const handleFeedbackSubmit = async (rating: number, comment?: string) => {
     try {
+      const token = Cookies.get("token");
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/api/feedback`,
         {
           rating,
           comment,
-          trigger: "manual"
+          trigger: feedbackTriggerType || "manual"
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success("Thank you for your feedback!");
+
+      toast.success("Thank you for your feedback! 🎉");
       setShowFeedbackModal(false);
+      resetFeedbackTrigger();
     } catch (error) {
       console.error("Failed to submit feedback:", error);
       toast.error("Failed to submit feedback. Please try again.");
@@ -541,6 +539,20 @@ export default function DashboardClient() {
 
   const recommendedJobs = jobApplications.filter((j) => j.status === "recommended");
   const isRateLimited = nextGenerationAllowedAt && Date.now() < nextGenerationAllowedAt;
+
+  // Smart feedback triggers
+  const { shouldShowFeedback, triggerType: feedbackTriggerType, resetTrigger: resetFeedbackTrigger } = useFeedbackTriggers({
+    appliedJobsCount,
+    isGenerating,
+    hasJobs: jobApplications.length > 0
+  });
+
+  // Show feedback modal based on smart triggers
+  useEffect(() => {
+    if (shouldShowFeedback && !showFeedbackModal && !isDemoMode) {
+      setShowFeedbackModal(true);
+    }
+  }, [shouldShowFeedback, showFeedbackModal, isDemoMode]);
 
   return (
     <>
@@ -826,6 +838,12 @@ export default function DashboardClient() {
                     ))}
                   </motion.div>
                 </SortableContext>
+
+                {/* Overall Rating - Only show for recommended jobs */}
+                {!isDemoMode && recommendedJobs.length > 0 && (
+                  <OverallRating />
+                )}
+
                 {userPlan === "pro" && (
                   <div className="hidden lg:flex">
                     <DropZone savedCount={savedJobsCount} appliedCount={appliedJobsCount} />
@@ -837,12 +855,15 @@ export default function DashboardClient() {
         </div>
       </motion.div>
 
-      {/* Feedback Modal */}
+      {/* Feedback Modal - Now with context-aware messages */}
       <FeedbackModal
         isOpen={showFeedbackModal}
-        onClose={() => setShowFeedbackModal(false)}
+        onClose={() => {
+          setShowFeedbackModal(false);
+          resetFeedbackTrigger();
+        }}
         onSubmit={handleFeedbackSubmit}
-        trigger="job_generation"
+        trigger={feedbackTriggerType || "manual"}
       />
 
       <ConfirmationModal

@@ -5,10 +5,12 @@ import { CSS } from "@dnd-kit/utilities";
 import { useEffect, useRef, useState } from "react";
 import Confetti from "./Confetti";
 import LoadingButton from "./LoadingButton"; // Import LoadingButton
-import { Bookmark, CheckCheck, GripVertical } from 'lucide-react';
+import { Bookmark, CheckCheck, GripVertical, ThumbsUp, ThumbsDown } from 'lucide-react';
 import BlurredJobTitle from "./BlurredJobTitle";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 interface JobApplication {
   id: string;
@@ -79,6 +81,7 @@ const JobCard = ({
     useSortable({ id: job.id, disabled: showMoveButton });
 
   const [showConfetti, setShowConfetti] = useState(false);
+  const [jobFeedback, setJobFeedback] = useState<"thumbs_up" | "thumbs_down" | null>(null);
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024; // lg breakpoint is 1024px
 
@@ -133,6 +136,35 @@ const JobCard = ({
 
     if (job.job_url) {
       window.open(job.job_url, "_blank");
+    }
+  };
+
+  const handleJobFeedback = async (feedbackType: "thumbs_up" | "thumbs_down") => {
+    if (isDemoMode) {
+      toast.error("Sign up to provide feedback!", { icon: "🔒" });
+      return;
+    }
+
+    setJobFeedback(feedbackType);
+
+    try {
+      const token = Cookies.get("token");
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/feedback/job`,
+        {
+          job_url: job.job_url,
+          job_title: job.title,
+          feedback_type: feedbackType
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success(feedbackType === "thumbs_up" ? "Thanks! 👍" : "Got it 👎", {
+        duration: 2000
+      });
+    } catch (error) {
+      console.error("Failed to submit job feedback:", error);
+      setJobFeedback(null);
     }
   };
 
@@ -252,6 +284,36 @@ const JobCard = ({
               </div>
             )}
           </div>
+
+          {/* Quick Feedback - Thumbs Up/Down */}
+          {!isDemoMode && job.status === "recommended" && (
+            <div className="flex items-center justify-center gap-3 pt-3 border-t border-gray-200/50 dark:border-gray-700/50 mt-3">
+              <span className="text-xs text-gray-500 dark:text-gray-400">Was this helpful?</span>
+              <button
+                onClick={() => handleJobFeedback("thumbs_up")}
+                disabled={jobFeedback !== null}
+                className={`p-2 rounded-lg transition-colors ${jobFeedback === "thumbs_up"
+                    ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+                    : "text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+                  } disabled:opacity-50`}
+                aria-label="Helpful"
+              >
+                <ThumbsUp size={16} />
+              </button>
+              <button
+                onClick={() => handleJobFeedback("thumbs_down")}
+                disabled={jobFeedback !== null}
+                className={`p-2 rounded-lg transition-colors ${jobFeedback === "thumbs_down"
+                    ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
+                    : "text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  } disabled:opacity-50`}
+                aria-label="Not helpful"
+              >
+                <ThumbsDown size={16} />
+              </button>
+            </div>
+          )}
+
           {/* Desktop-only move button */}
           {showMoveButton && onMove && (
             <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">

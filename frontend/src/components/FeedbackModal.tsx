@@ -9,7 +9,7 @@ interface FeedbackModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (rating: number, comment?: string) => Promise<void>;
-    trigger?: "job_generation" | "manual" | "periodic";
+    trigger?: "job_generation" | "manual" | "periodic" | "applied_milestone" | "time_based" | "return_visit" | "exit_intent" | "success_story";
 }
 
 export default function FeedbackModal({
@@ -122,7 +122,7 @@ export default function FeedbackModal({
                                 <X size={20} />
                             </button>
 
-                            {/* Header */}
+                            {/* Header - Context-aware messages */}
                             <div className="text-center mb-6">
                                 <motion.span
                                     className="text-5xl block"
@@ -130,12 +130,26 @@ export default function FeedbackModal({
                                     animate={{ scale: 1 }}
                                     transition={{ duration: 0.3 }}
                                 >
-                                    ✨
+                                    {trigger === "applied_milestone" ? "🎉" :
+                                        trigger === "return_visit" ? "👋" :
+                                            trigger === "time_based" ? "💭" :
+                                                trigger === "exit_intent" ? "⏸️" :
+                                                    trigger === "success_story" ? "🚀" : "✨"}
                                 </motion.span>
                                 <h3 className="text-2xl font-bold text-white mt-4">
-                                    How was your experience?
+                                    {trigger === "applied_milestone" ? "Awesome progress!" :
+                                        trigger === "return_visit" ? "Welcome back!" :
+                                            trigger === "time_based" ? "Quick check-in" :
+                                                trigger === "exit_intent" ? "Before you go..." :
+                                                    trigger === "success_story" ? "Congratulations!" : "How was your experience?"}
                                 </h3>
-                                <p className="text-white/70 mt-2">We'd love to hear from you!</p>
+                                <p className="text-white/70 mt-2">
+                                    {trigger === "applied_milestone" ? "You've applied to 3+ jobs! How are the recommendations?" :
+                                        trigger === "return_visit" ? "How did your first batch of jobs work out?" :
+                                            trigger === "time_based" ? "Finding what you're looking for?" :
+                                                trigger === "exit_intent" ? "Quick rating before you leave?" :
+                                                    trigger === "success_story" ? "Would you recommend TackleIt to friends?" : "We'd love to hear from you!"}
+                                </p>
                             </div>
 
                             {/* Rating Slider */}

@@ -13,7 +13,12 @@ users_collection = db["users"]
 class FeedbackSubmission(BaseModel):
     rating: int = Field(..., ge=1, le=5, description="Rating from 1-5")
     comment: str | None = Field(None, max_length=200, description="Optional comment")
-    trigger: str = Field(..., pattern="^(job_generation|manual|periodic)$")
+    trigger: str = Field(..., pattern="^(job_generation|manual|periodic|applied_milestone|time_based|return_visit|exit_intent|success_story)$")
+
+class JobFeedback(BaseModel):
+    job_url: str = Field(..., description="URL of the job being rated")
+    feedback_type: str = Field(..., pattern="^(thumbs_up|thumbs_down)$")
+    job_title: str | None = Field(None, description="Job title for reference")
 
 class FeedbackStatsResponse(BaseModel):
     total_responses: int
@@ -41,7 +46,7 @@ async def submit_feedback(
     
     result = await feedback_collection.insert_one(feedback_doc)
     
-    #Update user's last feedback timestamp
+    # Update user's last feedback timestamp
     await users_collection.update_one(
         {"_id": ObjectId(user_id)},
         {"$set": {"last_feedback_given": datetime.utcnow()}}
@@ -78,6 +83,31 @@ async def get_feedback_stats():
         "total_responses": total_feedback,
         "average_rating": avg_rating,
         "five_star_count": five_star_count
+    }
+
+@router.post("/feedback/job", status_code=status.HTTP_201_CREATED)
+async def submit_job_feedback(
+    job_feedback: JobFeedback,
+    current_user: dict = Depends(get_current_user)
+):
+    """Submit quick feedback for a specific job (thumbs up/down)"""
+    user_id = current_user.get("_id")
+    
+    job_feedback_doc = {
+        "user_id": ObjectId(user_id),
+        "job_url": job_feedback.job_url,
+        "job_title": job_feedback.job_title,
+        "feedback_type": job_feedback.feedback_type,
+        "created_at": datetime.utcnow()
+    }
+    
+    # Store in a separate job_feedback collection
+    job_feedback_collection = db["job_feedback"]
+    await job_feedback_collection.insert_one(job_feedback_doc)
+    
+    return {
+        "message": "Thanks for the quick feedback!",
+        "feedback_type": job_feedback.feedback_type
     }
 
 @router.get("/feedback/user/history")
