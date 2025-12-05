@@ -33,7 +33,7 @@ export default function PrivacyTrustTeaser() {
                     </h2>
 
                     <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-8">
-                        100% opt-in features, enterprise-grade security, complete transparency, and easy account deletion with a 30-day grace period.
+                        AES-256 encryption for sensitive data, 100% opt-in features, complete transparency, and easy account deletion with a 30-day grace period.
                     </p>
 
                     <Link href="/privacy-trust">

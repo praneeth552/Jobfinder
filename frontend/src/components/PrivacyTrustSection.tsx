@@ -12,8 +12,8 @@ const privacyFeatures = [
     },
     {
         icon: Lock,
-        title: "Enterprise-Grade Security",
-        description: "Passwords hashed with industry-standard algorithms. Sensitive data encrypted at rest.",
+        title: "AES-256 Encryption",
+        description: "Resume data and OAuth tokens encrypted with AES-256. Passwords hashed with bcrypt.",
     },
     {
         icon: Eye,
@@ -239,11 +239,11 @@ export default function PrivacyTrustSection() {
                                 🔒 How We Protect:
                             </h4>
                             <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                                <li>• Passwords: Hashed, never plaintext</li>
-                                <li>• MongoDB Atlas encryption</li>
+                                <li>• AES-256 encryption for sensitive data</li>
+                                <li>• Passwords: bcrypt hashed, never plaintext</li>
+                                <li>• MongoDB Atlas with TLS encryption</li>
                                 <li>• HTTPS-only connections</li>
                                 <li>• Minimal Google Drive permissions</li>
-                                <li>• Open-source & transparent</li>
                             </ul>
                         </div>
                         <div>
