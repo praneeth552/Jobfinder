@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from database import db
 from dependencies import get_current_user
-from utils import is_pro_user, create_access_token
+from utils import is_pro_user
 from email_utils import send_pro_welcome_email, send_account_deletion_email
 from models import UserDataResponse, UserProfileResponse, DeleteAccountResponse, ResumeDataResponse, UserStatsResponse
 from bson import ObjectId
 from datetime import datetime, timedelta
+from encryption import decrypt_field
 import razorpay
 import os
 
@@ -178,6 +179,13 @@ async def get_user_data(current_user: dict = Depends(get_current_user)):
     if resume_data:
         resume_data["_id"] = str(resume_data["_id"])
         resume_data["user_id"] = str(resume_data["user_id"])
+        # Decrypt resume PII fields before returning
+        if resume_data.get("name"):
+            resume_data["name"] = decrypt_field(resume_data["name"])
+        if resume_data.get("email"):
+            resume_data["email"] = decrypt_field(resume_data["email"])
+        if resume_data.get("phone"):
+            resume_data["phone"] = decrypt_field(resume_data["phone"])
 
     return {
         "user_profile": user,
@@ -218,93 +226,6 @@ async def delete_user_account(current_user: dict = Depends(get_current_user)):
     await send_account_deletion_email(user_email, user_name)
     
     return {"message": "Your account has been scheduled for deletion."}
-
-
-@router.post("/onboarding/complete", status_code=status.HTTP_200_OK)
-async def complete_onboarding(current_user: dict = Depends(get_current_user)):
-    """Mark onboarding as completed"""
-    user_id = current_user.get("_id")
-    
-    await users_collection.update_one(
-        {"_id": ObjectId(user_id)},
-        {
-            "$set": {
-                "onboarding_completed": True,
-                "onboarding_completed_at": datetime.utcnow()
-            }
-        }
-    )
-    
-    return {"message": "Onboarding completed successfully"}
-
-
-@router.post("/onboarding/skip", status_code=status.HTTP_200_OK)
-async def skip_onboarding(current_user: dict = Depends(get_current_user)):
-    """Mark onboarding as skipped (same as completed, just different intent)"""
-    user_id = current_user.get("_id")
-    
-    await users_collection.update_one(
-        {"_id": ObjectId(user_id)},
-        {
-            "$set": {
-                "onboarding_completed": True,  # Treat skip as completion
-                "onboarding_completed_at": datetime.utcnow()
-            }
-        }
-    )
-    
-    return {"message": "Onboarding skipped"}
-
-
-@router.post("/onboarding/reset", status_code=status.HTTP_200_OK)
-async def reset_onboarding(current_user: dict = Depends(get_current_user)):
-    """Reset onboarding to allow user to replay the tutorial"""
-    user_id = current_user.get("_id")
-    
-    await users_collection.update_one(
-        {"_id": ObjectId(user_id)},
-        {
-            "$set": {
-                "onboarding_completed": False
-            },
-            "$unset": {
-                "onboarding_completed_at": ""
-            }
-        }
-    )
-    
-    return {"message": "Onboarding reset successfully. Reload the page to see the tour again."}
-
-
-@router.post("/changelog/seen", status_code=status.HTTP_200_OK)
-async def mark_changelog_seen(request: dict, current_user: dict = Depends(get_current_user)):
-    """Mark that user has seen a specific changelog version"""
-    user_id = current_user.get("_id")
-    version = request.get("version", "2.1.1")
-    
-    await users_collection.update_one(
-        {"_id": ObjectId(user_id)},
-        {"$set": {"last_seen_version": version}}
-    )
-    
-    return {"message": "Changelog marked as seen", "version": version}
-
-
-@router.post("/preferences/animations", status_code=status.HTTP_200_OK)
-async def update_animation_preference(
-    request: dict,
-    current_user: dict = Depends(get_current_user)
-):
-    """Update user's animation preference"""
-    user_id = current_user.get("_id")
-    enabled = request.get("enabled", True)
-    
-    await users_collection.update_one(
-        {"_id": ObjectId(user_id)},
-        {"$set": {"animations_enabled": enabled}}
-    )
-    
-    return {"message": "Animation preference updated", "enabled": enabled}
 
 @router.post("/me/restore", status_code=status.HTTP_200_OK)
 
@@ -417,3 +338,92 @@ async def redeem_reward(current_user: dict = Depends(get_current_user)):
 
 
     return {"message": "Reward redeemed successfully! Your Pro plan has been extended by one month."}
+
+
+# --- Onboarding Endpoints ---
+
+@router.post("/onboarding/complete", status_code=status.HTTP_200_OK)
+async def complete_onboarding(current_user: dict = Depends(get_current_user)):
+    """Mark onboarding as completed for the user"""
+    user_id = current_user.get("_id")
+    
+    await users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {
+            "$set": {
+                "onboarding_completed": True,
+                "onboarding_completed_at": datetime.utcnow()
+            }
+        }
+    )
+    
+    return {"message": "Onboarding completed successfully"}
+
+
+@router.post("/onboarding/skip", status_code=status.HTTP_200_OK)
+async def skip_onboarding(current_user: dict = Depends(get_current_user)):
+    """Mark onboarding as skipped (same as completed, just different intent)"""
+    user_id = current_user.get("_id")
+    
+    await users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {
+            "$set": {
+                "onboarding_completed": True,  # Treat skip as completion
+                "onboarding_completed_at": datetime.utcnow()
+            }
+        }
+    )
+    
+    return {"message": "Onboarding skipped"}
+
+
+@router.post("/onboarding/reset", status_code=status.HTTP_200_OK)
+async def reset_onboarding(current_user: dict = Depends(get_current_user)):
+    """Reset onboarding to allow user to replay the tutorial"""
+    user_id = current_user.get("_id")
+    
+    await users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {
+            "$set": {
+                "onboarding_completed": False
+            },
+            "$unset": {
+                "onboarding_completed_at": ""
+            }
+        }
+    )
+    
+    return {"message": "Onboarding reset successfully. Reload the page to see the tour again."}
+
+
+@router.post("/changelog/seen", status_code=status.HTTP_200_OK)
+async def mark_changelog_seen(request: dict, current_user: dict = Depends(get_current_user)):
+    """Mark that user has seen a specific changelog version"""
+    user_id = current_user.get("_id")
+    version = request.get("version", "2.1.1")
+    
+    await users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"last_seen_version": version}}
+    )
+    
+    return {"message": "Changelog marked as seen", "version": version}
+
+
+@router.post("/preferences/animations", status_code=status.HTTP_200_OK)
+async def update_animation_preference(
+    request: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update user's animation preference"""
+    user_id = current_user.get("_id")
+    enabled = request.get("enabled", True)
+    
+    await users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"animations_enabled": enabled}}
+    )
+    
+    return {"message": "Animation preference updated", "enabled": enabled}

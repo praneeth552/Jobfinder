@@ -210,6 +210,8 @@ async def confirm_upload(current_user: dict = Depends(get_current_user)):
 
 # (The rest of the endpoints: save-resume, update-from-resume, save_preferences, get_preferences remain the same)
 from pydantic import BaseModel
+from encryption import encrypt_field
+
 class ResumeSaveRequest(BaseModel):
     shouldSaveToProfile: bool
     resumeData: dict
@@ -218,9 +220,19 @@ class ResumeSaveRequest(BaseModel):
 async def save_resume_data(request: ResumeSaveRequest, current_user: dict = Depends(get_current_user)):
     if request.shouldSaveToProfile:
         user_id = current_user["_id"]
+        
+        # Encrypt sensitive resume fields
+        resume_data = request.resumeData.copy()
+        if resume_data.get("name"):
+            resume_data["name"] = encrypt_field(resume_data["name"])
+        if resume_data.get("email"):
+            resume_data["email"] = encrypt_field(resume_data["email"])
+        if resume_data.get("phone"):
+            resume_data["phone"] = encrypt_field(resume_data["phone"])
+        
         result = await resumes_collection.update_one(
             {"user_id": ObjectId(user_id)},
-            {"$set": {**request.resumeData, "user_id": ObjectId(user_id)}},
+            {"$set": {**resume_data, "user_id": ObjectId(user_id)}},
             upsert=True
         )
         if result.upserted_id or result.modified_count > 0:

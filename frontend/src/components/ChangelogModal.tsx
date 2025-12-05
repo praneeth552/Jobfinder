@@ -61,19 +61,14 @@ export default function ChangelogModal() {
                 const sessionVersion = sessionStorage.getItem(sessionKey);
 
                 if (sessionVersion === CURRENT_VERSION) {
-                    console.log("[Changelog] Already seen in this session");
                     return;
                 }
-
-                console.log("[Changelog] User last_seen_version:", data.last_seen_version, "Current:", CURRENT_VERSION);
 
                 // Show changelog only if user hasn't seen this version
                 // Use strict equality and handle null/undefined cases
                 if (!data.last_seen_version || data.last_seen_version !== CURRENT_VERSION) {
-                    console.log("[Changelog] Showing modal");
                     setTimeout(() => setIsVisible(true), 2000);
                 } else {
-                    console.log("[Changelog] Already seen, skipping");
                     // Mark version as seen in session storage
                     sessionStorage.setItem(sessionKey, CURRENT_VERSION);
                 }
@@ -102,7 +97,6 @@ export default function ChangelogModal() {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            console.log("[Changelog] Marked as seen in database");
             // Mark version as seen in session storage with user-specific key
             const sessionKey = `last_seen_version_${userResponse.data.email}`;
             sessionStorage.setItem(sessionKey, CURRENT_VERSION);

@@ -46,7 +46,14 @@ const PrivacyPolicy = () => {
     },
     {
       title: "5. Security of Your Information",
-      content: "We use administrative, technical, and physical security measures to help protect your personal information. While we have taken reasonable steps to secure the personal information you provide to us, please be aware that despite our efforts, no security measures are perfect or impenetrable, and no method of data transmission can be guaranteed against any interception or other type of misuse."
+      content: "We take the security of your data seriously and implement industry-standard encryption and security measures:",
+      bullets: [
+        { label: "Encryption at Rest:", text: "Sensitive personal data from your resume (name, email, phone) and Google OAuth tokens are encrypted using AES-256 encryption before being stored in our database." },
+        { label: "Password Security:", text: "We never store your actual password. Instead, we use bcrypt hashing, a one-way cryptographic function that cannot be reversed." },
+        { label: "Secure Payments:", text: "All payment information is handled securely by Razorpay, a PCI-DSS compliant payment processor. We never store your full credit card details." },
+        { label: "HTTPS Only:", text: "All data transmitted between your browser and our servers is encrypted using TLS/SSL." },
+        { label: "Data Minimization:", text: "We only collect and store the minimum data necessary to provide our services." }
+      ]
     },
     {
       title: "6. Your Rights and Choices",

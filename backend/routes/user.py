@@ -6,6 +6,7 @@ from email_utils import send_pro_welcome_email, send_account_deletion_email
 from models import UserDataResponse, UserProfileResponse, DeleteAccountResponse, ResumeDataResponse, UserStatsResponse
 from bson import ObjectId
 from datetime import datetime, timedelta
+from encryption import decrypt_field
 import razorpay
 import os
 
@@ -178,6 +179,13 @@ async def get_user_data(current_user: dict = Depends(get_current_user)):
     if resume_data:
         resume_data["_id"] = str(resume_data["_id"])
         resume_data["user_id"] = str(resume_data["user_id"])
+        # Decrypt resume PII fields before returning
+        if resume_data.get("name"):
+            resume_data["name"] = decrypt_field(resume_data["name"])
+        if resume_data.get("email"):
+            resume_data["email"] = decrypt_field(resume_data["email"])
+        if resume_data.get("phone"):
+            resume_data["phone"] = decrypt_field(resume_data["phone"])
 
     return {
         "user_profile": user,

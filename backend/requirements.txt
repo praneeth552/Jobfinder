@@ -24,3 +24,4 @@ spacy
 nltk
 pdfminer.six
 docx2txt
+cryptography

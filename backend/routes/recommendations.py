@@ -12,6 +12,7 @@ import asyncio
 from services.google_sheets import write_to_sheet
 from utils import is_pro_user
 from dependencies import get_current_user, limiter
+from encryption import decrypt_field
 
 # --- Load Environment ---
 load_dotenv()
@@ -160,7 +161,9 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
         resume_data = await resumes_collection.find_one({"user_id": user_object_id})
         if resume_data:
             user_profile_parts.append("RESUME:")
-            if resume_data.get("name"): user_profile_parts.append(f"Name: {resume_data['name']}")
+            # Decrypt name if it's encrypted (for Gemini prompt)
+            resume_name = decrypt_field(resume_data.get("name", "")) if resume_data.get("name") else None
+            if resume_name: user_profile_parts.append(f"Name: {resume_name}")
             if resume_data.get("roles"): user_profile_parts.append(f"Desired Roles: {', '.join(resume_data['roles'])}")
             if resume_data.get("skills"): user_profile_parts.append(f"Skills: {', '.join(resume_data['skills'])}")
             if resume_data.get("experience_summary"): user_profile_parts.append("Experience: " + "; ".join(resume_data["experience_summary"]))

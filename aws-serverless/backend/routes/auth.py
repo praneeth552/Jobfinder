@@ -22,6 +22,7 @@ from email_utils import send_email
 import pymongo
 from jose import jwt
 from dependencies import limiter
+from encryption import encrypt_field
 
 load_dotenv()
 router = APIRouter()
@@ -194,7 +195,8 @@ async def verify_otp(request: Request, data: VerifyOTP):
             "name": temp_user["name"],
             "email": temp_user["email"],
         })
-        user_dict["razorpay_customer_id"] = customer["id"]
+        # Encrypt razorpay_customer_id before storing
+        user_dict["razorpay_customer_id"] = encrypt_field(customer["id"])
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create Razorpay customer: {str(e)}")
 
@@ -351,7 +353,8 @@ async def google_login(data: GoogleToken):
                     "name": name,
                     "email": email,
                 })
-                new_user_data["razorpay_customer_id"] = customer["id"]
+                # Encrypt razorpay_customer_id before storing
+                new_user_data["razorpay_customer_id"] = encrypt_field(customer["id"])
             except Exception as e:
                 raise HTTPException(status_code=500, detail=f"Failed to create Razorpay customer: {str(e)}")
 

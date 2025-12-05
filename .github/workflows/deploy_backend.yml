@@ -52,3 +52,4 @@ jobs:
           MAIL_SSL: ${{ secrets.MAIL_SSL }}
           FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
           GOOGLE_CLIENT_SECRET_JSON: ${{ secrets.GOOGLE_CLIENT_SECRET_JSON }}
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}

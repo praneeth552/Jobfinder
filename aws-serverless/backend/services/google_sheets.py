@@ -8,6 +8,7 @@ from bson import ObjectId
 import os
 import asyncio
 from typing import Optional, List
+from encryption import encrypt_field, decrypt_field
 
 # Define the scopes required for the application
 SCOPES = [
@@ -23,14 +24,18 @@ async def get_google_service(user_id, service_name, version):
     if not user or "google_tokens" not in user:
         return None
 
-    creds = Credentials.from_authorized_user_info(json.loads(user["google_tokens"]), SCOPES)
+    # Decrypt tokens before use
+    tokens_json = decrypt_field(user["google_tokens"])
+    creds = Credentials.from_authorized_user_info(json.loads(tokens_json), SCOPES)
 
     if creds.expired and creds.refresh_token:
         try:
             await asyncio.to_thread(creds.refresh, Request())
+            # Encrypt tokens before saving
+            encrypted_tokens = encrypt_field(creds.to_json())
             await db.users.update_one(
                 {"_id": ObjectId(user_id)},
-                {"$set": {"google_tokens": creds.to_json()}}
+                {"$set": {"google_tokens": encrypted_tokens}}
             )
         except RefreshError as e:
             print(f"--- Google Token Refresh Error for user {user_id}: {e} ---")
@@ -89,8 +94,11 @@ async def handle_oauth_callback(user_id: str, tokens: str):
     # Fetch the user to check the bonus flag
     user_doc = await db.users.find_one({"_id": user_object_id})
     
+    # Encrypt tokens before storing
+    encrypted_tokens = encrypt_field(tokens)
+    
     update_fields = {
-        "google_tokens": tokens,
+        "google_tokens": encrypted_tokens,
         "sheets_enabled": True,
         "spreadsheet_id": None
     }
@@ -104,7 +112,7 @@ async def handle_oauth_callback(user_id: str, tokens: str):
         {"$set": update_fields},
         upsert=True
     )
-    print(f"--- Successfully enabled sheets for user {user_id} and stored tokens. ---")
+    print(f"--- Successfully enabled sheets for user {user_id} and stored encrypted tokens. ---")
 
 async def write_to_sheet(user_id: str, data: List) -> bool:
     print(f"--- Attempting to write to sheet for user {user_id} ---")
