@@ -3,6 +3,8 @@ import requests
 import logging
 from typing import List, Dict
 import re
+import json
+import http.client
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -16,7 +18,8 @@ if not BACKEND_ENDPOINT:
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-API_URL = "https://adobe.wd5.myworkdayjobs.com/wday/cxs/adobe/external_experienced/jobs"
+API_HOST = "adobe.wd5.myworkdayjobs.com"
+API_PATH = "/wday/cxs/adobe/external_experienced/jobs"
 
 def clean_html(raw_html: str) -> str:
     """A simple function to remove HTML tags from a string."""
@@ -28,21 +31,40 @@ def scrape_adobe():
     """Fetches job listings from Adobe's Workday API."""
     logging.info("Fetching Adobe job listings from Workday API...")
 
-    try:
-        # Simple request matching curl - minimal headers
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
-        payload = {"appliedFacets": {}, "limit": 50, "offset": 0, "searchText": ""}
-        
-        response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
-        response.raise_for_status()
-        data = response.json()
-        logging.info(f"Successfully fetched data from Adobe API. Total jobs: {data.get('total', 0)}")
-
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Failed to fetch data from Adobe API: {e}")
+    all_jobs = []
+    
+    # Pagination: 3 pages × 20 jobs = 60 jobs max
+    for offset in [0, 20, 40]:
+        try:
+            conn = http.client.HTTPSConnection(API_HOST)
+            headers = {"Content-Type": "application/json", "Accept": "application/json"}
+            payload = json.dumps({"appliedFacets": {}, "limit": 20, "offset": offset, "searchText": ""})
+            
+            conn.request("POST", API_PATH, payload, headers)
+            response = conn.getresponse()
+            
+            if response.status != 200:
+                logging.warning(f"Adobe API returned {response.status} for offset {offset}")
+                response.read()
+                conn.close()
+                continue
+            
+            data = json.loads(response.read().decode())
+            conn.close()
+            
+            jobs = data.get("jobPostings", [])
+            all_jobs.extend(jobs)
+            logging.info(f"Fetched {len(jobs)} Adobe jobs (offset={offset}, total available={data.get('total', 0)})")
+            
+        except Exception as e:
+            logging.error(f"Adobe API error at offset {offset}: {e}")
+    
+    if not all_jobs:
+        logging.error("Failed to fetch any Adobe jobs")
         return
-
-    job_listings = data.get("jobPostings", [])
+    
+    logging.info(f"Total Adobe jobs fetched: {len(all_jobs)}")
+    job_listings = all_jobs
     if not job_listings:
         logging.warning("No job listings found in the API response.")
         return

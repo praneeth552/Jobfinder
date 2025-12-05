@@ -1,6 +1,8 @@
 import os
 import requests
 import logging
+import json
+import http.client
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -17,24 +19,43 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 def scrape_intel():
     logging.info("Fetching INTEL job listings from API.")
 
-    API_URL = "https://intel.wd1.myworkdayjobs.com/wday/cxs/intel/External/jobs"
+    API_HOST = "intel.wd1.myworkdayjobs.com"
+    API_PATH = "/wday/cxs/intel/External/jobs"
     
-    try:
-        # Simple request matching curl - minimal headers
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
-        payload = {"appliedFacets": {}, "limit": 50, "offset": 0, "searchText": ""}
-        
-        response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
-        response.raise_for_status()
-        data = response.json()
-        jobs = data.get("jobPostings", [])[:50]
-        logging.info(f"Successfully fetched {len(jobs)} Intel jobs (total: {data.get('total', 0)})")
-
-    except Exception as e:
-        logging.error(f"Failed to fetch data from INTEL API: {e}")
+    all_jobs = []
+    
+    # Pagination: 3 pages × 20 jobs = 60 jobs max
+    for offset in [0, 20, 40]:
+        try:
+            conn = http.client.HTTPSConnection(API_HOST)
+            headers = {"Content-Type": "application/json", "Accept": "application/json"}
+            payload = json.dumps({"appliedFacets": {}, "limit": 20, "offset": offset, "searchText": ""})
+            
+            conn.request("POST", API_PATH, payload, headers)
+            response = conn.getresponse()
+            
+            if response.status != 200:
+                logging.warning(f"Intel API returned {response.status} for offset {offset}")
+                response.read()
+                conn.close()
+                continue
+            
+            data = json.loads(response.read().decode())
+            conn.close()
+            
+            jobs = data.get("jobPostings", [])
+            all_jobs.extend(jobs)
+            logging.info(f"Fetched {len(jobs)} Intel jobs (offset={offset}, total available={data.get('total', 0)})")
+            
+        except Exception as e:
+            logging.error(f"Intel API error at offset {offset}: {e}")
+    
+    if not all_jobs:
+        logging.error("Failed to fetch any Intel jobs")
         return
-
-    logging.info(f"Processing {len(jobs)} jobs...")
+    
+    jobs = all_jobs
+    logging.info(f"Total Intel jobs fetched: {len(jobs)}. Processing...")
 
     for index, job in enumerate(jobs, start=1):
         title = job.get("title", "N/A")

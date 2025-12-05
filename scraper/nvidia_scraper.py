@@ -2,6 +2,8 @@ import os
 import requests
 import logging
 from typing import List, Dict
+import json
+import http.client
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -14,25 +16,42 @@ if not BACKEND_ENDPOINT:
 
 logging.basicConfig(level=logging.INFO)
 
-API_URL = "https://nvidia.wd5.myworkdayjobs.com/wday/cxs/nvidia/NVIDIAExternalCareerSite/jobs"
+API_HOST = "nvidia.wd5.myworkdayjobs.com"
+API_PATH = "/wday/cxs/nvidia/NVIDIAExternalCareerSite/jobs"
 
 def fetch_nvidia_jobs() -> List[Dict]:
     logging.info("Fetching NVIDIA job listings from Workday API...")
     
-    try:
-        # Simple request matching curl - minimal headers
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
-        payload = {"appliedFacets": {}, "limit": 50, "offset": 0, "searchText": ""}
-        
-        resp = requests.post(API_URL, headers=headers, json=payload, timeout=30)
-        resp.raise_for_status()
-        data = resp.json()
-        jobs = data.get("jobPostings", [])[:50]
-        logging.info(f"Successfully fetched {len(jobs)} NVIDIA jobs (total: {data.get('total', 0)})")
-        return jobs
-    except Exception as e:
-        logging.error(f"NVIDIA API fetch error: {e}")
-        return []
+    all_jobs = []
+    
+    # Pagination: 3 pages × 20 jobs = 60 jobs max
+    for offset in [0, 20, 40]:
+        try:
+            conn = http.client.HTTPSConnection(API_HOST)
+            headers = {"Content-Type": "application/json", "Accept": "application/json"}
+            payload = json.dumps({"appliedFacets": {}, "limit": 20, "offset": offset, "searchText": ""})
+            
+            conn.request("POST", API_PATH, payload, headers)
+            response = conn.getresponse()
+            
+            if response.status != 200:
+                logging.warning(f"NVIDIA API returned {response.status} for offset {offset}")
+                response.read()
+                conn.close()
+                continue
+            
+            data = json.loads(response.read().decode())
+            conn.close()
+            
+            jobs = data.get("jobPostings", [])
+            all_jobs.extend(jobs)
+            logging.info(f"Fetched {len(jobs)} NVIDIA jobs (offset={offset}, total available={data.get('total', 0)})")
+            
+        except Exception as e:
+            logging.error(f"NVIDIA API error at offset {offset}: {e}")
+    
+    logging.info(f"Total NVIDIA jobs fetched: {len(all_jobs)}")
+    return all_jobs
 
 def scrape_nvidia():
     jobs = fetch_nvidia_jobs()
