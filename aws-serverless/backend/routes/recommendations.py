@@ -28,12 +28,12 @@ tasks_collection = db["generation_tasks"]
 
 # --- Gemini Configuration ---
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-GEMINI_MODEL_NAME = "gemini-flash-latest"
+GEMINI_MODEL_NAME = "gemini-flash-latest"  # Keep original working model
 GENERATION_CONFIG = {
-    "temperature": 0.7,
-    "top_p": 0.95,
+    "temperature": 0.5,  # Reduced for more consistent output
+    "top_p": 0.9,
     "top_k": 40,
-    "max_output_tokens": 16384,
+    "max_output_tokens": 8192,  # Increased to prevent JSON truncation
     "response_mime_type": "application/json",
 }
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
@@ -48,11 +48,11 @@ SAFETY_SETTINGS = {
 def build_prompt(user_profile, jobs):
     for job in jobs:
         if "description" in job and job["description"]:
-            job["description"] = job["description"][:300] + "..."
+            job["description"] = job["description"][:150] + "..."
     jobs_data = [
         {
             "title": job.get("title"), 
-            "company": str(job.get("company", "")),  # Ensure company is string
+            "company": str(job.get("company", "")),
             "location": job.get("location"),
             "description": job.get("description", "No description"), 
             "job_url": job.get("job_url"),
@@ -60,90 +60,40 @@ def build_prompt(user_profile, jobs):
     ]
     jobs_json = json.dumps(jobs_data, indent=2)
 
-    return f"""
-You are a precise job-matching system. Your task is to find the BEST matching jobs for this candidate.
+    return f"""You are a job-matching system. Find the BEST matching jobs for this candidate.
 
-####################
 # CANDIDATE PROFILE
-####################
 {user_profile}
 
-####################
-# AVAILABLE JOBS
-####################
+# AVAILABLE JOBS (Pre-filtered for relevance)
 {jobs_json}
 
-####################
-# MATCHING RULES (FOLLOW EXACTLY)
-####################
+# SCORING CRITERIA
+Score each job 0-100 based on:
+- Location match (user's preferred locations): +30 points
+- Skills overlap (tech stack in description): +40 points
+- Role title match (matches desired roles): +30 points
 
-### PHASE 1: HARD FILTERS (Eliminate jobs that fail ANY of these)
+# OUTPUT REQUIREMENTS
+- Return 8-15 jobs as a JSON array
+- Include jobs with score 40 or higher (be generous)
+- Sort by match_score descending
+- Maximum 3 jobs per company
 
-**LOCATION FILTER:**
-- Extract user's preferred cities/states from their profile
-- A job PASSES if: exact city match, OR same state/region, OR job is "Remote"/"WFH"/"Hybrid"/"Pan India"
-- A job FAILS if: different city AND different state AND NOT remote
-- City aliases: Bangalore=Bengaluru, Mumbai=Bombay, Gurgaon=Gurugram, Hyderabad≈Secunderabad
-
-**EXPERIENCE FILTER:**
-- Fresher/Intern/0-1 years: ONLY accept Intern/Trainee/Graduate/Entry-level/0-1 year roles
-  → REJECT any role with "Senior", "Lead", "Staff", "Principal", "Manager", "Architect", or "2+ years"
-- 1-3 years: Accept Junior/Mid roles (1-4 years)
-  → REJECT Senior/Lead/Staff roles or 5+ year requirements
-- 3-5 years: Accept Mid/Senior roles (3-6 years)
-- 5+ years: Accept Senior/Lead/Principal roles
-
-**KEYWORD FILTER:**
-- If user specified EXCLUDE keywords → REJECT jobs containing those words
-- If user specified MUST-HAVE keywords → only include jobs containing at least one
-
-### PHASE 2: SCORING (Only for jobs that PASSED Phase 1)
-
-Score each passing job 0-100:
-- **Skills Match (0-50 pts)**: How many of user's tech skills appear in job description?
-- **Role Title Match (0-30 pts)**: Does job title match user's desired roles?
-- **Company Diversity (0-20 pts)**: First job from this company gets +20, second gets +10, third+ gets 0
-
-Only include jobs scoring 55 or higher.
-
-####################
-# OUTPUT FORMAT
-####################
-
-Return ONLY a valid JSON array. NO markdown, NO backticks, NO explanation.
+Return ONLY valid JSON. No markdown, no backticks.
 
 [
   {{
-    "title": "Exact job title from input",
+    "title": "Job title",
     "company": "Company name",
-    "location": "Location from input",
-    "match_score": 85,
-    "reason": "Why this matches: [location check] + [experience check] + [skills match]",
-    "job_url": "URL from input"
+    "location": "Location",
+    "match_score": 75,
+    "reason": "Brief explanation of match",
+    "job_url": "URL"
   }}
 ]
-
-**REQUIREMENTS:**
-- Return 8-12 jobs maximum
-- Sort by match_score descending
-- "reason" must confirm: (1) location match, (2) experience level appropriate, (3) skills overlap
-- For freshers: ONLY intern/trainee/graduate/entry-level jobs - NO exceptions
-- Maximum 2 jobs per company
-- Use ONLY data from the input - never invent job details
-
-####################
-# EXECUTION CHECKLIST
-####################
-Before outputting, verify:
-☐ Did I check EVERY job against location filter?
-☐ Did I check EVERY job against experience filter?
-☐ For fresher profiles: Did I REJECT all senior/lead/experienced roles?
-☐ Did I calculate scores only for jobs that passed BOTH filters?
-☐ Did I sort by score descending?
-☐ Did I limit to max 2 jobs per company?
-☐ Is my output valid JSON starting with '[' and ending with ']'?
-
 """
+
 
 
 
@@ -194,17 +144,108 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
             raise Exception("User has no resume data or preferences set.")
 
         user_profile_string = "\n".join(user_profile_parts)
-        jobs = await jobs_collection.find({}).to_list(length=100)
-        if not jobs:
+        
+        # Fetch ALL jobs from database
+        all_jobs = await jobs_collection.find({}).to_list(length=None)
+        if not all_jobs:
             raise Exception("No jobs found in the database")
+        
+        print(f"DEBUG: Fetched {len(all_jobs)} total jobs from database")
+        
+        # Pre-filter jobs based on user preferences
+        def pre_filter_jobs(jobs, prefs, resume):
+            filtered = []
+            
+            # Extract filter criteria
+            preferred_locations = [loc.lower() for loc in prefs.get("location", [])]
+            preferred_roles = [role.lower() for role in prefs.get("role", [])]
+            experience_level = prefs.get("experience_level", "").lower()
+            exclude_keywords = [kw.lower() for kw in prefs.get("exclude_keywords", [])]
+            tech_stack = [tech.lower() for tech in prefs.get("tech_stack", [])]
+            
+            # Also get roles from resume if available
+            if resume:
+                preferred_roles.extend([r.lower() for r in resume.get("roles", [])])
+            
+            for job in jobs:
+                title = (job.get("title") or "").lower()
+                location = (job.get("location") or "").lower()
+                description = (job.get("description") or "").lower()
+                
+                # Skip if contains excluded keywords
+                if any(kw in title or kw in description for kw in exclude_keywords):
+                    continue
+                
+                # Experience-based filtering
+                is_senior_job = any(kw in title for kw in ["senior", "sr.", "sr ", "lead", "principal", "staff", "manager", "architect", "director"])
+                is_entry_job = any(kw in title or kw in description for kw in ["fresher", "entry", "graduate", "intern", "trainee", "0-1", "0-2", "1-2", "associate", "junior"])
+                has_high_exp_req = any(exp in description for exp in ["5+ years", "5-", "6-", "7-", "8-", "9-", "10+", "experienced professionals", "5 years", "6 years", "7 years", "8 years", "9 years", "10 years", "minimum 5", "minimum 6", "minimum 7", "minimum 8"])
+                
+                # FRESHER: Skip senior roles
+                if experience_level in ["fresher", "junior (0-2 years)", "0-1 years"]:
+                    if is_senior_job or has_high_exp_req:
+                        continue
+                
+                # MID-LEVEL (2-5 years): Skip principal/director level roles
+                elif experience_level in ["2-3 years", "3-5 years", "mid (2-5 years)"]:
+                    if any(kw in title for kw in ["principal", "director", "vp", "head of"]):
+                        continue
+                
+                # SENIOR (5+ years): Skip fresh graduate/intern roles
+                elif experience_level in ["5+ years", "senior (5+ years)", "senior"]:
+                    if is_entry_job and not is_senior_job:
+                        continue  # Skip entry-level only jobs
+                
+                score = 0
+                
+                # Location match (+3 points)
+                if any(loc in location for loc in preferred_locations) or "remote" in location:
+                    score += 3
+                
+                # Role match (+3 points)
+                if any(role in title for role in preferred_roles):
+                    score += 3
+                
+                # Tech stack match (+1 point per match, max 3)
+                tech_matches = sum(1 for tech in tech_stack if tech in description or tech in title)
+                score += min(tech_matches, 3)
+                
+                # Only include jobs with some relevance
+                if score >= 2:
+                    job["_prefilter_score"] = score
+                    filtered.append(job)
+            
+            # Sort by pre-filter score and take top 50 (reduced from 100 for faster processing)
+            filtered.sort(key=lambda x: x.get("_prefilter_score", 0), reverse=True)
+            return filtered[:50]
+        
+        # Apply pre-filtering
+        jobs = pre_filter_jobs(all_jobs, preferences, resume_data)
+        print(f"DEBUG: Pre-filtered to {len(jobs)} relevant jobs")
 
         prompt = build_prompt(user_profile_string, jobs)
         model = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, generation_config=GENERATION_CONFIG, safety_settings=SAFETY_SETTINGS)
-        response = await asyncio.to_thread(model.generate_content, prompt)
+        
+        # Retry logic for Gemini API
+        max_retries = 2
+        response = None
+        for attempt in range(max_retries):
+            try:
+                response = await asyncio.to_thread(model.generate_content, prompt)
+                if response.candidates and response.candidates[0].content.parts:
+                    break
+                print(f"DEBUG: Attempt {attempt+1} - Empty response, retrying...")
+                await asyncio.sleep(2)  # Wait before retry
+            except Exception as api_error:
+                print(f"DEBUG: Attempt {attempt+1} - API error: {api_error}")
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(2)
+                else:
+                    raise api_error
 
-        if not response.candidates or not response.candidates[0].content.parts:
-            feedback = response.prompt_feedback if hasattr(response, 'prompt_feedback') else 'No feedback available'
-            raise Exception(f"AI content filtering triggered. Feedback: {feedback}")
+        if not response or not response.candidates or not response.candidates[0].content.parts:
+            feedback = response.prompt_feedback if response and hasattr(response, 'prompt_feedback') else 'No feedback available'
+            raise Exception(f"AI content filtering triggered after {max_retries} attempts. Feedback: {feedback}")
 
         raw_text = response.text.strip()
         if raw_text.startswith("```"):
