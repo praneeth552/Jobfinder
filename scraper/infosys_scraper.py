@@ -36,7 +36,7 @@ def scrape_infosys():
     data = response.json()
 
     # If API returns a list directly
-    jobs = data[:40] if isinstance(data, list) else data.get("careerSearchJobs", [])[:40]
+    jobs = data[:50] if isinstance(data, list) else data.get("careerSearchJobs", [])[:50]
 
     logging.info(f"Fetched {len(jobs)} jobs. Processing each now...")
 

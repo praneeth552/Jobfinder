@@ -15,12 +15,16 @@ if not BACKEND_ENDPOINT:
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Capgemini India Jobs API
+# Capgemini Jobs API - Multiple regions for global jobs
 CAPGEMINI_API_URL = "https://cg-job-search-microservices.azurewebsites.net/api/job-search/"
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "application/json, text/plain, */*"
 }
+
+# Multiple country codes and search terms for more diverse global jobs
+COUNTRY_CODES = ["in-en", "us-en", "gb-en"]  # India, US, UK
+SEARCH_TERMS = ["developer", "engineer", "software"]
 
 def clean_html(raw_html: str) -> str:
     """Remove HTML tags from a string."""
@@ -33,28 +37,39 @@ def clean_html(raw_html: str) -> str:
     cleantext = cleantext.replace('&rsquo;', "'").replace('&ldquo;', '"').replace('&rdquo;', '"')
     return cleantext.strip()[:500]  # Limit description length
 
-def fetch_capgemini_jobs(search_term: str = "") -> List[Dict]:
-    """Fetch jobs from Capgemini API."""
-    logging.info(f"Fetching Capgemini job listings (search: '{search_term}')...")
-    try:
-        params = {
-            "country_code": "in-en",
-            "search": search_term
-        }
-        resp = requests.get(CAPGEMINI_API_URL, headers=HEADERS, params=params)
-        resp.raise_for_status()
-        data = resp.json()
-        return data.get("data", [])[:40]
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Capgemini API fetch error: {e}")
-        return []
+def fetch_capgemini_jobs() -> List[Dict]:
+    """Fetch jobs from Capgemini API across multiple regions."""
+    logging.info("Fetching Capgemini job listings from multiple regions...")
+    all_jobs = []
+    seen_urls = set()
+    
+    for country_code in COUNTRY_CODES:
+        for search_term in SEARCH_TERMS:
+            try:
+                params = {
+                    "country_code": country_code,
+                    "search": search_term
+                }
+                resp = requests.get(CAPGEMINI_API_URL, headers=HEADERS, params=params)
+                resp.raise_for_status()
+                data = resp.json()
+                jobs = data.get("data", [])
+                
+                for job in jobs:
+                    job_url = job.get("apply_job_url", "")
+                    if job_url and job_url not in seen_urls:
+                        seen_urls.add(job_url)
+                        all_jobs.append(job)
+                
+                logging.info(f"Region '{country_code}' search '{search_term}': {len(jobs)} jobs, {len(all_jobs)} total unique")
+            except requests.exceptions.RequestException as e:
+                logging.error(f"Capgemini API fetch error for {country_code}/{search_term}: {e}")
+    
+    return all_jobs[:60]  # Return up to 60 unique jobs
 
 def scrape_capgemini():
-    """Scrape Capgemini jobs - API returns many results with 'developer' search."""
-    
-    # The Capgemini API doesn't support fresher-specific keywords like 'intern' or 'trainee'
-    # It works best with job role searches like 'developer', 'engineer', etc.
-    jobs = fetch_capgemini_jobs("developer")
+    """Scrape Capgemini jobs from multiple regions."""
+    jobs = fetch_capgemini_jobs()
     
     if not jobs:
         logging.warning("No Capgemini jobs found or an error occurred.")

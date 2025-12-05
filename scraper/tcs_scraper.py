@@ -17,25 +17,53 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 TCS_API_URL = "https://ibegin.tcsapps.com/candidate/api/v1/jobs/searchJ?at=1753900034586"
 HEADERS = {
     "Content-Type": "application/json", 
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "application/json, text/plain, */*",
     "Origin": "https://ibegin.tcsapps.com",
     "Referer": "https://ibegin.tcsapps.com/candidate/"
 }
-PAYLOAD = {"jobCity":"","jobFunction":"","jobExperience":"","jobSkill":None,"pageNumber":"1","userText":"developer","jobTitleOrder":None,"jobCityOrder":None,"jobFunctionOrder":None,"jobExperienceOrder":None,"applyByOrder":None,"regular":True,"walkin":True}
+
+# Multiple search terms to get more diverse jobs
+SEARCH_TERMS = ["developer", "engineer", "software", "analyst"]
 
 def fetch_tcs_jobs() -> List[Dict]:
     logging.info("Fetching TCS job listings from API...")
-    try:
-        resp = requests.post(TCS_API_URL, headers=HEADERS, json=PAYLOAD)
-        resp.raise_for_status()
-        data = resp.json()
-        return data.get("data", {}).get("jobs", [])[:40]
-    except requests.exceptions.RequestException as e:
-        logging.error(f"TCS API fetch error: {e}")
-        if e.response:
-            logging.error(f"Response content: {e.response.text}")
-        return []
+    all_jobs = []
+    seen_ids = set()
+    
+    for term in SEARCH_TERMS:
+        try:
+            payload = {
+                "jobCity": "",
+                "jobFunction": "",
+                "jobExperience": "",
+                "jobSkill": None,
+                "pageNumber": "1",
+                "userText": term,
+                "jobTitleOrder": None,
+                "jobCityOrder": None,
+                "jobFunctionOrder": None,
+                "jobExperienceOrder": None,
+                "applyByOrder": None,
+                "regular": True,
+                "walkin": True
+            }
+            resp = requests.post(TCS_API_URL, headers=HEADERS, json=payload)
+            resp.raise_for_status()
+            data = resp.json()
+            jobs = data.get("data", {}).get("jobs", [])
+            
+            for job in jobs:
+                job_id = job.get("id")
+                if job_id and job_id not in seen_ids:
+                    seen_ids.add(job_id)
+                    all_jobs.append(job)
+            
+            logging.info(f"Search '{term}': found {len(jobs)} jobs, {len(all_jobs)} total unique")
+        except requests.exceptions.RequestException as e:
+            logging.error(f"TCS API fetch error for '{term}': {e}")
+    
+    return all_jobs[:60]  # Return up to 60 unique jobs
 
 def scrape_tcs():
     jobs = fetch_tcs_jobs()

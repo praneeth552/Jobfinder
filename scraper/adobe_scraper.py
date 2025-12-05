@@ -16,40 +16,27 @@ if not BACKEND_ENDPOINT:
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-ADOBE_API_URL = "https://adobe.wd5.myworkdayjobs.com/wday/cxs/adobe/external_experienced/jobs"
-HEADERS = {
-    "Content-Type": "application/json",
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
-    "Accept": "application/json"
-}
-
-PAYLOAD = {
-    "appliedFacets": {},
-    "limit": 40,
-    "offset": 0,
-    "searchText": "software engineer" # Changed from empty to get more relevant jobs
-}
+API_URL = "https://adobe.wd5.myworkdayjobs.com/wday/cxs/adobe/external_experienced/jobs"
 
 def clean_html(raw_html: str) -> str:
-    """
-    A simple function to remove HTML tags from a string.
-    """
+    """A simple function to remove HTML tags from a string."""
     cleanr = re.compile('<.*?>')
     cleantext = re.sub(cleanr, '', raw_html)
     return cleantext.strip()
 
 def scrape_adobe():
-    """
-    Fetches job listings from Adobe's Workday API, processes them,
-    and sends them to the backend endpoint.
-    """
+    """Fetches job listings from Adobe's Workday API."""
     logging.info("Fetching Adobe job listings from Workday API...")
 
     try:
-        response = requests.post(ADOBE_API_URL, headers=HEADERS, json=PAYLOAD)
+        # Simple request matching curl - minimal headers
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        payload = {"appliedFacets": {}, "limit": 50, "offset": 0, "searchText": ""}
+        
+        response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
         response.raise_for_status()
         data = response.json()
-        logging.info(f"Successfully fetched data from Adobe API. Total jobs found: {data.get('total', 0)}")
+        logging.info(f"Successfully fetched data from Adobe API. Total jobs: {data.get('total', 0)}")
 
     except requests.exceptions.RequestException as e:
         logging.error(f"Failed to fetch data from Adobe API: {e}")

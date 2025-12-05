@@ -14,18 +14,22 @@ if not BACKEND_ENDPOINT:
 
 logging.basicConfig(level=logging.INFO)
 
-NVIDIA_API_URL = "https://nvidia.wd5.myworkdayjobs.com/wday/cxs/nvidia/NVIDIAExternalCareerSite/jobs"
-HEADERS = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"}
-PAYLOAD = {"appliedFacets": {}, "limit": 40, "offset": 0, "searchText": ""}
+API_URL = "https://nvidia.wd5.myworkdayjobs.com/wday/cxs/nvidia/NVIDIAExternalCareerSite/jobs"
 
 def fetch_nvidia_jobs() -> List[Dict]:
     logging.info("Fetching NVIDIA job listings from Workday API...")
-
+    
     try:
-        resp = requests.post(NVIDIA_API_URL, headers=HEADERS, json=PAYLOAD)
+        # Simple request matching curl - minimal headers
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        payload = {"appliedFacets": {}, "limit": 50, "offset": 0, "searchText": ""}
+        
+        resp = requests.post(API_URL, headers=headers, json=payload, timeout=30)
         resp.raise_for_status()
         data = resp.json()
-        return data.get("jobPostings", [])[:20]
+        jobs = data.get("jobPostings", [])[:50]
+        logging.info(f"Successfully fetched {len(jobs)} NVIDIA jobs (total: {data.get('total', 0)})")
+        return jobs
     except Exception as e:
         logging.error(f"NVIDIA API fetch error: {e}")
         return []

@@ -17,35 +17,24 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 def scrape_intel():
     logging.info("Fetching INTEL job listings from API.")
 
-    # INTEL jobs API URL
-    INTEL_API_URL = "https://intel.wd1.myworkdayjobs.com/wday/cxs/intel/External/jobs"
-
-    # Headers to mimic browser request
-    HEADERS = {
-        "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
-        "Accept": "application/json"
-    }
-
-    # Payload required by the Workday API
-    PAYLOAD = {
-        "appliedFacets": {},
-        "limit": 40,
-        "offset": 0,
-        "searchText": "software"
-    }
-
+    API_URL = "https://intel.wd1.myworkdayjobs.com/wday/cxs/intel/External/jobs"
+    
     try:
-        response = requests.post(INTEL_API_URL, headers=HEADERS, json=PAYLOAD)
+        # Simple request matching curl - minimal headers
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        payload = {"appliedFacets": {}, "limit": 50, "offset": 0, "searchText": ""}
+        
+        response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
         response.raise_for_status()
         data = response.json()
+        jobs = data.get("jobPostings", [])[:50]
+        logging.info(f"Successfully fetched {len(jobs)} Intel jobs (total: {data.get('total', 0)})")
+
     except Exception as e:
         logging.error(f"Failed to fetch data from INTEL API: {e}")
         return
 
-    jobs = data.get("jobPostings", [])
-
-    logging.info(f"Fetched {len(jobs)} jobs. Processing each now...")
+    logging.info(f"Processing {len(jobs)} jobs...")
 
     for index, job in enumerate(jobs, start=1):
         title = job.get("title", "N/A")

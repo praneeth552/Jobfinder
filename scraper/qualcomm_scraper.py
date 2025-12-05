@@ -15,19 +15,21 @@ if not BACKEND_ENDPOINT:
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-QUALCOMM_API_URL = "https://careers.qualcomm.com/api/apply/v2/jobs/446706493031/jobs?domain=qualcomm.com"
+QUALCOMM_API_URL = "https://careers.qualcomm.com/api/apply/v2/jobs"
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "application/json, text/plain, */*"
 }
 
+# Multiple search terms for more diverse jobs
+SEARCH_TERMS = ["software", "engineer", "developer", "intern"]
+
 def get_job_description(url: str) -> str:
     try:
-        response = requests.get(url, headers=HEADERS)
+        response = requests.get(url, headers=HEADERS, timeout=5)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
         # Find the element containing the job description
-        # This selector might need adjustment based on the actual page structure
         description_div = soup.find("div", class_="ats-description")
         return description_div.get_text(strip=True) if description_div else "Description not found."
     except requests.exceptions.RequestException as e:
@@ -36,16 +38,29 @@ def get_job_description(url: str) -> str:
 
 def fetch_qualcomm_jobs() -> List[Dict]:
     logging.info("Fetching Qualcomm job listings from API...")
-    try:
-        resp = requests.get(QUALCOMM_API_URL, headers=HEADERS)
-        resp.raise_for_status()
-        data = resp.json()
-        return data.get("positions", [])[:40]
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Qualcomm API fetch error: {e}")
-        if e.response:
-            logging.error(f"Response content: {e.response.text}")
-        return []
+    all_jobs = []
+    seen_ids = set()
+    
+    for term in SEARCH_TERMS:
+        try:
+            # Use keyword search parameter
+            url = f"{QUALCOMM_API_URL}?domain=qualcomm.com&query={term}&limit=50"
+            resp = requests.get(url, headers=HEADERS, timeout=15)
+            resp.raise_for_status()
+            data = resp.json()
+            jobs = data.get("positions", [])
+            
+            for job in jobs:
+                job_id = job.get("id", "")
+                if job_id and job_id not in seen_ids:
+                    seen_ids.add(job_id)
+                    all_jobs.append(job)
+            
+            logging.info(f"Search '{term}': found {len(jobs)} jobs, {len(all_jobs)} total unique")
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Qualcomm API fetch error for '{term}': {e}")
+    
+    return all_jobs[:60]  # Return up to 60 unique jobs
 
 def scrape_qualcomm():
     jobs = fetch_qualcomm_jobs()
