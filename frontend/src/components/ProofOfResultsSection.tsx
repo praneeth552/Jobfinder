@@ -113,8 +113,8 @@ export default function ProofOfResultsSection() {
                             <li className="flex items-start gap-3">
                                 <Check className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
                                 <div>
-                                    <p className="font-semibold text-[--foreground]">150 fresh jobs weekly</p>
-                                    <p className="text-sm text-[--foreground]/70">From real company websites, Monday mornings</p>
+                                    <p className="font-semibold text-[--foreground]">500+ fresh jobs weekly</p>
+                                    <p className="text-sm text-[--foreground]/70">Smart pre-filtered from 10+ top companies</p>
                                 </div>
                             </li>
                         </ul>

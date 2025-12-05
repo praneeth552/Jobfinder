@@ -23,8 +23,8 @@ const steps = [
     },
     {
         icon: Sparkles,
-        title: "AI Matches Jobs",
-        description: "From 150+ real company websites, updated weekly",
+        title: "Smart AI Matching",
+        description: "Pre-filtered from 500+ jobs based on your experience level",
         timeSaved: "5 min per company",
         color: "from-orange-500 to-red-500",
     },
