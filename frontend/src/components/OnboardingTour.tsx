@@ -57,11 +57,11 @@ export default function OnboardingTour() {
                 const sessionCompleted = sessionStorage.getItem(sessionKey);
 
                 if (sessionCompleted === "true") {
-                    console.log("[Onboarding] Already completed in this session for", data.email);
+                    console.log("[Onboarding] Already completed in this session");
                     return;
                 }
 
-                console.log("[Onboarding] User completed:", data.onboarding_completed, "Email:", data.email);
+                console.log("[Onboarding] User completed:", data.onboarding_completed);
 
                 // Start tour if not completed
                 if (!data.onboarding_completed) {

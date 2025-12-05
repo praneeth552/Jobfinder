@@ -18,7 +18,7 @@ def scrape_infosys():
     logging.info("Fetching Infosys job listings from API.")
 
     # Infosys jobs API URL
-    INFOSYS_API_URL = "https://intapgateway.infosysapps.com/careersci/search/intapjbsrch/getCareerSearchJobs?sourceId=1,21&searchText=ALL"
+    INFOSYS_API_URL = "https://intapgateway.infosysapps.com/careersci/search/intapjbsrch/getCareerSearchJobs?sourceId=1,21&searchText=fresher OR intern OR trainee OR developer"
 
     # Headers to mimic browser request
     HEADERS = {
@@ -36,7 +36,7 @@ def scrape_infosys():
     data = response.json()
 
     # If API returns a list directly
-    jobs = data[:20] if isinstance(data, list) else data.get("careerSearchJobs", [])[:20]
+    jobs = data[:40] if isinstance(data, list) else data.get("careerSearchJobs", [])[:40]
 
     logging.info(f"Fetched {len(jobs)} jobs. Processing each now...")
 

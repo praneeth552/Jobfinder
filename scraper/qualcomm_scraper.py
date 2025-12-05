@@ -40,7 +40,7 @@ def fetch_qualcomm_jobs() -> List[Dict]:
         resp = requests.get(QUALCOMM_API_URL, headers=HEADERS)
         resp.raise_for_status()
         data = resp.json()
-        return data.get("positions", [])[:20]
+        return data.get("positions", [])[:40]
     except requests.exceptions.RequestException as e:
         logging.error(f"Qualcomm API fetch error: {e}")
         if e.response:

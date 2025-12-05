@@ -43,6 +43,7 @@ jobs:
         python scraper/accenture_scraper.py
         python scraper/adobe_scraper.py
         python scraper/amazon_scraper.py
+        python scraper/capgemini_scraper.py
         python scraper/deloitte_scraper.py
         python scraper/intel_scraper.py
         python scraper/infosys_scraper.py

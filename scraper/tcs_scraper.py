@@ -30,7 +30,7 @@ def fetch_tcs_jobs() -> List[Dict]:
         resp = requests.post(TCS_API_URL, headers=HEADERS, json=PAYLOAD)
         resp.raise_for_status()
         data = resp.json()
-        return data.get("data", {}).get("jobs", [])[:20]
+        return data.get("data", {}).get("jobs", [])[:40]
     except requests.exceptions.RequestException as e:
         logging.error(f"TCS API fetch error: {e}")
         if e.response:

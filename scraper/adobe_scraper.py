@@ -25,7 +25,7 @@ HEADERS = {
 
 PAYLOAD = {
     "appliedFacets": {},
-    "limit": 20,
+    "limit": 40,
     "offset": 0,
     "searchText": "software engineer" # Changed from empty to get more relevant jobs
 }

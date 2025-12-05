@@ -61,11 +61,11 @@ export default function ChangelogModal() {
                 const sessionVersion = sessionStorage.getItem(sessionKey);
 
                 if (sessionVersion === CURRENT_VERSION) {
-                    console.log("[Changelog] Already seen in this session for", data.email);
+                    console.log("[Changelog] Already seen in this session");
                     return;
                 }
 
-                console.log("[Changelog] User last_seen_version:", data.last_seen_version, "Current:", CURRENT_VERSION, "Email:", data.email);
+                console.log("[Changelog] User last_seen_version:", data.last_seen_version, "Current:", CURRENT_VERSION);
 
                 // Show changelog only if user hasn't seen this version
                 // Use strict equality and handle null/undefined cases

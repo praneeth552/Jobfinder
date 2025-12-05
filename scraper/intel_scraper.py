@@ -30,7 +30,7 @@ def scrape_intel():
     # Payload required by the Workday API
     PAYLOAD = {
         "appliedFacets": {},
-        "limit": 20,
+        "limit": 40,
         "offset": 0,
         "searchText": "software"
     }

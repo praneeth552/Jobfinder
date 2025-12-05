@@ -33,8 +33,8 @@ HEADERS = {
 
 PAYLOAD = {
     'startIndex': '0',
-    'maxResultSize': '20',
-    'jobKeyword': 'Software Engineer',
+    'maxResultSize': '40',
+    'jobKeyword': 'fresher OR intern OR trainee OR Software Engineer',
     'jobCountry': 'India',
     'jobLanguage': 'en',
     'countrySite': 'in-en',
@@ -56,7 +56,7 @@ def fetch_accenture_jobs() -> List[Dict]:
         resp = requests.post(ACCENTURE_API_URL, headers=HEADERS, data=PAYLOAD)
         resp.raise_for_status()
         data = resp.json()
-        return data.get("data", [])[:20]
+        return data.get("data", [])[:40]
     except requests.exceptions.RequestException as e:
         logging.error(f"Accenture API fetch error: {e}")
         if e.response:

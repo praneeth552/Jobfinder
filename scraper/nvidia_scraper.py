@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 
 NVIDIA_API_URL = "https://nvidia.wd5.myworkdayjobs.com/wday/cxs/nvidia/NVIDIAExternalCareerSite/jobs"
 HEADERS = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"}
-PAYLOAD = {"appliedFacets": {}, "limit": 20, "offset": 0, "searchText": ""}
+PAYLOAD = {"appliedFacets": {}, "limit": 40, "offset": 0, "searchText": ""}
 
 def fetch_nvidia_jobs() -> List[Dict]:
     logging.info("Fetching NVIDIA job listings from Workday API...")

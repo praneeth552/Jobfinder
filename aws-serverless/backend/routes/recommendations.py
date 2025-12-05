@@ -50,143 +50,105 @@ def build_prompt(user_profile, jobs):
             job["description"] = job["description"][:300] + "..."
     jobs_data = [
         {
-            "title": job.get("title"),
+            "title": job.get("title"), 
             "company": str(job.get("company", "")),  # Ensure company is string
             "location": job.get("location"),
-            "description": job.get("description", "No description"),
+            "description": job.get("description", "No description"), 
             "job_url": job.get("job_url"),
         } for job in jobs
     ]
     jobs_json = json.dumps(jobs_data, indent=2)
 
     return f"""
-You are an expert job-matching engine. Your ONLY job is to select the BEST jobs for this candidate from the given list.
+You are a precise job-matching system. Your task is to find the BEST matching jobs for this candidate.
 
-########################
-## INPUT: USER PROFILE
-########################
+####################
+# CANDIDATE PROFILE
+####################
 {user_profile}
 
-########################
-## INPUT: AVAILABLE JOBS
-########################
+####################
+# AVAILABLE JOBS
+####################
 {jobs_json}
 
-########################
-## MATCHING STRATEGY
-########################
+####################
+# MATCHING RULES (FOLLOW EXACTLY)
+####################
 
-### 1. EXPERIENCE LEVEL MATCHING (SMART & FLEXIBLE)
-**Core Principle**: Prioritize jobs at user's level, but include relevant stretch opportunities.
+### PHASE 1: HARD FILTERS (Eliminate jobs that fail ANY of these)
 
-**For Freshers / Interns / 0-1 Years:**
-- PRIMARY (70% of results): Internships, trainee, graduate, or entry-level roles (0-1 years)
-- STRETCH (30% of results): 1-2 year roles IF they have strong tech stack match (+15 skill overlap bonus)
-- EXCLUDE: Anything requiring 3+ years, or roles with "Senior", "Lead", "Staff" titles
+**LOCATION FILTER:**
+- Extract user's preferred cities/states from their profile
+- A job PASSES if: exact city match, OR same state/region, OR job is "Remote"/"WFH"/"Hybrid"/"Pan India"
+- A job FAILS if: different city AND different state AND NOT remote
+- City aliases: Bangalore=Bengaluru, Mumbai=Bombay, Gurgaon=Gurugram, Hyderabad≈Secunderabad
 
-**For 1-3 Years Experience:**
-- PRIMARY (70%): Junior/Mid-level roles (1-3 years)
-- STRETCH (30%): Entry-level roles (if strong match) OR 3-4 year roles (if skills align)
-- EXCLUDE: Internships, trainee programs, and roles requiring 5+ years
+**EXPERIENCE FILTER:**
+- Fresher/Intern/0-1 years: ONLY accept Intern/Trainee/Graduate/Entry-level/0-1 year roles
+  → REJECT any role with "Senior", "Lead", "Staff", "Principal", "Manager", "Architect", or "2+ years"
+- 1-3 years: Accept Junior/Mid roles (1-4 years)
+  → REJECT Senior/Lead/Staff roles or 5+ year requirements
+- 3-5 years: Accept Mid/Senior roles (3-6 years)
+- 5+ years: Accept Senior/Lead/Principal roles
 
-**For 3-7 Years Experience:**
-- PRIMARY (70%): Mid/Senior roles (3-7 years)
-- STRETCH (30%): 2-3 year roles (if strong match) OR 7-10 year roles (if skills align)
-- EXCLUDE: Internships, graduate programs, and roles requiring 10+ years
+**KEYWORD FILTER:**
+- If user specified EXCLUDE keywords → REJECT jobs containing those words
+- If user specified MUST-HAVE keywords → only include jobs containing at least one
 
-**For 7+ Years Experience:**
-- PRIMARY (70%): Senior/Lead/Principal/Architect roles (7+ years)
-- STRETCH (30%): 5-7 year roles (if strong match) OR Staff/Principal roles (if skills align)
-- EXCLUDE: Internships, junior, and mid-level roles
+### PHASE 2: SCORING (Only for jobs that PASSED Phase 1)
 
-**Experience Level Indicators:**
-Look for these keywords in job titles/descriptions:
-- Entry: "Intern", "Trainee", "Graduate", "Junior", "Entry-level", "Associate"
-- Mid: "Mid-level", "Software Engineer", "Developer" (without Senior/Junior)
-- Senior: "Senior", "Lead", "Staff", "Principal", "Architect", "Manager"
+Score each passing job 0-100:
+- **Skills Match (0-50 pts)**: How many of user's tech skills appear in job description?
+- **Role Title Match (0-30 pts)**: Does job title match user's desired roles?
+- **Company Diversity (0-20 pts)**: First job from this company gets +20, second gets +10, third+ gets 0
 
-### 2. SCORING SYSTEM (0-100 points)
-**Experience Tier Match:**
-- PRIMARY tier match: +50 points (base)
-- STRETCH tier match: +35 points (conditional on strong skills)
-- Outside acceptable range: 0 points (reject)
+Only include jobs scoring 55 or higher.
 
-**Skills & Tech Stack:**
-- Strong overlap (60%+): +25 points
-- Moderate overlap (40-60%): +15 points
-- Weak overlap (<40%): +5 points
+####################
+# OUTPUT FORMAT
+####################
 
-**Must-Have Keywords:**
-- Contains all must-have keywords: +15 points
-- Missing some: +5 points
+Return ONLY a valid JSON array. NO markdown, NO backticks, NO explanation.
 
-**Location & Work Preferences:**
-- Exact location match OR Remote: +10 points
-- Nearby/Hybrid options: +5 points
-
-**Role Type & Seniority:**
-- Perfect alignment with preferences: +10 points
-
-**Company Diversity Bonus:**
-- First job from this company: +5 points
-- Already have 2+ from this company: -10 points
-
-**MINIMUM THRESHOLD:** Only include jobs scoring 65+ points
-
-### 3. KEYWORD FILTERING (HARD RULES)
-- **EXCLUDED keywords**: If job contains ANY excluded keyword → REJECT immediately
-- **MUST-HAVE keywords**: If missing → score penalty -20 points
-
-### 4. COMPANY DIVERSITY
-- Aim for 6-8 different companies in final results
-- Maximum 2 jobs from any single company
-- Prioritize diversity over flooding from one source
-
-########################
-## OUTPUT FORMAT (CRITICAL)
-########################
-Return ONLY a JSON array. No prose, no markdown, no backticks, no wrapper object.
-
-**Structure:**
 [
   {{
-    "title": "Job Title",
-    "company": "Company Name",
-    "location": "City / Remote / Hybrid",
-    "match_score": 87,
-    "reason": "Brief explanation (<= 30 words) focusing on why it's a good match",
-    "job_url": "https://example.com/job-posting"
+    "title": "Exact job title from input",
+    "company": "Company name",
+    "location": "Location from input",
+    "match_score": 85,
+    "reason": "Why this matches: [location check] + [experience check] + [skills match]",
+    "job_url": "URL from input"
   }}
 ]
 
-**Requirements:**
-- Return 8-10 jobs (mix of PRIMARY and STRETCH tiers where applicable)
-- For freshers: ~7 internships/entry-level + ~3 1-year roles (if skills-qualified)
-- "match_score" must be integer 0-100
-- "reason" must be under 30 words
+**REQUIREMENTS:**
+- Return 8-12 jobs maximum
 - Sort by match_score descending
-- Never invent data - use only what's in the input
+- "reason" must confirm: (1) location match, (2) experience level appropriate, (3) skills overlap
+- For freshers: ONLY intern/trainee/graduate/entry-level jobs - NO exceptions
+- Maximum 2 jobs per company
+- Use ONLY data from the input - never invent job details
 
-########################
-## EXECUTION STEPS
-########################
-1. Parse user's experience level and preferences
-2. For each job, determine: PRIMARY tier, STRETCH tier, or REJECT
-3. Calculate match score using the scoring system above
-4. Apply keyword filters (EXCLUDE/MUST-HAVE)
-5. Select top 8-10 jobs, ensuring:
-   - ~70% PRIMARY tier + ~30% STRETCH tier
-   - Company diversity (max 2 per company)
-   - All score >= 65
-6. Sort by match_score (highest first)
-7. Output ONLY the JSON array
-
-IMPORTANT: Do NOT wrap the JSON in ```json or any markdown. Output MUST start with '[' and end with ']'.
+####################
+# EXECUTION CHECKLIST
+####################
+Before outputting, verify:
+☐ Did I check EVERY job against location filter?
+☐ Did I check EVERY job against experience filter?
+☐ For fresher profiles: Did I REJECT all senior/lead/experienced roles?
+☐ Did I calculate scores only for jobs that passed BOTH filters?
+☐ Did I sort by score descending?
+☐ Did I limit to max 2 jobs per company?
+☐ Is my output valid JSON starting with '[' and ending with ']'?
 
 """
 
+
+
 # --- Background Task ---
 async def _run_recommendation_generation(user_id: str, task_id: str):
+    print(f"DEBUG: Starting recommendation generation v3 for task {task_id}")
     await tasks_collection.update_one({"_id": task_id}, {"$set": {"status": "running", "updated_at": datetime.utcnow()}})
     try:
         user_object_id = ObjectId(user_id)
@@ -214,12 +176,22 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
             if preferences.get("company_size"): user_profile_parts.append(f"Company Size: {', '.join(preferences['company_size'])}")
             if preferences.get("job_type"): user_profile_parts.append(f"Job Type: {', '.join(preferences['job_type'])}")
             if preferences.get("work_arrangement"): user_profile_parts.append(f"Work: {', '.join(preferences['work_arrangement'])}")
+            
+            # NEW FIELDS for enhanced role matching
+            if preferences.get("seniority_level"): 
+                user_profile_parts.append(f"**CRITICAL** Seniority Level: {preferences['seniority_level']}")
+            if preferences.get("role_type"): 
+                user_profile_parts.append(f"**CRITICAL** Role Type Preference: {preferences['role_type']}")
+            if preferences.get("exclude_keywords"): 
+                user_profile_parts.append(f"EXCLUDE jobs containing: {', '.join(preferences['exclude_keywords'])}")
+            if preferences.get("must_have_keywords"): 
+                user_profile_parts.append(f"PRIORITIZE jobs containing: {', '.join(preferences['must_have_keywords'])}")
 
         if not user_profile_parts:
             raise Exception("User has no resume data or preferences set.")
 
         user_profile_string = "\n".join(user_profile_parts)
-        jobs = await jobs_collection.find({}).to_list(length=50)
+        jobs = await jobs_collection.find({}).to_list(length=100)
         if not jobs:
             raise Exception("No jobs found in the database")
 
@@ -253,6 +225,7 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
 
         recommended_jobs = [RecommendedJob(**job) for job in recommended_jobs_data]
 
+        # Calculate time saved for this batch
         # Calculate time saved for this batch
         # Ensure company is a string (AI sometimes returns dict/object)
         unique_companies = set()
@@ -290,6 +263,8 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
         )
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         print(f"❌ ERROR in background task {task_id} for user {user_id}: {e}")
         await tasks_collection.update_one(
             {"_id": task_id},
@@ -350,7 +325,6 @@ async def get_recommendation_status(task_id: str, current_user: dict = Depends(g
         "result": task.get("result"),
         "error": task.get("error")
     }
-
 @router.post("/recommendations/demo")
 @limiter.limit("2/day")
 async def generate_demo_recommendations(request: Request):

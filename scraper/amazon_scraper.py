@@ -15,7 +15,7 @@ if not BACKEND_ENDPOINT:
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 BASE_URL = "https://www.amazon.jobs"
-SEARCH_URL = BASE_URL + "/en/search.json?offset=0&result_limit=20&sort=relevant&category%5B%5D=software-development&category%5B%5D=engineering-hardware&category%5B%5D=engineering-operations-it-support&category%5B%5D=project-program-product-management-technical&job_type%5B%5D=Full-Time&country%5B%5D=IND"
+SEARCH_URL = BASE_URL + "/en/search.json?offset=0&result_limit=40&sort=relevant&category%5B%5D=software-development&category%5B%5D=engineering-hardware&category%5B%5D=engineering-operations-it-support&category%5B%5D=project-program-product-management-technical&job_type%5B%5D=Full-Time&job_type%5B%5D=Intern&country%5B%5D=IND"
 
 async def scrape_amazon_jobs():
     logging.info("Fetching Amazon job listings...")
