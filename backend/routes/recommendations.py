@@ -181,8 +181,8 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
                 is_entry_job = any(kw in title or kw in description for kw in ["fresher", "entry", "graduate", "intern", "trainee", "0-1", "0-2", "1-2", "associate", "junior"])
                 has_high_exp_req = any(exp in description for exp in ["5+ years", "5-", "6-", "7-", "8-", "9-", "10+", "experienced professionals", "5 years", "6 years", "7 years", "8 years", "9 years", "10 years", "minimum 5", "minimum 6", "minimum 7", "minimum 8"])
                 
-                # FRESHER: Skip senior roles
-                if experience_level in ["fresher", "junior (0-2 years)", "0-1 years"]:
+                # FRESHER/INTERN: Skip senior roles
+                if experience_level.lower() in ["fresher", "internship", "junior (0-2 years)", "0-1 years", "entry level", "0-2 years"]:
                     if is_senior_job or has_high_exp_req:
                         continue
                 
@@ -318,7 +318,6 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
 # --- API Endpoints ---
 @router.post("/recommendations/start", status_code=202)
 async def start_recommendation_generation(
-    background_tasks: BackgroundTasks,
     current_user: dict = Depends(get_current_user)
 ):
     user_id = current_user.get("_id")
@@ -347,7 +346,9 @@ async def start_recommendation_generation(
         "updated_at": datetime.utcnow()
     })
 
-    background_tasks.add_task(_run_recommendation_generation, user_id, task_id)
+    # Use asyncio.create_task instead of BackgroundTasks for Lambda compatibility
+    # This runs in the same event loop and Lambda will wait for it
+    asyncio.create_task(_run_recommendation_generation(user_id, task_id))
     
     return {"task_id": task_id, "message": "Recommendation generation started."}
 
