@@ -6,11 +6,13 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
-BACKEND_ENDPOINT = os.getenv("NEXT_PUBLIC_API_URL")
+BACKEND_ENDPOINT = os.getenv("NEXT_PUBLIC_API_URL", "").rstrip("/")
 
 if not BACKEND_ENDPOINT:
     logging.error("NEXT_PUBLIC_API_URL environment variable not set.")
     exit(1)
+
+logging.info(f"Using backend endpoint: {BACKEND_ENDPOINT}")
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -92,7 +94,14 @@ def scrape_accenture():
 
         logging.info(f"[{i}] {title} at {location_str} — {job_url}")
         try:
-            post_resp = requests.post(f"{BACKEND_ENDPOINT}/jobs/", json=payload)
+            url = f"{BACKEND_ENDPOINT}/jobs"
+            post_resp = requests.post(url, json=payload, allow_redirects=False, timeout=30)
+            
+            # Check if we got a redirect response
+            if post_resp.status_code in (301, 302, 307, 308):
+                logging.error(f"Redirect detected! Status: {post_resp.status_code}, Location: {post_resp.headers.get('Location', 'N/A')}")
+                continue
+            
             post_resp.raise_for_status()
             logging.info(f"Successfully posted job '{title}' to backend.")
         except requests.exceptions.RequestException as e:

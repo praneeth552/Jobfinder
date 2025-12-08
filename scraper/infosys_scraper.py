@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
-BACKEND_ENDPOINT = os.getenv("NEXT_PUBLIC_API_URL")
+BACKEND_ENDPOINT = os.getenv("NEXT_PUBLIC_API_URL", "").rstrip("/")
 
 if not BACKEND_ENDPOINT:
     logging.error("NEXT_PUBLIC_API_URL environment variable not set.")
@@ -71,7 +71,11 @@ def scrape_infosys():
 
         # Push to backend
         try:
-            backend_response = requests.post(f"{BACKEND_ENDPOINT}/jobs/", json=payload)
+            url = f"{BACKEND_ENDPOINT}/jobs"
+            backend_response = requests.post(url, json=payload, allow_redirects=False, timeout=30)
+            if backend_response.status_code in (301, 302, 307, 308):
+                logging.error(f"Redirect detected! Status: {backend_response.status_code}, Location: {backend_response.headers.get('Location', 'N/A')}")
+                continue
             backend_response.raise_for_status()
             logging.info(f"Successfully sent job '{title}' to backend.")
         except requests.exceptions.RequestException as e:
