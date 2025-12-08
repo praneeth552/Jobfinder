@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 jobs_collection = db["jobs"]
 
-@router.post("/")
+@router.post("")
 async def create_job(request: Request):
     # Log raw request body to see what's actually being sent
     try:
@@ -38,7 +38,7 @@ async def create_job(request: Request):
         logger.error(f"Validation or Database Error: {e}", exc_info=True)
         raise HTTPException(status_code=422, detail=f"Failed to process job data: {e}")
 
-@router.get("/")
+@router.get("")
 async def read_jobs():
     jobs = []
     async for job in jobs_collection.find():

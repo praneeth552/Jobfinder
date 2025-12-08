@@ -74,7 +74,7 @@ def scrape_nvidia():
 
         logging.info(f"[{i}] {title} at {location} — {job_url}")
         try:
-            url = f"{BACKEND_ENDPOINT}/jobs/"
+            url = f"{BACKEND_ENDPOINT}/jobs"
             post_resp = requests.post(url, json=payload, timeout=30)
             post_resp.raise_for_status()
             logging.info("Posted successfully.")

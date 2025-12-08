@@ -71,7 +71,7 @@ def scrape_infosys():
 
         # Push to backend
         try:
-            url = f"{BACKEND_ENDPOINT}/jobs/"
+            url = f"{BACKEND_ENDPOINT}/jobs"
             backend_response = requests.post(url, json=payload, timeout=30)
             backend_response.raise_for_status()
             logging.info(f"Successfully sent job '{title}' to backend.")

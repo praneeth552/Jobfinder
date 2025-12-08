@@ -51,7 +51,7 @@ def scrape_deloitte():
 
             logging.info(f"[{i}] {title} at {location_str} — {job_url}")
             try:
-                url = f"{BACKEND_ENDPOINT}/jobs/"
+                url = f"{BACKEND_ENDPOINT}/jobs"
                 post_resp = requests.post(url, json=payload, timeout=30)
                 post_resp.raise_for_status()
                 logging.info(f"Successfully posted job '{title}' to backend.")
