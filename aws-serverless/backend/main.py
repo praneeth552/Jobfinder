@@ -28,7 +28,8 @@ import re
 
 load_dotenv()
 
-app = FastAPI()
+# redirect_slashes=False prevents 307 redirects that cause infinite loops with Lambda URLs
+app = FastAPI(redirect_slashes=False)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 

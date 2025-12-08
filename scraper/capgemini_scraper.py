@@ -112,11 +112,8 @@ def scrape_capgemini():
 
         logging.info(f"[{i}] {title} at {location} ({experience_level})")
         try:
-            url = f"{BACKEND_ENDPOINT}/jobs"
-            post_resp = requests.post(url, json=payload, allow_redirects=False, timeout=30)
-            if post_resp.status_code in (301, 302, 307, 308):
-                logging.error(f"Redirect detected! Status: {post_resp.status_code}, Location: {post_resp.headers.get('Location', 'N/A')}")
-                continue
+            url = f"{BACKEND_ENDPOINT}/jobs/"
+            post_resp = requests.post(url, json=payload, timeout=30)
             post_resp.raise_for_status()
             logging.info(f"Successfully posted job '{title}' to backend.")
         except requests.exceptions.RequestException as e:

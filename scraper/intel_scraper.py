@@ -82,11 +82,8 @@ def scrape_intel():
 
         # Push to backend
         try:
-            url = f"{BACKEND_ENDPOINT}/jobs"
-            backend_response = requests.post(url, json=payload, allow_redirects=False, timeout=30)
-            if backend_response.status_code in (301, 302, 307, 308):
-                logging.error(f"Redirect detected! Status: {backend_response.status_code}, Location: {backend_response.headers.get('Location', 'N/A')}")
-                continue
+            url = f"{BACKEND_ENDPOINT}/jobs/"
+            backend_response = requests.post(url, json=payload, timeout=30)
             backend_response.raise_for_status()
             logging.info(f"Successfully sent job '{title}' to backend.")
         except requests.exceptions.RequestException as e:
