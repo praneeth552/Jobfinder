@@ -127,7 +127,7 @@ const UserProfile = ({
             <User className="text-slate-800 dark:text-white" size={22} />
             <span className="text-sm font-semibold text-slate-800 dark:text-white">{userName}</span>
             {userPlan === 'pro' && (
-              <span className="flex items-center gap-1 bg-yellow-400 text-white px-1.5 py-0.5 rounded-full text-xs font-semibold">
+              <span className="flex items-center gap-1 bg-[--foreground] text-[--background] px-1.5 py-0.5 rounded-full text-xs font-semibold">
                 <Star size={10} />
                 Pro
               </span>

@@ -5,22 +5,13 @@ import { useAnimations } from "@/context/AnimationContext";
 import { Zap, ZapOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-interface AnimationToggleProps {
-    isOverDarkSection?: boolean;
-}
-
-export default function AnimationToggle({ isOverDarkSection = false }: AnimationToggleProps) {
+export default function AnimationToggle() {
     const { animationsEnabled, toggleAnimations } = useAnimations();
     const [showTooltip, setShowTooltip] = useState(false);
 
     const tooltipText = animationsEnabled
         ? "Animations are ON"
         : "Animations are OFF";
-
-    const getTextColor = () => {
-        if (isOverDarkSection) return "text-white";
-        return "text-gray-800 dark:text-gray-200";
-    };
 
     return (
         <div
@@ -33,7 +24,7 @@ export default function AnimationToggle({ isOverDarkSection = false }: Animation
             {/* Unified container with toggle + text */}
             <button
                 onClick={toggleAnimations}
-                className="group relative flex items-center gap-2 rounded-full border border-white/20 dark:border-gray-700 bg-white/10 dark:bg-gray-900/60 px-3 py-1.5 shadow-sm hover:bg-white/20 dark:hover:bg-gray-800/70 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/70"
+                className="group relative flex items-center gap-2 rounded-full border border-[--border] bg-[--card-background] px-3 py-1.5 shadow-sm hover:border-[--foreground]/20 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[--foreground]/30"
                 aria-label={animationsEnabled ? "Disable animations" : "Enable animations"}
                 aria-pressed={animationsEnabled}
                 type="button"
@@ -49,7 +40,7 @@ export default function AnimationToggle({ isOverDarkSection = false }: Animation
                             transition={{ duration: 0.18 }}
                             className="flex items-center justify-center"
                         >
-                            <Zap className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-600 dark:text-purple-400 fill-purple-600/70 dark:fill-purple-400/70 drop-shadow-sm" />
+                            <Zap className="w-3.5 h-3.5 md:w-4 md:h-4 text-[--foreground]" />
                         </motion.div>
                     ) : (
                         <motion.div
@@ -60,18 +51,18 @@ export default function AnimationToggle({ isOverDarkSection = false }: Animation
                             transition={{ duration: 0.18 }}
                             className="flex items-center justify-center"
                         >
-                            <ZapOff className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-500 dark:text-gray-400" />
+                            <ZapOff className="w-3.5 h-3.5 md:w-4 md:h-4 text-[--foreground]/50" />
                         </motion.div>
                     )}
                 </AnimatePresence>
 
                 {/* On / Off chip */}
-                <span className="text-[0.65rem] md:text-xs font-semibold tracking-wide px-1.5 md:px-2 py-0.5 rounded-full bg-white/60 text-gray-900 dark:bg-purple-500/20 dark:text-purple-200 group-hover:bg-white dark:group-hover:bg-purple-500/30 transition-colors">
+                <span className="text-[0.65rem] md:text-xs font-medium tracking-wide px-1.5 md:px-2 py-0.5 rounded-full bg-[--foreground]/10 text-[--foreground]/80 group-hover:bg-[--foreground]/15 transition-colors">
                     {animationsEnabled ? "On" : "Off"}
                 </span>
 
                 {/* Label text - now INSIDE the button, hidden on small screens */}
-                <span className={`hidden md:inline text-xs font-medium ${getTextColor()}`}>
+                <span className="hidden md:inline text-xs font-medium text-[--foreground]/70">
                     Animations
                 </span>
             </button>
@@ -84,10 +75,10 @@ export default function AnimationToggle({ isOverDarkSection = false }: Animation
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 4 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute left-0 bottom-full mb-2 max-w-xs px-3 py-2 bg-gray-900/95 dark:bg-gray-900 text-white text-xs rounded-md pointer-events-none z-50 shadow-lg backdrop-blur-sm"
+                        className="absolute left-0 bottom-full mb-2 max-w-xs px-3 py-2 bg-[--foreground] text-[--background] text-xs rounded-md pointer-events-none z-50 shadow-lg"
                     >
                         {tooltipText}
-                        <div className="absolute left-5 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900 dark:border-t-gray-900" />
+                        <div className="absolute left-5 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-[--foreground]" />
                     </motion.div>
                 )}
             </AnimatePresence>

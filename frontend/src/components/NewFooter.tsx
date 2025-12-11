@@ -41,7 +41,7 @@ const NewFooter = () => {
     >
       <Link
         href={href}
-        className="text-gray-400 hover:text-indigo-400 transition-colors duration-300 block"
+        className="text-[--foreground]/60 hover:text-[--foreground] transition-colors duration-300 block"
       >
         {children}
       </Link>
@@ -49,21 +49,21 @@ const NewFooter = () => {
   );
 
   return (
-    <footer className="bg-[#020617] text-white pt-20 pb-10 border-t border-white/5">
+    <footer className="bg-[--secondary] text-[--foreground] pt-20 pb-10 border-t border-[--border]">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="md:col-span-1 space-y-6">
-            <h3 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
+            <h3 className="text-3xl font-bold text-[--foreground]">
               TackleIt
             </h3>
-            <p className="text-gray-400 leading-relaxed">
+            <p className="text-[--foreground]/60 leading-relaxed">
               Your personal AI-powered assistant to automate the job search and land your dream role faster.
             </p>
           </div>
 
           <div className="md:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-8">
             <div>
-              <h4 className="font-semibold text-lg mb-6 text-white">Product</h4>
+              <h4 className="font-semibold text-lg mb-6 text-[--foreground]">Product</h4>
               <ul className="space-y-4">
                 <FooterLink href="/pricing">Pricing</FooterLink>
                 <FooterLink href="/about">About</FooterLink>
@@ -71,7 +71,7 @@ const NewFooter = () => {
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-lg mb-6 text-white">Legal</h4>
+              <h4 className="font-semibold text-lg mb-6 text-[--foreground]">Legal</h4>
               <ul className="space-y-4">
                 <FooterLink href="/terms">Terms of Service</FooterLink>
                 <FooterLink href="/privacy">Privacy Policy</FooterLink>
@@ -79,7 +79,7 @@ const NewFooter = () => {
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-lg mb-6 text-white">Connect</h4>
+              <h4 className="font-semibold text-lg mb-6 text-[--foreground]">Connect</h4>
               <div className="flex items-center gap-4">
                 {socialLinks.map((link, index) => (
                   <a
@@ -87,7 +87,7 @@ const NewFooter = () => {
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-indigo-600 hover:text-white transition-all duration-300 hover:scale-110"
+                    className="w-10 h-10 rounded-full bg-[--foreground]/5 flex items-center justify-center text-[--foreground]/60 hover:bg-[--foreground] hover:text-[--background] transition-all duration-300 hover:scale-110"
                     aria-label={link.name}
                   >
                     {link.icon}
@@ -98,7 +98,7 @@ const NewFooter = () => {
           </div>
         </div>
 
-        <div className="border-t border-white/5 pt-8 pb-6 flex flex-col items-center gap-4 text-sm text-gray-500 text-center">
+        <div className="border-t border-[--border] pt-8 pb-6 flex flex-col items-center gap-4 text-sm text-[--foreground]/50 text-center">
           <p className="max-w-2xl mx-auto mb-4">
             As the sole developer of this application, I am constantly working to improve it. This means that features may be added, changed, or removed to enhance performance and user experience. Your understanding is appreciated.
           </p>

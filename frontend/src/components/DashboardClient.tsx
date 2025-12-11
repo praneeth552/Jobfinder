@@ -576,7 +576,7 @@ export default function DashboardClient() {
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.8, ease: "easeInOut" }}
-                className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:to-purple-400 text-center md:text-left pb-2 whitespace-nowrap"
+                className="text-3xl sm:text-4xl font-bold text-[--foreground] text-center md:text-left pb-2 whitespace-nowrap"
               >
                 Your AI-Curated Job Feed
               </motion.h1>
@@ -597,13 +597,12 @@ export default function DashboardClient() {
                 isolation: 'isolate'
               }}
             >
-              {/* Get Personalized Jobs Button with PURPLE DOT */}
+              {/* Get Personalized Jobs Button - Subtle indicator */}
               <div className="relative inline-block">
-                {/* Pulsing indicator for new users with empty dashboard */}
+                {/* Simple indicator for new users with empty dashboard */}
                 {!isGenerating && jobApplications.length === 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-4 w-4 z-50">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-500 opacity-100"></span>
-                    <span className="relative inline-flex rounded-full h-4 w-4 bg-gradient-to-br from-purple-500 via-violet-500 to-indigo-500 border-2 border-white dark:border-slate-900 shadow-lg"></span>
+                  <span className="absolute -top-1 -right-1 flex h-3 w-3 z-50">
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-[--foreground]/60 border border-[--background]"></span>
                   </span>
                 )}
 
@@ -613,8 +612,8 @@ export default function DashboardClient() {
                   expandedContent={
                     <span className="flex items-center gap-2 whitespace-nowrap text-sm font-semibold">
                       <span>Get Personalized Jobs</span>
-                      <span className="px-2 py-0.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs rounded-full font-bold animate-pulse">
-                        ✨ AI
+                      <span className="px-2 py-0.5 bg-[--foreground]/10 text-[--foreground]/70 text-xs rounded-full font-medium">
+                        AI
                       </span>
                     </span>
                   }

@@ -5,6 +5,8 @@ import { BrainCircuit, FileText, Bell, User, FileUp, Star, ChevronDown, ChevronU
 import { motion, useMotionTemplate, useMotionValue, AnimatePresence } from "framer-motion";
 import { MouseEvent } from "react";
 import { useAnimations } from "@/context/AnimationContext";
+import HandDrawnCircle from "@/components/HandDrawnCircle";
+import HandDrawnBorder from "@/components/HandDrawnBorder";
 
 const features = [
   {
@@ -64,7 +66,7 @@ function FeatureCard({ feature }: { feature: typeof features[0] }) {
 
   return (
     <motion.div
-      className={`group relative border border-[--border] bg-[--card-background] overflow-hidden rounded-3xl p-8 transition-colors hover:border-[--primary]/50 ${feature.className}`}
+      className={`group relative bg-[--card-background] overflow-hidden rounded-3xl p-8 transition-colors ${feature.className}`}
       onMouseMove={handleMouseMove}
       whileHover={animationsEnabled ? { y: -5 } : {}}
       initial={animationsEnabled ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
@@ -72,6 +74,7 @@ function FeatureCard({ feature }: { feature: typeof features[0] }) {
       viewport={{ once: true }}
       transition={{ duration: animationsEnabled ? 0.5 : 0 }}
     >
+      <HandDrawnBorder className="text-[--border] group-hover:text-[--foreground]/30 transition-colors duration-500" strokeWidth={1} />
       <motion.div
         className="pointer-events-none absolute -inset-px opacity-0 transition duration-300 group-hover:opacity-100"
         style={{
@@ -113,7 +116,7 @@ export default function FeaturesSection() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[--foreground]">
-            Everything you need to <span className="text-[--primary]">succeed</span>
+            Everything you need to <span className="relative inline-block px-1 z-10"><HandDrawnCircle className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-[45%] w-[130%] h-[150%] text-[--primary]" strokeWidth={2} />succeed</span>
           </h2>
           <p className="text-xl text-[--foreground]/80 max-w-2xl mx-auto">
             Powerful features designed to streamline your job search and help you land your dream role faster.

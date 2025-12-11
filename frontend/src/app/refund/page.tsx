@@ -3,7 +3,7 @@
 import React from 'react';
 import SimpleNavbar from '@/components/SimpleNavbar';
 import NewFooter from '@/components/NewFooter';
-import { RefreshCw, DollarSign } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const RefundPolicyPage = () => {
@@ -39,63 +39,54 @@ const RefundPolicyPage = () => {
   ];
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 via-white to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950 text-gray-800 min-h-screen dark:text-gray-100 relative overflow-hidden">
-      {/* Background Decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-10 w-96 h-96 bg-indigo-200/20 dark:bg-indigo-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-10 w-96 h-96 bg-purple-200/20 dark:bg-purple-500/10 rounded-full blur-3xl" />
-      </div>
-
+    <div className="bg-[--background] text-[--foreground] min-h-screen relative overflow-hidden">
       <SimpleNavbar />
 
       <main className="pt-32 pb-16 relative z-10">
-        <div className="container mx-auto px-6 max-w-5xl">
+        <div className="container mx-auto px-6 max-w-4xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="relative group"
+            transition={{ duration: 0.5 }}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-            <div className="relative bg-white dark:bg-gray-800/80 backdrop-blur-xl shadow-2xl rounded-3xl p-8 md:p-12 border border-gray-200 dark:border-gray-700">
+            <div className="relative bg-[--card-background] backdrop-blur-sm shadow-sm rounded-2xl p-8 md:p-12 border border-[--border]">
               {/* Header */}
               <div className="text-center mb-12">
                 <div className="inline-flex items-center gap-3 mb-6">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500">
-                    <RefreshCw className="text-white" size={28} />
+                  <div className="p-3 rounded-xl bg-[--secondary] border border-[--border]">
+                    <RefreshCw className="text-[--foreground]/70" size={24} />
                   </div>
                 </div>
-                <h1 className="text-4xl md:text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-indigo-800 to-purple-800 dark:from-white dark:via-indigo-200 dark:to-purple-200 mb-4">
+                <h1 className="text-3xl md:text-4xl font-bold text-[--foreground] mb-4">
                   Refund & Cancellation Policy
                 </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Last Updated: August 12, 2025</p>
+                <p className="text-sm text-[--foreground]/50">Last Updated: August 12, 2025</p>
               </div>
 
               {/* Content */}
-              <div className="space-y-10 text-lg text-gray-700 dark:text-gray-300">
+              <div className="space-y-8 text-base text-[--foreground]/80">
                 {sections.map((section, index) => (
                   <motion.section
                     key={index}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 15 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: index * 0.05 }}
+                    transition={{ duration: 0.3, delay: index * 0.03 }}
                     className="scroll-mt-24"
                   >
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-3">
-                      <span className="w-1 h-8 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full" />
+                    <h2 className="text-xl font-semibold text-[--foreground] mb-3 flex items-center gap-3">
+                      <span className="w-1 h-6 bg-[--foreground]/20 rounded-full" />
                       {section.title}
                     </h2>
 
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       <p className="leading-relaxed">{section.content}</p>
 
                       {section.link && (
                         <span>
                           <a
                             href={section.link.href}
-                            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors underline decoration-indigo-300 dark:decoration-indigo-600 underline-offset-4"
+                            className="text-[--foreground] hover:text-[--foreground]/70 font-medium transition-colors underline underline-offset-4"
                           >
                             {section.link.text}
                           </a>
@@ -108,10 +99,10 @@ const RefundPolicyPage = () => {
                       )}
 
                       {section.bullets && (
-                        <ul className="list-none space-y-3 pl-4">
+                        <ul className="list-none space-y-2 pl-4">
                           {section.bullets.map((bullet, idx) => (
                             <li key={idx} className="flex gap-3">
-                              <span className="text-indigo-500 dark:text-indigo-400">•</span>
+                              <span className="text-[--foreground]/40">•</span>
                               <div>{bullet.text}</div>
                             </li>
                           ))}
@@ -119,7 +110,7 @@ const RefundPolicyPage = () => {
                       )}
 
                       {section.note && (
-                        <p className="mt-3 leading-relaxed font-medium text-gray-800 dark:text-gray-200">
+                        <p className="mt-3 leading-relaxed font-medium text-[--foreground]">
                           {section.note}
                         </p>
                       )}

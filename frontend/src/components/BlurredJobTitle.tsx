@@ -17,7 +17,7 @@ export default function BlurredJobTitle({ title, isDemo }: BlurredJobTitleProps)
 
             {/* Overlay badge */}
             <div className="absolute inset-0 flex items-center justify-center opacity-100 group-hover:opacity-90 transition-opacity">
-                <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-1.5 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1.5 animate-pulse">
+                <div className="bg-[--foreground] text-[--background] px-4 py-1.5 rounded-full text-xs font-medium shadow-sm flex items-center gap-1.5">
                     <svg
                         className="w-3 h-3"
                         fill="none"

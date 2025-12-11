@@ -103,9 +103,9 @@ function ResetPasswordForm() {
 
     setLoading(true);
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/reset-password`, { 
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/reset-password`, {
         token,
-        new_password: password 
+        new_password: password
       });
       toast.success(res.data.message || "Password reset successfully! You can now sign in.");
       setIsSuccess(true);
@@ -129,7 +129,7 @@ function ResetPasswordForm() {
           {isSuccess ? (
             <div className="text-center text-black dark:text-white">
               <p>Your password has been successfully reset.</p>
-              <button onClick={() => router.push('/signin')} className="mt-4 w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-full font-semibold transition">
+              <button onClick={() => router.push('/signin')} className="mt-4 w-full bg-[--foreground] hover:opacity-90 text-[--background] px-4 py-3 rounded-full font-semibold transition">
                 Back to Sign In
               </button>
             </div>
@@ -172,7 +172,7 @@ function ResetPasswordForm() {
                   {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              <LoadingButton type="submit" isLoading={loading} className="submit-button-swipe bg-purple-600 hover:bg-purple-700 text-white w-full px-4 py-3 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500" disabled={loading}>
+              <LoadingButton type="submit" isLoading={loading} className="submit-button-swipe bg-[--foreground] hover:opacity-90 text-[--background] w-full px-4 py-3 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500" disabled={loading}>
                 Reset Password
               </LoadingButton>
             </form>

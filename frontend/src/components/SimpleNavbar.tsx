@@ -61,38 +61,36 @@ export default function SimpleNavbar() {
         animate="animate"
         className={`pointer-events-auto w-[95%] max-w-5xl flex justify-between items-center px-3 md:px-6 py-2 md:py-3 transition-all duration-500 rounded-full
           ${hasScrolled
-            ? "bg-white/80 dark:bg-black/60 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]"
-            : "bg-white/50 dark:bg-black/20 backdrop-blur-md border border-white/10"}`}
+            ? "bg-[--card-background]/90 backdrop-blur-xl border border-[--border] dark:border-white/10 shadow-lg"
+            : "bg-[--card-background]/70 backdrop-blur-md border border-[--border]/50 dark:border-transparent"}`}
       >
         <Link
           href="/"
           className="flex items-center gap-1.5 md:gap-2 flex-shrink-0"
         >
-          <span className="text-lg md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[--primary] to-purple-500 hover:scale-105 transition-transform">
+          <span className="text-lg md:text-2xl font-bold text-[--foreground] hover:opacity-80 transition-opacity">
             TackleIt
           </span>
 
           {/* Early Access Badge - Compact on mobile */}
           <span className="inline-flex items-center px-1.5 md:px-2.5 py-0.5 md:py-1 text-[7px] md:text-[10px] font-semibold 
                          uppercase tracking-wide rounded-full 
-                         bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 
-                         text-[--primary] border border-[--primary]/20
-                         shadow-sm shadow-[--primary]/10 whitespace-nowrap">
+                         bg-[--foreground]/5 
+                         text-[--foreground]/70 border border-[--border]
+                         whitespace-nowrap">
             Early
           </span>
         </Link>
 
-        <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
-          <div className="flex items-center gap-1 bg-white/5 rounded-full p-0.5 md:p-1 border border-white/10 backdrop-blur-sm">
-            <ThemeToggle />
-          </div>
+        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+          <ThemeToggle />
           <AnimationToggle />
 
           <motion.button
             onClick={handleCollaborateClick}
-            className="relative px-3 py-1.5 md:px-6 md:py-2.5 bg-[--primary] text-white rounded-full font-semibold text-xs md:text-sm shadow-lg shadow-[--primary]/25 hover:shadow-xl hover:shadow-[--primary]/40 transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden group flex justify-center whitespace-nowrap w-auto md:w-[160px]"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            className="relative px-3 py-1.5 md:px-6 md:py-2.5 bg-[--foreground] text-[--background] rounded-full font-semibold text-xs md:text-sm transition-all duration-300 hover:opacity-90 active:scale-95 overflow-hidden group flex justify-center whitespace-nowrap w-auto md:w-[160px]"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             {/* Mobile: Simple static text */}
             <span className="md:hidden relative z-10 font-bold">Collab?</span>
@@ -113,13 +111,6 @@ export default function SimpleNavbar() {
                 </motion.span>
               </AnimatePresence>
             </span>
-
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20"
-              initial={{ x: '-100%' }}
-              whileHover={{ x: '100%' }}
-              transition={{ duration: 0.6 }}
-            />
           </motion.button>
         </div>
       </motion.nav>

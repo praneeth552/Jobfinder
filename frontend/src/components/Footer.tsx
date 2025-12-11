@@ -26,11 +26,11 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-black text-white py-12">
+    <footer className="bg-[--secondary] border-t border-[--border] text-[--foreground] py-12">
       <div className="container mx-auto px-4">
         <div className="text-center mb-8">
-          <h3 className="text-3xl font-bold">TackleIt</h3>
-          <p className="text-lg text-gray-400 mt-2">
+          <h3 className="text-3xl font-bold text-[--foreground]">TackleIt</h3>
+          <p className="text-lg text-[--foreground]/60 mt-2">
             Your personal AI-powered assistant to automate the job search and land your dream role faster.
           </p>
         </div>
@@ -42,7 +42,7 @@ const Footer = () => {
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-400 hover:text-white transition"
+              className="text-[--foreground]/50 hover:text-[--foreground] transition"
             >
               {link.icon}
             </a>
@@ -50,12 +50,12 @@ const Footer = () => {
         </div>
 
         <div className="text-center mb-8">
-          <a href={"https://github.com/praneeth552/Jobfinder"} target="_blank" rel="noopener noreferrer" className="text-lg text-gray-400 hover:text-white transition border border-gray-600 rounded-full px-6 py-2">
+          <a href={"https://github.com/praneeth552/Jobfinder"} target="_blank" rel="noopener noreferrer" className="text-lg text-[--foreground]/60 hover:text-[--foreground] transition border border-[--border] rounded-full px-6 py-2">
             Contribute on GitHub
           </a>
         </div>
 
-        <div className="text-center text-gray-500">
+        <div className="text-center text-[--foreground]/50">
           <p className="mb-2 text-sm">
             As the sole developer of this application, I am constantly working to improve it. This means that features may be added, changed, or removed to enhance performance and user experience. Your understanding is appreciated.
           </p>

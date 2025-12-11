@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useAnimations } from "@/context/AnimationContext";
-import { Sparkles, Rocket, Wrench } from "lucide-react";
+import { History } from "lucide-react";
 
 interface ChangelogEntry {
     category: "feature" | "improvement" | "fix";
@@ -94,32 +94,6 @@ const VERSIONS: VersionRelease[] = [
     },
 ];
 
-const getCategoryIcon = (category: ChangelogEntry["category"]) => {
-    switch (category) {
-        case "feature":
-            return Sparkles;
-        case "improvement":
-            return Rocket;
-        case "fix":
-            return Wrench;
-        default:
-            return Sparkles;
-    }
-};
-
-const getCategoryColor = (category: ChangelogEntry["category"]) => {
-    switch (category) {
-        case "feature":
-            return "text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20";
-        case "improvement":
-            return "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20";
-        case "fix":
-            return "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20";
-        default:
-            return "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/20";
-    }
-};
-
 export default function VersionHistory() {
     const { animationsEnabled } = useAnimations();
     const [activeVersion, setActiveVersion] = useState("2.1.1");
@@ -137,7 +111,7 @@ export default function VersionHistory() {
     };
 
     return (
-        <section className="bg-gradient-to-b from-gray-50 to-white py-24 px-4 dark:from-gray-900 dark:to-black">
+        <section className="bg-[--background] py-24 px-4">
             <div className="container mx-auto max-w-7xl">
                 {/* Header */}
                 <motion.div
@@ -149,10 +123,10 @@ export default function VersionHistory() {
                     transition={{ duration: animationsEnabled ? 0.6 : 0 }}
                     className="mb-16 text-center"
                 >
-                    <h1 className="mb-4 text-5xl font-bold text-gray-900 dark:text-white">
+                    <h1 className="mb-4 text-5xl font-bold text-[--foreground]">
                         Changelog
                     </h1>
-                    <p className="text-lg text-gray-600 dark:text-gray-400">
+                    <p className="text-lg text-[--foreground]/60">
                         The latest updates and improvements to TackleIt
                     </p>
                 </motion.div>
@@ -162,7 +136,7 @@ export default function VersionHistory() {
                     {/* Main timeline */}
                     <div className="relative flex-1 lg:max-w-3xl">
                         {/* Timeline line */}
-                        <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-purple-200 via-blue-200 to-transparent dark:from-purple-900 dark:via-blue-900" />
+                        <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-[--border]" />
 
                         <div className="space-y-12">
                             {VERSIONS.map((release, index) => (
@@ -183,56 +157,49 @@ export default function VersionHistory() {
                                     className="relative scroll-mt-32 pl-20"
                                 >
                                     {/* Timeline dot */}
-                                    <div className="absolute left-6 top-2 h-5 w-5 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 ring-4 ring-white shadow-lg dark:ring-gray-900" />
+                                    <div className="absolute left-6 top-2 h-5 w-5 rounded-full bg-[--foreground] ring-4 ring-[--background]" />
 
                                     {/* Card */}
-                                    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg transition-shadow hover:shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                                    <div className="rounded-2xl border border-[--border] bg-[--card-background] p-6 transition-shadow hover:shadow-lg">
                                         {/* Header */}
                                         <div className="mb-4 flex items-center justify-between">
                                             <div className="flex items-center gap-3">
-                                                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                                                <h2 className="text-2xl font-bold text-[--foreground]">
                                                     v{release.version}
                                                 </h2>
                                                 {index === 0 && (
-                                                    <span className="rounded-full bg-gradient-to-r from-purple-600 to-blue-600 px-3 py-1 text-xs font-semibold text-white">
+                                                    <span className="rounded-full bg-[--foreground] px-3 py-1 text-xs font-semibold text-[--background]">
                                                         LATEST
                                                     </span>
                                                 )}
                                             </div>
-                                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                                            <span className="text-sm text-[--foreground]/50">
                                                 {release.date}
                                             </span>
                                         </div>
 
                                         {/* Highlight */}
                                         {release.highlight && (
-                                            <p className="mb-6 text-sm italic text-gray-600 dark:text-gray-400">
+                                            <p className="mb-6 text-sm italic text-[--foreground]/60">
                                                 {release.highlight}
                                             </p>
                                         )}
 
                                         {/* Entries */}
                                         <div className="space-y-3">
-                                            {release.entries.map((entry, idx) => {
-                                                const EntryIcon = getCategoryIcon(entry.category);
-                                                const colorClass = getCategoryColor(entry.category);
-
-                                                return (
-                                                    <div
-                                                        key={idx}
-                                                        className="group flex items-start gap-3"
-                                                    >
-                                                        <div
-                                                            className={`rounded-lg p-2 transition-transform group-hover:scale-110 ${colorClass}`}
-                                                        >
-                                                            <EntryIcon className="h-4 w-4" />
-                                                        </div>
-                                                        <p className="flex-1 leading-relaxed text-gray-700 dark:text-gray-300">
-                                                            {entry.title}
-                                                        </p>
+                                            {release.entries.map((entry, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    className="group flex items-start gap-3"
+                                                >
+                                                    <div className="rounded-lg p-2 bg-[--foreground]/5">
+                                                        <History className="h-4 w-4 text-[--foreground]/60" />
                                                     </div>
-                                                );
-                                            })}
+                                                    <p className="flex-1 leading-relaxed text-[--foreground]/80">
+                                                        {entry.title}
+                                                    </p>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 </motion.div>
@@ -248,7 +215,7 @@ export default function VersionHistory() {
                                 delay: animationsEnabled ? 0.5 : 0,
                                 duration: animationsEnabled ? 0.6 : 0,
                             }}
-                            className="mt-16 text-center text-sm text-gray-500 dark:text-gray-400"
+                            className="mt-16 text-center text-sm text-[--foreground]/50"
                         >
                             <p>More updates coming soon...</p>
                         </motion.div>
@@ -268,9 +235,9 @@ export default function VersionHistory() {
                                     duration: animationsEnabled ? 0.6 : 0,
                                     delay: animationsEnabled ? 0.2 : 0,
                                 }}
-                                className="rounded-xl border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800"
+                                className="rounded-xl border border-[--border] bg-[--card-background] p-4"
                             >
-                                <h3 className="mb-4 px-2 text-sm font-semibold text-gray-900 dark:text-white">
+                                <h3 className="mb-4 px-2 text-sm font-semibold text-[--foreground]">
                                     Versions
                                 </h3>
                                 <nav className="space-y-1">
@@ -279,8 +246,8 @@ export default function VersionHistory() {
                                             key={release.version}
                                             onClick={() => scrollToVersion(release.version)}
                                             className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-all ${activeVersion === release.version
-                                                ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-md"
-                                                : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+                                                ? "bg-[--foreground] text-[--background]"
+                                                : "text-[--foreground]/70 hover:bg-[--foreground]/5"
                                                 }`}
                                         >
                                             <div className="flex items-center justify-between">

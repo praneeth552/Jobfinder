@@ -20,41 +20,15 @@ interface NavbarProps {
 export default function Navbar({ onGetStarted }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
-  const [isOverDarkSection, setIsOverDarkSection] = useState(false);
   const [textIndex, setTextIndex] = useState(0);
 
   const buttonTexts = ["Got Ideas?", "Collaborate?", "Feedback?"];
   const router = useRouter();
 
-  // Scroll listener: shadow + dark-section detection
+  // Scroll listener for shadow effect
   useEffect(() => {
     const handleScroll = () => {
       setHasScrolled(window.scrollY > 20);
-
-      const contactSection = document.getElementById("contact-section");
-      const footerSection = document.querySelector("footer");
-
-      const scrollPosition = window.scrollY + 100; // offset roughly equal to navbar height
-      let isDark = false;
-
-      if (contactSection) {
-        const { offsetTop, offsetHeight } = contactSection;
-        if (
-          scrollPosition >= offsetTop &&
-          scrollPosition < offsetTop + offsetHeight
-        ) {
-          isDark = true;
-        }
-      }
-
-      if (footerSection && !isDark) {
-        const { offsetTop } = footerSection as HTMLElement;
-        if (scrollPosition >= offsetTop) {
-          isDark = true;
-        }
-      }
-
-      setIsOverDarkSection(isDark);
     };
 
     handleScroll(); // run once on mount
@@ -149,12 +123,10 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
   };
 
   const getTextColor = () => {
-    if (isOverDarkSection) return "text-white";
     return "text-[--foreground]";
   };
 
   const getIconColorClass = () => {
-    if (isOverDarkSection) return "text-white";
     return "text-[--foreground]";
   };
 
@@ -168,9 +140,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
           animate="animate"
           className={`pointer-events-auto mt-4 w-[95%] max-w-5xl flex items-center justify-between px-6 py-3 rounded-full transition-all duration-500
             ${hasScrolled
-              ? isOverDarkSection
-                ? "bg-black/60 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.37)]"
-                : "bg-white/80 dark:bg-black/60 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(31,38,135,0.37)]"
+              ? "bg-white/80 dark:bg-black/60 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(31,38,135,0.37)]"
               : "bg-white/50 dark:bg-black/20 backdrop-blur-md border border-white/10"
             }`}
         >
@@ -181,15 +151,14 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <span className="bg-gradient-to-r from-[--primary] to-purple-500 bg-clip-text text-transparent">
+              <span className="text-[--foreground]">
                 TackleIt
               </span>
               <span
-                className="inline-block whitespace-nowrap rounded-full border border-[--primary]/20
-                           bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10
+                className="inline-block whitespace-nowrap rounded-full border border-[--border]
+                           bg-[--foreground]/5
                            px-2 md:px-2.5 py-0.5 md:py-1 text-[8px] md:text-[10px] font-semibold
-                           uppercase tracking-wide text-[--primary] shadow-sm shadow-[--primary]/10
-                           dark:text-purple-400"
+                           uppercase tracking-wide text-[--foreground]/70"
               >
                 Early Access
               </span>
@@ -198,11 +167,9 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
 
           {/* Desktop actions */}
           <div className="hidden items-center gap-3 md:flex">
-            <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1 backdrop-blur-sm">
-              <ThemeToggle />
-            </div>
+            <ThemeToggle />
 
-            <AnimationToggle isOverDarkSection={isOverDarkSection} />
+            <AnimationToggle />
 
             {/* Pricing / Sign in / Collaborate */}
             <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 p-1.5 backdrop-blur-md">
@@ -212,8 +179,8 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
                             transition-all duration-300 hover:scale-105 active:scale-95 ${getTextColor()}`}
               >
                 <span className="relative z-10 font-semibold">Pricing</span>
-                <div className="absolute inset-0 translate-x-[-100%] bg-gradient-to-r from-blue-500/10 to-purple-500/10
-                                transition-transform duration-300 group-hover:translate-x-0 dark:from-blue-400/10 dark:to-purple-400/10" />
+                <div className="absolute inset-0 translate-x-[-100%] bg-[--foreground]/5
+                                transition-transform duration-300 group-hover:translate-x-0" />
               </button>
 
               <button
@@ -222,8 +189,8 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
                             transition-all duration-300 hover:scale-105 active:scale-95 ${getTextColor()}`}
               >
                 <span className="relative z-10 font-semibold">Sign in</span>
-                <div className="absolute inset-0 translate-x-[-100%] bg-gradient-to-r from-blue-500/10 to-purple-500/10
-                                transition-transform duration-300 group-hover:translate-x-0 dark:from-blue-400/10 dark:to-purple-400/10" />
+                <div className="absolute inset-0 translate-x-[-100%] bg-[--foreground]/5
+                                transition-transform duration-300 group-hover:translate-x-0" />
               </button>
 
               <motion.button
@@ -265,7 +232,7 @@ export default function Navbar({ onGetStarted }: NavbarProps) {
 
           {/* Mobile menu trigger */}
           <div className="flex items-center gap-2 md:hidden">
-            <AnimationToggle isOverDarkSection={isOverDarkSection} />
+            <AnimationToggle />
             <ThemeToggle />
             <motion.button
               onClick={() => setIsMobileMenuOpen((prev) => !prev)}

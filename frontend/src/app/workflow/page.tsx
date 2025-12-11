@@ -43,9 +43,9 @@ const Section = ({
   stepNumber,
 }: SectionProps) => (
   <motion.div
-    className={`bg-white/10 backdrop-blur-md p-6 rounded-2xl border shadow-lg relative transition-all duration-500 ${isActive
-      ? "border-purple-400 bg-white/20 shadow-purple-500/25"
-      : "border-white/20"
+    className={`bg-[--card-background] backdrop-blur-md p-6 rounded-2xl border shadow-lg relative transition-all duration-500 ${isActive
+      ? "border-[--foreground]/30 shadow-xl"
+      : "border-[--border]"
       } ${className ?? ""}`}
     variants={{
       hidden: { opacity: 0, y: 20 },
@@ -55,8 +55,8 @@ const Section = ({
     {typeof stepNumber === "number" && (
       <div
         className={`absolute -top-5 -left-5 w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold shadow-lg border-2 transition-all duration-500 z-20 ${isActive
-          ? "bg-purple-500 text-white border-purple-400 shadow-purple-500/50"
-          : "bg-gray-700 text-gray-300 border-gray-600"
+          ? "bg-[--foreground] text-[--background] border-[--foreground]/50"
+          : "bg-[--card-background] text-[--foreground]/70 border-[--border]"
           }`}
       >
         {stepNumber}
@@ -64,19 +64,19 @@ const Section = ({
     )}
     <div className="flex items-center mb-4">
       <div
-        className={`p-2 rounded-lg mr-4 transition-all duration-500 ${isActive ? "bg-purple-500/20" : "bg-white/20"
+        className={`p-2 rounded-lg mr-4 transition-all duration-500 ${isActive ? "bg-[--foreground]/10" : "bg-[--foreground]/5"
           }`}
       >
         {icon}
       </div>
       <h3
-        className={`text-xl md:text-2xl font-bold transition-all duration-500 ${isActive ? "text-purple-300" : "text-white"
+        className={`text-xl md:text-2xl font-bold transition-all duration-500 ${isActive ? "text-[--foreground]" : "text-[--foreground]/80"
           }`}
       >
         {title}
       </h3>
     </div>
-    <div className="space-y-4 text-gray-200">{children}</div>
+    <div className="space-y-4 text-[--foreground]/70">{children}</div>
   </motion.div>
 );
 
@@ -86,9 +86,9 @@ interface TechItemProps {
 }
 
 const TechItem = ({ name, icon }: TechItemProps) => (
-  <div className="flex items-center bg-gray-800/50 px-3 py-2 rounded-lg">
+  <div className="flex items-center bg-[--foreground]/5 px-3 py-2 rounded-lg">
     {icon}
-    <span className="ml-3 font-medium text-sm">{name}</span>
+    <span className="ml-3 font-medium text-sm text-[--foreground]/80">{name}</span>
   </div>
 );
 
@@ -99,167 +99,167 @@ const WorkflowPage = () => {
     {
       id: 1,
       title: "User Registration & Authentication",
-      icon: <Users size={24} className="text-purple-300" />,
+      icon: <Users size={24} className="text-[--foreground]/70" />,
       description:
         "Users sign up securely with email/password (verified via OTP) or Google OAuth. Account credentials are encrypted and stored securely.",
       tech: [
         {
           name: "JWT Tokens",
-          icon: <ShieldCheck size={20} className="text-green-400" />,
+          icon: <ShieldCheck size={20} className="text-[--foreground]/60" />,
         },
         {
           name: "Google OAuth 2.0",
-          icon: <Globe size={20} className="text-red-400" />,
+          icon: <Globe size={20} className="text-[--foreground]/60" />,
         },
         {
           name: "OTP Verification",
-          icon: <Mail size={20} className="text-blue-400" />,
+          icon: <Mail size={20} className="text-[--foreground]/60" />,
         },
         {
           name: "Cloudflare Turnstile",
-          icon: <ShieldCheck size={20} className="text-orange-400" />,
+          icon: <ShieldCheck size={20} className="text-[--foreground]/60" />,
         },
       ],
     },
     {
       id: 2,
       title: "Preference Setup & Resume Parsing",
-      icon: <Upload size={24} className="text-purple-300" />,
+      icon: <Upload size={24} className="text-[--foreground]/70" />,
       description:
         "Users set preferences manually OR upload their resume for AI parsing OR both. The NLP pipeline extracts skills, experience, and roles while users configure target roles, seniority, locations, and smart filters.",
       tech: [
-        { name: "pdfminer.six", icon: <Code size={20} className="text-red-400" /> },
-        { name: "spaCy NLP", icon: <BrainCircuit size={20} className="text-green-400" /> },
-        { name: "React Forms", icon: <Code size={20} className="text-blue-400" /> },
-        { name: "Smart Filters", icon: <Search size={20} className="text-purple-400" /> },
+        { name: "pdfminer.six", icon: <Code size={20} className="text-[--foreground]/60" /> },
+        { name: "spaCy NLP", icon: <BrainCircuit size={20} className="text-[--foreground]/60" /> },
+        { name: "React Forms", icon: <Code size={20} className="text-[--foreground]/60" /> },
+        { name: "Smart Filters", icon: <Search size={20} className="text-[--foreground]/60" /> },
       ],
     },
     {
       id: 3,
       title: "Dashboard, Changelog & Onboarding",
-      icon: <Sparkles size={24} className="text-purple-300" />,
+      icon: <Sparkles size={24} className="text-[--foreground]/70" />,
       description:
         "Users land on their dashboard. If there's a new release, a changelog modal appears. Then, new users see an interactive tour highlighting key features.",
       tech: [
-        { name: "React Dashboard", icon: <Code size={20} className="text-blue-400" /> },
-        { name: "Version Tracking", icon: <Code size={20} className="text-purple-400" /> },
-        { name: "React Joyride", icon: <Code size={20} className="text-purple-400" /> },
-        { name: "Modal System", icon: <Bell size={20} className="text-yellow-400" /> },
+        { name: "React Dashboard", icon: <Code size={20} className="text-[--foreground]/60" /> },
+        { name: "Version Tracking", icon: <Code size={20} className="text-[--foreground]/60" /> },
+        { name: "React Joyride", icon: <Code size={20} className="text-[--foreground]/60" /> },
+        { name: "Modal System", icon: <Bell size={20} className="text-[--foreground]/60" /> },
       ],
     },
     {
       id: 4,
       title: "Auto-Generation for New Users",
-      icon: <Sparkles size={24} className="text-purple-300" />,
+      icon: <Sparkles size={24} className="text-[--foreground]/70" />,
       description:
         "Upon tour completion or skip, an event triggers automatic job generation for new users—zero manual effort! Session storage prevents duplicate generation.",
       tech: [
-        { name: "Event System", icon: <BrainCircuit size={20} className="text-yellow-400" /> },
-        { name: "Auto-Trigger", icon: <Sparkles size={20} className="text-green-400" /> },
-        { name: "Session Storage", icon: <Database size={20} className="text-blue-400" /> },
+        { name: "Event System", icon: <BrainCircuit size={20} className="text-[--foreground]/60" /> },
+        { name: "Auto-Trigger", icon: <Sparkles size={20} className="text-[--foreground]/60" /> },
+        { name: "Session Storage", icon: <Database size={20} className="text-[--foreground]/60" /> },
       ],
     },
     {
       id: 5,
       title: "Automated Job Database Scraping",
-      icon: <Database size={24} className="text-purple-300" />,
+      icon: <Database size={24} className="text-[--foreground]/70" />,
       description:
         "A GitHub Actions cron job runs weekly, scraping 30+ company career pages and APIs using Playwright. Fresh job listings are stored in MongoDB Atlas for instant retrieval.",
       tech: [
-        { name: "Playwright", icon: <Code size={20} className="text-green-400" /> },
-        { name: "MongoDB Atlas", icon: <Database size={20} className="text-green-400" /> },
-        { name: "GitHub Actions", icon: <Github size={20} className="text-gray-400" /> },
-        { name: "Scheduled Cron", icon: <Bell size={20} className="text-orange-400" /> },
+        { name: "Playwright", icon: <Code size={20} className="text-[--foreground]/60" /> },
+        { name: "MongoDB Atlas", icon: <Database size={20} className="text-[--foreground]/60" /> },
+        { name: "GitHub Actions", icon: <Github size={20} className="text-[--foreground]/60" /> },
+        { name: "Scheduled Cron", icon: <Bell size={20} className="text-[--foreground]/60" /> },
       ],
     },
     {
       id: 6,
       title: "AI-Powered Hyper-Personalized Matching",
-      icon: <BrainCircuit size={24} className="text-purple-300" />,
+      icon: <BrainCircuit size={24} className="text-[--foreground]/70" />,
       description:
         "Google Gemini AI performs dual-analysis: combining user preferences AND parsed resume data to rank jobs with precision semantic matching. This ensures maximum relevance for every recommendation.",
       tech: [
-        { name: "Google Gemini AI", icon: <Sparkles size={20} className="text-yellow-400" /> },
-        { name: "Semantic Analysis", icon: <BrainCircuit size={20} className="text-purple-400" /> },
-        { name: "Dual-Input Scoring", icon: <CheckCircle size={20} className="text-green-400" /> },
+        { name: "Google Gemini AI", icon: <Sparkles size={20} className="text-[--foreground]/60" /> },
+        { name: "Semantic Analysis", icon: <BrainCircuit size={20} className="text-[--foreground]/60" /> },
+        { name: "Dual-Input Scoring", icon: <CheckCircle size={20} className="text-[--foreground]/60" /> },
       ],
     },
     {
       id: 7,
       title: "Personalized Job Recommendations",
-      icon: <Search size={24} className="text-purple-300" />,
+      icon: <Search size={24} className="text-[--foreground]/70" />,
       description:
         "Users receive AI-curated job recommendations on their dashboard. They can search, filter by company/location/tech stack, and explore detailed job descriptions with direct application links.",
       tech: [
-        { name: "FastAPI Backend", icon: <Code size={20} className="text-green-400" /> },
-        { name: "Real-time Search", icon: <Search size={20} className="text-blue-400" /> },
-        { name: "MongoDB Queries", icon: <Database size={20} className="text-green-400" /> },
+        { name: "FastAPI Backend", icon: <Code size={20} className="text-[--foreground]/60" /> },
+        { name: "Real-time Search", icon: <Search size={20} className="text-[--foreground]/60" /> },
+        { name: "MongoDB Queries", icon: <Database size={20} className="text-[--foreground]/60" /> },
       ],
     },
     {
       id: 8,
       title: "Pro Subscription & Payment",
-      icon: <Sparkles size={24} className="text-purple-300" />,
+      icon: <Sparkles size={24} className="text-[--foreground]/70" />,
       description:
         "Users can upgrade to Pro for weekly recommendations (vs. monthly), unlocking premium features. Secure payments processed via Razorpay with real-time subscription management.",
       tech: [
-        { name: "Razorpay SDK", icon: <Code size={20} className="text-blue-400" /> },
-        { name: "Subscription Logic", icon: <CheckCircle size={20} className="text-green-400" /> },
-        { name: "Secure Payments", icon: <ShieldCheck size={20} className="text-orange-400" /> },
+        { name: "Razorpay SDK", icon: <Code size={20} className="text-[--foreground]/60" /> },
+        { name: "Subscription Logic", icon: <CheckCircle size={20} className="text-[--foreground]/60" /> },
+        { name: "Secure Payments", icon: <ShieldCheck size={20} className="text-[--foreground]/60" /> },
       ],
     },
     {
       id: 9,
       title: "Pro Dashboard Features",
-      icon: <Briefcase size={24} className="text-purple-300" />,
+      icon: <Briefcase size={24} className="text-[--foreground]/70" />,
       description:
         "Pro users access an enhanced dashboard with Saved/Applied sections. Drag-and-drop job cards to track application status. Export recommendations to a Google Sheet in your Drive with one click.",
       tech: [
-        { name: "DnD Kit", icon: <Code size={20} className="text-purple-400" /> },
-        { name: "Google Sheets API", icon: <Database size={20} className="text-green-400" /> },
-        { name: "OAuth Scopes", icon: <ShieldCheck size={20} className="text-orange-400" /> },
-        { name: "State Management", icon: <Code size={20} className="text-blue-400" /> },
+        { name: "DnD Kit", icon: <Code size={20} className="text-[--foreground]/60" /> },
+        { name: "Google Sheets API", icon: <Database size={20} className="text-[--foreground]/60" /> },
+        { name: "OAuth Scopes", icon: <ShieldCheck size={20} className="text-[--foreground]/60" /> },
+        { name: "State Management", icon: <Code size={20} className="text-[--foreground]/60" /> },
       ],
     },
     {
       id: 10,
       title: "Email Notifications",
-      icon: <Bell size={24} className="text-purple-300" />,
+      icon: <Bell size={24} className="text-[--foreground]/70" />,
       description:
         "Users receive automated email notifications for new job matches and important updates. Pro users get notifications when they update their preferences.",
       tech: [
-        { name: "SMTP Email", icon: <Mail size={20} className="text-red-400" /> },
-        { name: "Email Templates", icon: <Mail size={20} className="text-blue-400" /> },
-        { name: "Async Processing", icon: <Code size={20} className="text-green-400" /> },
+        { name: "SMTP Email", icon: <Mail size={20} className="text-[--foreground]/60" /> },
+        { name: "Email Templates", icon: <Mail size={20} className="text-[--foreground]/60" /> },
+        { name: "Async Processing", icon: <Code size={20} className="text-[--foreground]/60" /> },
       ],
     },
     {
       id: 11,
       title: "Enhanced UX & Accessibility",
-      icon: <Sparkles size={24} className="text-purple-300" />,
+      icon: <Sparkles size={24} className="text-[--foreground]/70" />,
       description:
         "Global animation toggle lets users choose instant page loads or delightful Framer Motion animations. Version history, speech-to-text contact forms, responsive design, dark mode, and reduced-motion support create an inclusive, premium experience.",
       tech: [
-        { name: "Framer Motion", icon: <Code size={20} className="text-purple-400" /> },
-        { name: "Animation Toggle", icon: <Sparkles size={20} className="text-yellow-400" /> },
-        { name: "Tailwind CSS", icon: <Code size={20} className="text-blue-400" /> },
-        { name: "Web Speech API", icon: <Code size={20} className="text-red-400" /> },
-        { name: "Accessibility", icon: <ShieldCheck size={20} className="text-green-400" /> },
+        { name: "Framer Motion", icon: <Code size={20} className="text-[--foreground]/60" /> },
+        { name: "Animation Toggle", icon: <Sparkles size={20} className="text-[--foreground]/60" /> },
+        { name: "Tailwind CSS", icon: <Code size={20} className="text-[--foreground]/60" /> },
+        { name: "Web Speech API", icon: <Code size={20} className="text-[--foreground]/60" /> },
+        { name: "Accessibility", icon: <ShieldCheck size={20} className="text-[--foreground]/60" /> },
       ],
     },
     {
       id: 12,
       title: "Serverless Cloud Deployment",
-      icon: <Cloud size={24} className="text-purple-300" />,
+      icon: <Cloud size={24} className="text-[--foreground]/70" />,
       description:
         "Frontend deployed on AWS Amplify with auto CI/CD. Backend containerized via Docker, pushed to ECR, deployed as Lambda functions with API Gateway routing. Full automation via GitHub Actions.",
       tech: [
-        { name: "AWS Amplify", icon: <Cloud size={20} className="text-orange-400" /> },
-        { name: "AWS Lambda", icon: <Server size={20} className="text-orange-400" /> },
-        { name: "Docker Container", icon: <Code size={20} className="text-blue-400" /> },
-        { name: "ECR Registry", icon: <Database size={20} className="text-green-400" /> },
-        { name: "GitHub Actions", icon: <Github size={20} className="text-gray-400" /> },
-        { name: "API Gateway", icon: <Server size={20} className="text-green-400" /> },
+        { name: "AWS Amplify", icon: <Cloud size={20} className="text-[--foreground]/60" /> },
+        { name: "AWS Lambda", icon: <Server size={20} className="text-[--foreground]/60" /> },
+        { name: "Docker Container", icon: <Code size={20} className="text-[--foreground]/60" /> },
+        { name: "ECR Registry", icon: <Database size={20} className="text-[--foreground]/60" /> },
+        { name: "GitHub Actions", icon: <Github size={20} className="text-[--foreground]/60" /> },
+        { name: "API Gateway", icon: <Server size={20} className="text-[--foreground]/60" /> },
       ],
     },
   ];
@@ -285,7 +285,7 @@ const WorkflowPage = () => {
   }, [totalSteps]);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white font-sans">
+    <div className="min-h-screen bg-[--background] text-[--foreground] font-sans">
       <SimpleNavbar />
 
       <div className="p-4 pt-32 md:p-8 md:pt-32">
@@ -295,18 +295,18 @@ const WorkflowPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">
+          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-[--foreground]">
             TackleIt Workflow Architecture
           </h1>
-          <p className="mt-4 text-base md:text-lg text-gray-400 max-w-3xl mx-auto px-4">
+          <p className="mt-4 text-base md:text-lg text-[--foreground]/60 max-w-3xl mx-auto px-4">
             A visual journey of how our platform connects users to their dream
             jobs, from the first click to the final recommendation.
           </p>
-          <p className="mt-2 text-sm text-purple-300">
-            ✨ New: Auto-generation for new users & Global animation toggle for
+          <p className="mt-2 text-sm text-[--foreground]/70">
+            New: Auto-generation for new users & Global animation toggle for
             enhanced UX
           </p>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-[--foreground]/50">
             Watch the automated workflow demonstration below
           </p>
         </motion.div>
@@ -346,15 +346,17 @@ const WorkflowPage = () => {
                       y1={startY}
                       x2="20"
                       y2={endY}
-                      stroke={currentStep > index ? "#a855f7" : "#374151"}
+                      stroke={currentStep > index ? "var(--foreground)" : "var(--border)"}
                       strokeWidth={3}
                       strokeDasharray={currentStep > index ? "0" : "5,5"}
+                      style={{ opacity: currentStep > index ? 0.6 : 0.3 }}
                     />
                     {currentStep === index + 1 && (
                       <motion.circle
                         cx="20"
                         r="6"
-                        fill="#a855f7"
+                        fill="var(--foreground)"
+                        style={{ opacity: 0.6 }}
                         initial={{ cy: startY }}
                         animate={{ cy: endY }}
                         transition={{ duration: 3, ease: "easeInOut" }}
@@ -368,11 +370,11 @@ const WorkflowPage = () => {
 
           {/* Mobile progress bar */}
           <div
-            className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-700 md:hidden"
+            className="absolute left-8 top-0 bottom-0 w-0.5 bg-[--border] md:hidden"
             style={{ zIndex: 1 }}
           >
             <motion.div
-              className="w-full bg-purple-500"
+              className="w-full bg-[--foreground]/50"
               style={{
                 height: `${((currentStep + 1) / totalSteps) * 100}%`,
               }}
@@ -411,7 +413,7 @@ const WorkflowPage = () => {
                       isActive={currentStep === index}
                       className="w-full"
                     >
-                      <p className="text-gray-300 mb-4 text-sm md:text-base">
+                      <p className="text-[--foreground]/60 mb-4 text-sm md:text-base">
                         {step.description}
                       </p>
                       <div className="flex flex-wrap gap-2 md:gap-3">
@@ -432,13 +434,13 @@ const WorkflowPage = () => {
 
           {/* Progress indicator */}
           <motion.div
-            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800/90 backdrop-blur-md px-4 py-2 md:px-6 md:py-3 rounded-full shadow-lg border border-gray-700"
+            className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-[--card-background]/90 backdrop-blur-md px-4 py-2 md:px-6 md:py-3 rounded-full shadow-lg border border-[--border]"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1 }}
           >
             <div className="flex items-center gap-3 md:gap-4">
-              <span className="text-xs md:text-sm text-gray-300 whitespace-nowrap">
+              <span className="text-xs md:text-sm text-[--foreground]/70 whitespace-nowrap">
                 Step {currentStep + 1} of {totalSteps}
               </span>
               <div className="flex gap-1 md:gap-2">
@@ -446,10 +448,10 @@ const WorkflowPage = () => {
                   <div
                     key={index}
                     className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-all duration-300 ${index === currentStep
-                      ? "bg-purple-500 scale-125"
+                      ? "bg-[--foreground] scale-125"
                       : index < currentStep
-                        ? "bg-purple-400"
-                        : "bg-gray-600"
+                        ? "bg-[--foreground]/50"
+                        : "bg-[--border]"
                       }`}
                   />
                 ))}

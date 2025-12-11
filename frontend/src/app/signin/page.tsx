@@ -216,7 +216,7 @@ function SigninForm() {
 
                 <div className="mb-4">
                   <GoogleLogin
-                    theme="outline"
+                    theme="filled_black"
                     shape="pill"
                     onSuccess={handleGoogleSignIn}
                     onError={() => toast.error("Google Login Failed")}
@@ -242,7 +242,7 @@ function SigninForm() {
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="px-4 py-2.5 rounded-xl border border-white/30 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="px-4 py-2.5 rounded-xl border border-white/30 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[--foreground]/30"
                     required
                   />
                   <div className="relative">
@@ -250,7 +250,7 @@ function SigninForm() {
                       name="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Password"
-                      className="w-full px-4 py-2.5 rounded-xl border border-white/30 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-4 py-2.5 rounded-xl border border-white/30 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[--foreground]/30"
                       required
                     />
                     <button
@@ -266,7 +266,7 @@ function SigninForm() {
                     <button
                       type="button"
                       onClick={handleForgotPasswordClick}
-                      className="font-semibold text-purple-600 hover:underline"
+                      className="font-semibold text-[--foreground] hover:underline"
                     >
                       Forgot Password?
                     </button>
@@ -279,7 +279,7 @@ function SigninForm() {
                   <LoadingButton
                     type="submit"
                     isLoading={loading}
-                    className="submit-button-swipe bg-purple-600 hover:bg-purple-700 text-white w-full px-4 py-3 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500"
+                    className="submit-button-swipe bg-[--foreground] hover:opacity-90 text-[--background] w-full px-4 py-3 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500"
                     disabled={loading || !turnstileToken}
                     ripple
                   >
@@ -291,7 +291,7 @@ function SigninForm() {
                   Don&apos;t have an account?{" "}
                   <button
                     onClick={() => setIsNavigating(true)}
-                    className="text-purple-600 font-semibold hover:underline"
+                    className="text-[--foreground] font-semibold hover:underline"
                   >
                     Sign up
                   </button>

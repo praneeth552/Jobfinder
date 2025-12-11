@@ -507,7 +507,7 @@ export default function PreferencesClient() {
                       setCustomRole("");
                     }
                   }}
-                  className="submit-button-swipe bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full"
+                  className="submit-button-swipe bg-[--foreground] hover:opacity-90 text-[--background] font-bold py-2 px-4 rounded-full"
                 >
                   Add
                 </button>

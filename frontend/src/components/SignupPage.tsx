@@ -265,7 +265,7 @@ export default function SignupPage() {
             <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-black dark:text-white text-center">Create your account</h2>
 
             <div className="flex justify-center w-full mb-4">
-              <GoogleLogin onSuccess={handleGoogleSignup} onError={() => toast.error("Google signup failed")} theme="outline" shape="pill" />
+              <GoogleLogin onSuccess={handleGoogleSignup} onError={() => toast.error("Google signup failed")} theme="filled_black" shape="pill" />
             </div>
 
             <div className="my-3 text-black dark:text-white text-sm flex items-center w-full">
@@ -282,7 +282,7 @@ export default function SignupPage() {
                 value={form.name}
                 onChange={handleChange}
                 onBlur={() => validateField('name', form.name)}
-                className={`px-4 py-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 ${errors.name ? 'border-red-500 focus:ring-red-500' : 'border-white/30 dark:border-gray-700 focus:ring-purple-500'}`}
+                className={`px-4 py-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 ${errors.name ? 'border-red-500 focus:ring-red-500' : 'border-white/30 dark:border-gray-700 focus:ring-[--foreground]/30'}`}
                 required
               />
               {errors.name && <p className="text-red-500 text-xs px-2">{errors.name}</p>}
@@ -293,7 +293,7 @@ export default function SignupPage() {
                 value={form.email}
                 onChange={handleChange}
                 onBlur={() => validateField('email', form.email)}
-                className={`px-4 py-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-white/30 dark:border-gray-700 focus:ring-purple-500'}`}
+                className={`px-4 py-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-white/30 dark:border-gray-700 focus:ring-[--foreground]/30'}`}
                 required
               />
               {errors.email && (
@@ -304,7 +304,7 @@ export default function SignupPage() {
                       <button
                         type="button"
                         onClick={() => router.push(`/signin?email=${encodeURIComponent(form.email)}`)}
-                        className="font-semibold text-purple-600 hover:underline"
+                        className="font-semibold text-[--foreground] hover:underline"
                       >
                         Sign in instead?
                       </button>
@@ -323,7 +323,7 @@ export default function SignupPage() {
                   onChange={handleChange}
                   onFocus={() => setIsPasswordFocused(true)}
                   onBlur={() => setIsPasswordFocused(false)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-white/30 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-4 py-2.5 rounded-xl border border-white/30 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[--foreground]/30"
                   required
                 />
                 <button
@@ -344,7 +344,7 @@ export default function SignupPage() {
                   onChange={handleChange}
                   className={`w-full px-4 py-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 text-black dark:text-white placeholder-black dark:placeholder-gray-400 focus:outline-none focus:ring-2 ${!passwordsMatch && form.confirmPassword.length > 0
                     ? "border-red-500 focus:ring-red-500"
-                    : "border-white/30 dark:border-gray-700 focus:ring-purple-500"
+                    : "border-white/30 dark:border-gray-700 focus:ring-[--foreground]/30"
                     }`}
                   required
                 />
@@ -377,7 +377,7 @@ export default function SignupPage() {
               <LoadingButton
                 type="submit"
                 isLoading={loading}
-                className="submit-button-swipe bg-purple-600 hover:bg-purple-700 text-white w-full px-4 py-3 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500"
+                className="submit-button-swipe bg-[--foreground] hover:opacity-90 text-[--background] w-full px-4 py-3 rounded-full font-semibold transition cursor-pointer disabled:bg-gray-500"
                 disabled={loading || !turnstileToken}
                 ripple
               >
@@ -387,7 +387,7 @@ export default function SignupPage() {
 
             <p className="mt-6 text-black dark:text-white text-center">
               Already have an account?{" "}
-              <button onClick={() => router.push("/signin")} className="text-purple-600 font-semibold hover:underline">
+              <button onClick={() => router.push("/signin")} className="text-[--foreground] font-semibold hover:underline">
                 Sign in
               </button>
             </p>

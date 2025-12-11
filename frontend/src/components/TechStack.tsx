@@ -3,6 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import './TechStack.css';
+import HandDrawnCircle from "@/components/HandDrawnCircle";
 
 const TechStack = () => {
   const tech = [
@@ -60,7 +61,7 @@ const TechStack = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[--primary]/5 to-transparent pointer-events-none" />
 
       <h2 className="text-3xl md:text-4xl font-bold text-[--foreground] mb-16 relative z-10">
-        Powered by the <span className="text-[--primary]">latest technologies</span>
+        Powered by the <span className="relative inline-block whitespace-nowrap px-1 z-10"><HandDrawnCircle className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-[45%] w-[110%] h-[160%] text-[--primary]" strokeWidth={2} />latest technologies</span>
       </h2>
 
       <div className="w-full overflow-hidden relative flex [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] group">

@@ -22,8 +22,8 @@ interface SpeechRecognition extends EventTarget {
 
 declare global {
   interface Window {
-    SpeechRecognition: { new (): SpeechRecognition };
-    webkitSpeechRecognition: { new (): SpeechRecognition };
+    SpeechRecognition: { new(): SpeechRecognition };
+    webkitSpeechRecognition: { new(): SpeechRecognition };
   }
 }
 
@@ -132,127 +132,126 @@ const MobileContactForm = () => {
 
   return (
     <motion.form
-        onSubmit={handleSubmit}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
-        className="bg-[#111] p-8 rounded-[16px]"
+      onSubmit={handleSubmit}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
+      className="bg-[#111] p-8 rounded-[16px]"
+    >
+      <Toaster />
+      <motion.div
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 0.6, ease: 'easeOut' }}
+        className="mb-4"
       >
-        <Toaster />
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.6, ease: 'easeOut' }}
-          className="mb-4"
+        <label
+          htmlFor="mobile-name"
+          className="block text-gray-300 font-semibold mb-2 text-sm"
         >
-          <label
-            htmlFor="mobile-name"
-            className="block text-gray-300 font-semibold mb-2 text-sm"
-          >
-            Name
-          </label>
-          <input
-            type="text"
-            id="mobile-name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white"
-            required
-          />
-        </motion.div>
+          Name
+        </label>
+        <input
+          type="text"
+          id="mobile-name"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white"
+          required
+        />
+      </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.8, ease: 'easeOut' }}
-          className="mb-4"
+      <motion.div
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 0.8, ease: 'easeOut' }}
+        className="mb-4"
+      >
+        <label
+          htmlFor="mobile-email"
+          className="block text-gray-300 font-semibold mb-2 text-sm"
         >
-          <label
-            htmlFor="mobile-email"
-            className="block text-gray-300 font-semibold mb-2 text-sm"
-          >
-            Email
-          </label>
-          <input
-            type="email"
-            id="mobile-email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white"
-            required
-          />
-        </motion.div>
+          Email
+        </label>
+        <input
+          type="email"
+          id="mobile-email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white"
+          required
+        />
+      </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 1, ease: 'easeOut' }}
-          className="mb-4"
+      <motion.div
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 1, ease: 'easeOut' }}
+        className="mb-4"
+      >
+        <label
+          htmlFor="mobile-interest"
+          className="block text-gray-300 font-semibold mb-2 text-sm"
         >
-          <label
-            htmlFor="mobile-interest"
-            className="block text-gray-300 font-semibold mb-2 text-sm"
-          >
-            How can I help you?
-          </label>
-          <select
-            id="mobile-interest"
-            name="interest"
-            value={formData.interest}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white"
-          >
-            <option>Suggest a feature</option>
-            <option>Report a bug</option>
-            <option>Collaborate with you</option>
-            <option>Just saying hi</option>
-          </select>
-        </motion.div>
+          How can I help you?
+        </label>
+        <select
+          id="mobile-interest"
+          name="interest"
+          value={formData.interest}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white"
+        >
+          <option>Suggest a feature</option>
+          <option>Report a bug</option>
+          <option>Collaborate with you</option>
+          <option>Just saying hi</option>
+        </select>
+      </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 1.2, ease: 'easeOut' }}
-          className="mb-4 relative"
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 1.2, ease: 'easeOut' }}
+        className="mb-4 relative"
+      >
+        <label
+          htmlFor="mobile-message"
+          className="block text-gray-300 font-semibold mb-2 text-sm"
         >
-          <label
-            htmlFor="mobile-message"
-            className="block text-gray-300 font-semibold mb-2 text-sm"
-          >
-            Message / Suggestion
-          </label>
-          <textarea
-            id="mobile-message"
-            name="message"
-            value={formData.message}
-            onChange={handleChange}
-            rows={4}
-            className="w-full px-4 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white pr-10"
-            required
-          ></textarea>
-          <button
-            type="button"
-            onClick={handleMicClick}
-            className={`absolute right-3 top-[42px] text-gray-400 hover:text-purple-500 ${
-              isRecording ? 'text-red-500 animate-pulse' : ''
+          Message / Suggestion
+        </label>
+        <textarea
+          id="mobile-message"
+          name="message"
+          value={formData.message}
+          onChange={handleChange}
+          rows={4}
+          className="w-full px-4 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-800 text-white pr-10"
+          required
+        ></textarea>
+        <button
+          type="button"
+          onClick={handleMicClick}
+          className={`absolute right-3 top-[42px] text-gray-400 hover:text-purple-500 ${isRecording ? 'text-red-500 animate-pulse' : ''
             }`}
-          >
-            <Mic size={20} />
-          </button>
-        </motion.div>
+        >
+          <Mic size={20} />
+        </button>
+      </motion.div>
 
-        <div className="text-center pt-4">
-          <LoadingButton
-            type="submit"
-            isLoading={isSubmitting}
-            className="submit-button-swipe px-8 py-3 font-semibold text-white bg-purple-600 rounded-full transition disabled:bg-gray-500 disabled:cursor-not-allowed"
-          >
-            Submit
-          </LoadingButton>
-        </div>
-      </motion.form>
+      <div className="text-center pt-4">
+        <LoadingButton
+          type="submit"
+          isLoading={isSubmitting}
+          className="submit-button-swipe px-8 py-3 font-semibold text-[--background] bg-[--foreground] rounded-full transition disabled:bg-gray-500 disabled:cursor-not-allowed"
+        >
+          Submit
+        </LoadingButton>
+      </div>
+    </motion.form>
     // </div>
   );
 };

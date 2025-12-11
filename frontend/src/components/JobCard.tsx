@@ -219,12 +219,12 @@ const JobCard = ({
             {job.match_score && (
               <div className="mb-4">
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Match Score</span>
-                  <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">{job.match_score}%</span>
+                  <span className="text-xs font-semibold text-[--foreground]/50">Match Score</span>
+                  <span className="text-xs font-bold text-[--foreground]">{job.match_score}%</span>
                 </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                <div className="w-full bg-[--foreground]/10 rounded-full h-2">
                   <div
-                    className="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-500"
+                    className="bg-[--foreground] h-2 rounded-full transition-all duration-500"
                     style={{ width: `${job.match_score}%` }}
                   />
                 </div>
@@ -244,10 +244,7 @@ const JobCard = ({
               <LoadingButton
                 onClick={handleViewJobClick}
                 isLoading={false}
-                className={`w-full px-4 py-2.5 rounded-lg text-white font-semibold flex items-center justify-center transition-colors duration-300 ${isDemoMode
-                  ? "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-md"
-                  : "bg-indigo-600 hover:bg-indigo-700"
-                  }`}
+                className="w-full px-4 py-2.5 rounded-lg text-[--background] bg-[--foreground] hover:opacity-90 font-semibold flex items-center justify-center transition-opacity duration-300"
               >
                 {isDemoMode ? (
                   <>
@@ -276,7 +273,7 @@ const JobCard = ({
                 <LoadingButton
                   onClick={handleApplyClick}
                   isLoading={isApplying}
-                  className="flex-1 px-4 py-2.5 rounded-lg text-white bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 font-semibold flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="flex-1 px-4 py-2.5 rounded-lg text-[--background] bg-[--foreground] hover:opacity-90 font-semibold flex items-center justify-center transition-opacity duration-300"
                 >
                   <CheckCheck size={18} className="mr-2" />
                   Apply
@@ -293,8 +290,8 @@ const JobCard = ({
                 onClick={() => handleJobFeedback("thumbs_up")}
                 disabled={jobFeedback !== null}
                 className={`p-2 rounded-lg transition-colors ${jobFeedback === "thumbs_up"
-                    ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-                    : "text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+                  ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+                  : "text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
                   } disabled:opacity-50`}
                 aria-label="Helpful"
               >
@@ -304,8 +301,8 @@ const JobCard = ({
                 onClick={() => handleJobFeedback("thumbs_down")}
                 disabled={jobFeedback !== null}
                 className={`p-2 rounded-lg transition-colors ${jobFeedback === "thumbs_down"
-                    ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
-                    : "text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
+                  : "text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                   } disabled:opacity-50`}
                 aria-label="Not helpful"
               >
@@ -320,7 +317,7 @@ const JobCard = ({
               <LoadingButton
                 onClick={handleMoveClick}
                 isLoading={isMoving}
-                className="w-full px-4 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700 font-semibold"
+                className="w-full px-4 py-2 rounded-md text-[--background] bg-[--foreground] hover:opacity-90 font-semibold"
               >
                 Move to Recommendations
               </LoadingButton>
