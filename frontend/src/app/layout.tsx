@@ -7,11 +7,15 @@ import { AuthProvider } from "@/context/AuthContext";
 import AuthInitializer from "@/components/AuthInitializer";
 import { ThemeProvider } from "@/context/ThemeContext";
 import Script from "next/script";
-import { Inter } from 'next/font/google';
 import AppContent from "@/components/AppContent";
 import QueryProvider from "@/components/QueryProvider";
+import { Space_Grotesk } from 'next/font/google';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-space-grotesk',
+  display: 'swap'
+});
 
 export const metadata = {
   metadataBase: new URL("https://www.tackleit.xyz"),
@@ -122,7 +126,7 @@ import BodyWrapper from "@/components/BodyWrapper";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={spaceGrotesk.variable}>
       <head>
         {/* Structured Data */}
         <script

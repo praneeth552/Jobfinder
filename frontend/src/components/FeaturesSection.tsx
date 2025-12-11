@@ -1,7 +1,8 @@
 "use client";
 
-import { Globe, BrainCircuit, FileText, Bell, User, FileUp, Star, Zap, ShieldCheck } from "lucide-react";
-import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
+import { useState } from "react";
+import { BrainCircuit, FileText, Bell, User, FileUp, Star, ChevronDown, ChevronUp } from "lucide-react";
+import { motion, useMotionTemplate, useMotionValue, AnimatePresence } from "framer-motion";
 import { MouseEvent } from "react";
 import { useAnimations } from "@/context/AnimationContext";
 
@@ -11,36 +12,42 @@ const features = [
     title: "AI-Powered Recommendations",
     description: "Leverage our advanced AI to get job recommendations that truly match your skills and career goals.",
     className: "md:col-span-2",
+    isPrimary: true,
   },
   {
     icon: User,
     title: "Personalized Dashboard",
     description: "A dedicated dashboard to manage your job applications, preferences, and recommendations.",
     className: "md:col-span-1",
+    isPrimary: true,
   },
   {
     icon: FileUp,
     title: "Intelligent Resume Parsing",
     description: "Automatically extracts your skills and experience from your resume to save you time.",
     className: "md:col-span-1",
+    isPrimary: true,
   },
   {
     icon: Star,
     title: "Advanced Job Tracking (Pro)",
     description: "Save, apply, and manage your job applications with our advanced tracking tools.",
     className: "md:col-span-2",
+    isPrimary: false,
   },
   {
     icon: FileText,
     title: "Google Sheets Integration (Pro)",
     description: "Automatically export all your curated job listings directly into your personal Google Sheets.",
     className: "md:col-span-2",
+    isPrimary: false,
   },
   {
     icon: Bell,
     title: "Smart Notifications (Pro)",
     description: "Get instant notifications whenever new relevant jobs that match your profile are found.",
     className: "md:col-span-1",
+    isPrimary: false,
   },
 ];
 
@@ -90,6 +97,10 @@ function FeatureCard({ feature }: { feature: typeof features[0] }) {
 
 export default function FeaturesSection() {
   const { animationsEnabled } = useAnimations();
+  const [showAll, setShowAll] = useState(false);
+
+  const visibleFeatures = showAll ? features : features.filter(f => f.isPrimary);
+  const proFeatures = features.filter(f => !f.isPrimary);
 
   return (
     <section className="py-24 px-4">
@@ -110,10 +121,35 @@ export default function FeaturesSection() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {features.map((feature, index) => (
+          {visibleFeatures.map((feature, index) => (
             <FeatureCard key={index} feature={feature} />
           ))}
         </div>
+
+        {/* View All / View Less Toggle */}
+        <AnimatePresence>
+          {proFeatures.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex justify-center mt-10"
+            >
+              <button
+                onClick={() => setShowAll(!showAll)}
+                className="group flex items-center gap-2 px-6 py-3 rounded-full border border-[--border] bg-[--card-background] hover:border-[--primary]/50 hover:bg-[--primary]/5 transition-all duration-300 text-[--foreground]/80 hover:text-[--primary]"
+              >
+                <span className="font-medium">
+                  {showAll ? "Show Less" : `View ${proFeatures.length} Pro Features`}
+                </span>
+                {showAll ? (
+                  <ChevronUp className="w-5 h-5 transition-transform group-hover:-translate-y-0.5" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 transition-transform group-hover:translate-y-0.5" />
+                )}
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );
