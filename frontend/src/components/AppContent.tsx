@@ -27,7 +27,7 @@ const AppContent = ({ children }: { children: ReactNode }) => {
     <>
       <ThemedLayout>{children}</ThemedLayout>
       <AnimatePresence>
-        {showSearchBar && (
+        {showSearchBar && auth?.isAuthenticated && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}

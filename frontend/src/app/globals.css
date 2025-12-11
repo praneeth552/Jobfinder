@@ -283,6 +283,16 @@ textarea {
   background: rgb(71, 85, 105);
 }
 
+/* Scrollbar Hide - for hiding scrollbar while maintaining scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
 /* Marquee Animation */
 @keyframes marquee {
   0% {

@@ -29,8 +29,7 @@ const ROLES = [
 ];
 const LOCATIONS = ["Bangalore", "Hyderabad", "Pune", "Mumbai", "Delhi NCR", "Chennai", "Remote (India)", "San Francisco Bay Area", "New York City", "London", "Berlin", "Remote (Global)"];
 const EXPERIENCE_LEVELS = ["Internship", "Fresher", "1-3 Years", "3-5 Years", "5-7 Years", "7-10 Years", "10+ Years"];
-const SALARY_RANGES = ["0-5 LPA", "5-10 LPA", "10-20 LPA", "20-30 LPA", "30-50 LPA", "50+ LPA"];
-const COMPANY_SIZES = ["Startup (1-50)", "Mid-Size (51-500)", "Large (500+)"];
+// REMOVED: SALARY_RANGES and COMPANY_SIZES - not used in job filtering
 const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship"];
 const WORK_ARRANGEMENTS = ["On-site", "Hybrid", "Remote"];
 
@@ -153,8 +152,7 @@ export default function PreferencesClient() {
     location: [] as string[],
     tech_stack: [] as string[],
     experience_level: "",
-    desired_salary: "",
-    company_size: [] as string[],
+    // REMOVED: desired_salary and company_size - not used in filtering
     job_type: [] as string[],
     work_arrangement: [] as string[],
     // NEW FIELDS for enhanced role matching
@@ -227,8 +225,7 @@ export default function PreferencesClient() {
             location: data.location || [],
             tech_stack: data.tech_stack || [],
             experience_level: data.experience_level || "",
-            desired_salary: data.desired_salary || "",
-            company_size: data.company_size || [],
+            // REMOVED: desired_salary and company_size
             job_type: data.job_type || [],
             work_arrangement: data.work_arrangement || [],
             seniority_level: data.seniority_level || "",
@@ -345,7 +342,6 @@ export default function PreferencesClient() {
     const toastId = toast.loading("Saving your preferences...");
     try {
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/preferences`, preferences, { headers: { Authorization: `Bearer ${Cookies.get("token")}` } });
-      toast.success("Preferences saved successfully!", { id: toastId });
       toast.success("Preferences saved successfully!", { id: toastId });
 
       // Check for demo intent job
@@ -532,13 +528,7 @@ export default function PreferencesClient() {
               {EXPERIENCE_LEVELS.map(exp => <SelectionPill key={exp} label={exp} isSelected={preferences.experience_level === exp} onClick={() => handleSingleSelect('experience_level', exp)} />)}
             </PreferenceCard>
 
-            <PreferenceCard title="What's your desired salary?" description="Let us know your salary expectations (LPA - Lakhs Per Annum).">
-              {SALARY_RANGES.map(salary => <SelectionPill key={salary} label={salary} isSelected={preferences.desired_salary === salary} onClick={() => handleSingleSelect('desired_salary', salary)} />)}
-            </PreferenceCard>
-
-            <PreferenceCard title="What's your ideal company size?" description="Select up to 2 company sizes.">
-              {COMPANY_SIZES.map(size => <SelectionPill key={size} label={size} isSelected={preferences.company_size.includes(size)} onClick={() => handleMultiSelect('company_size', size, 2)} />)}
-            </PreferenceCard>
+            {/* REMOVED: Salary and Company Size preference cards - not used in job filtering */}
 
             <PreferenceCard title="What type of employment are you looking for?" description="Select up to 2 job types.">
               {JOB_TYPES.map(type => <SelectionPill key={type} label={type} isSelected={preferences.job_type.includes(type)} onClick={() => handleMultiSelect('job_type', type, 2)} />)}

@@ -60,7 +60,7 @@ def build_prompt(user_profile, jobs):
     ]
     jobs_json = json.dumps(jobs_data, indent=2)
 
-    return f"""You are a job-matching system. Find the BEST matching jobs for this candidate.
+    return f"""You are a job-matching expert. Find the BEST matching jobs for this candidate.
 
 # CANDIDATE PROFILE
 {user_profile}
@@ -68,17 +68,20 @@ def build_prompt(user_profile, jobs):
 # AVAILABLE JOBS (Pre-filtered for relevance)
 {jobs_json}
 
-# SCORING CRITERIA
-Score each job 0-100 based on:
-- Location match (user's preferred locations): +30 points
-- Skills overlap (tech stack in description): +40 points
-- Role title match (matches desired roles): +30 points
+# SCORING RULES (0-100)
+- Location/Remote match: +30 pts (exact location or remote if user prefers remote)
+- Role title match: +30 pts (job title matches desired roles)
+- Skills overlap: +25 pts (tech stack mentioned in job description)
+- Job type match (Full-time/Part-time/Contract): +10 pts
+- Seniority level match: +5 pts
 
 # OUTPUT REQUIREMENTS
-- Return 8-15 jobs as a JSON array
-- Include jobs with score 40 or higher (be generous)
-- Sort by match_score descending
+- Return 10-20 jobs as a JSON array
+- Include jobs with score 25 or higher (be GENEROUS for experienced candidates)
+- For candidates with 5+ years experience, include senior-level roles
+- For candidates wanting Remote work, prioritize remote jobs
 - Maximum 3 jobs per company
+- Sort by match_score descending
 
 Return ONLY valid JSON. No markdown, no backticks.
 
@@ -152,16 +155,28 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
         
         print(f"DEBUG: Fetched {len(all_jobs)} total jobs from database")
         
-        # Pre-filter jobs based on user preferences
+        # Pre-filter jobs based on user preferences - ENHANCED VERSION
         def pre_filter_jobs(jobs, prefs, resume):
+            """Filter jobs using ALL preference fields with scoring-based approach."""
             filtered = []
             
-            # Extract filter criteria
+            # Extract ALL filter criteria
             preferred_locations = [loc.lower() for loc in prefs.get("location", [])]
             preferred_roles = [role.lower() for role in prefs.get("role", [])]
-            experience_level = prefs.get("experience_level", "").lower()
-            exclude_keywords = [kw.lower() for kw in prefs.get("exclude_keywords", [])]
             tech_stack = [tech.lower() for tech in prefs.get("tech_stack", [])]
+            exclude_keywords = [kw.lower() for kw in prefs.get("exclude_keywords", [])]
+            must_have_keywords = [kw.lower() for kw in prefs.get("must_have_keywords", [])]
+            
+            # NEW: Extract previously unused preferences
+            job_types = [jt.lower() for jt in prefs.get("job_type", [])]  # Full-time, Part-time, Contract
+            work_arrangements = [wa.lower() for wa in prefs.get("work_arrangement", [])]  # Remote, Hybrid, On-site
+            experience_level = prefs.get("experience_level", "").lower()  # 10+ Years, 1-3 Years, etc.
+            seniority_level = prefs.get("seniority_level", "").lower()  # Senior (5-10 years), Junior, etc.
+            role_type = prefs.get("role_type", "").lower()  # Individual Contributor, Management
+            
+            # Check if user wants remote work (from location OR work_arrangement)
+            user_wants_remote = any("remote" in loc for loc in preferred_locations) or \
+                               any("remote" in wa for wa in work_arrangements)
             
             # Also get roles from resume if available
             if resume:
@@ -172,52 +187,91 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
                 location = (job.get("location") or "").lower()
                 description = (job.get("description") or "").lower()
                 
+                # === HARD FILTERS (Skip job if fails) ===
+                
                 # Skip if contains excluded keywords
-                if any(kw in title or kw in description for kw in exclude_keywords):
+                if exclude_keywords and any(kw in title or kw in description for kw in exclude_keywords):
                     continue
                 
-                # Experience-based filtering
-                is_senior_job = any(kw in title for kw in ["senior", "sr.", "sr ", "lead", "principal", "staff", "manager", "architect", "director"])
-                is_entry_job = any(kw in title or kw in description for kw in ["fresher", "entry", "graduate", "intern", "trainee", "0-1", "0-2", "1-2", "associate", "junior"])
-                has_high_exp_req = any(exp in description for exp in ["5+ years", "5-", "6-", "7-", "8-", "9-", "10+", "experienced professionals", "5 years", "6 years", "7 years", "8 years", "9 years", "10 years", "minimum 5", "minimum 6", "minimum 7", "minimum 8"])
+                # Experience/Seniority detection
+                is_senior_job = any(kw in title for kw in ["senior", "sr.", "sr ", "lead", "principal", "staff", "architect", "director", "head"])
+                is_entry_job = any(kw in title for kw in ["fresher", "entry", "graduate", "intern", "trainee", "associate", "junior"])
+                is_management_job = any(kw in title for kw in ["manager", "head", "director", "vp", "lead", "team lead"])
                 
-                # FRESHER/INTERN: Skip senior roles
-                if experience_level.lower() in ["fresher", "internship", "junior (0-2 years)", "0-1 years", "entry level", "0-2 years"]:
-                    if is_senior_job or has_high_exp_req:
+                # Fresher/Intern: Skip senior roles
+                if experience_level in ["fresher", "internship", "0-1 years"] or "junior" in seniority_level:
+                    if is_senior_job:
                         continue
                 
-                # MID-LEVEL (2-5 years): Skip principal/director level roles
-                elif experience_level in ["2-3 years", "3-5 years", "mid (2-5 years)"]:
-                    if any(kw in title for kw in ["principal", "director", "vp", "head of"]):
-                        continue
-                
-                # SENIOR (5+ years): Skip fresh graduate/intern roles
-                elif experience_level in ["5+ years", "senior (5+ years)", "senior"]:
+                # Senior (5+ years, 7-10 years, 10+ years): Skip entry-level
+                senior_experience = ["5-7 years", "7-10 years", "10+ years"]
+                if experience_level in senior_experience or "senior" in seniority_level or "staff" in seniority_level:
                     if is_entry_job and not is_senior_job:
-                        continue  # Skip entry-level only jobs
+                        continue
                 
+                # Role type filtering (IC vs Management) - only if specified
+                if role_type:
+                    if role_type == "individual contributor" and is_management_job:
+                        continue
+                    if "management" in role_type and not is_management_job:
+                        continue
+                
+                # === SCORING (Higher score = better match) ===
                 score = 0
                 
-                # Location match (+3 points)
-                if any(loc in location for loc in preferred_locations) or "remote" in location:
-                    score += 3
+                # Location match (+4 points) - Improved remote handling
+                remote_keywords = ["remote", "work from home", "wfh", "anywhere", "distributed"]
+                is_remote_job = any(kw in location for kw in remote_keywords)
                 
-                # Role match (+3 points)
+                if user_wants_remote and is_remote_job:
+                    score += 4
+                elif preferred_locations:
+                    # Check if any preferred city is in job location
+                    for loc in preferred_locations:
+                        # Extract city name (e.g., "bangalore" from "remote (india)")
+                        city = loc.replace("remote", "").replace("(", "").replace(")", "").strip()
+                        if city and city in location:
+                            score += 4
+                            break
+                        elif loc in location:
+                            score += 4
+                            break
+                
+                # Role match (+4 points)
                 if any(role in title for role in preferred_roles):
+                    score += 4
+                
+                # Tech stack match (+2 points per match, max 6)
+                tech_matches = sum(1 for tech in tech_stack if tech in description or tech in title)
+                score += min(tech_matches * 2, 6)
+                
+                # Must-have keywords (+3 points)
+                if must_have_keywords and any(kw in title or kw in description for kw in must_have_keywords):
                     score += 3
                 
-                # Tech stack match (+1 point per match, max 3)
-                tech_matches = sum(1 for tech in tech_stack if tech in description or tech in title)
-                score += min(tech_matches, 3)
+                # Job type match (+2 points) - Full-time, Part-time, Contract
+                if job_types:
+                    if any(jt in description.lower() or jt in title for jt in job_types):
+                        score += 2
                 
-                # Only include jobs with some relevance
-                if score >= 2:
+                # Work arrangement match (+2 points)
+                if work_arrangements:
+                    if any("remote" in wa for wa in work_arrangements) and is_remote_job:
+                        score += 2
+                    elif any("hybrid" in wa for wa in work_arrangements) and "hybrid" in description:
+                        score += 2
+                    elif any("on-site" in wa or "onsite" in wa for wa in work_arrangements) and not is_remote_job:
+                        score += 2
+                
+                # Include all jobs with any relevance (let AI do final filtering)
+                # Lower threshold to 1 to include more jobs for experienced users
+                if score >= 1:
                     job["_prefilter_score"] = score
                     filtered.append(job)
             
-            # Sort by pre-filter score and take top 50 (reduced from 100 for faster processing)
+            # Sort by score and take top 100 for AI (increased from 50)
             filtered.sort(key=lambda x: x.get("_prefilter_score", 0), reverse=True)
-            return filtered[:50]
+            return filtered[:100]
         
         # Apply pre-filtering
         jobs = pre_filter_jobs(all_jobs, preferences, resume_data)

@@ -24,6 +24,7 @@ import FeedbackModal from "./FeedbackModal"; // Import FeedbackModal for testing
 import OnboardingTour from "./OnboardingTour"; // Import OnboardingTour
 import ChangelogModal from "./ChangelogModal"; // Import ChangelogModal
 import { useAnimations } from "@/context/AnimationContext";
+import { useAuth } from "@/context/AuthContext";
 import { useFeedbackTriggers } from "@/hooks/useFeedbackTriggers";
 import OverallRating from "./OverallRating";
 
@@ -40,6 +41,7 @@ interface JobApplication {
 
 export default function DashboardClient() {
   const { animationsEnabled } = useAnimations();
+  const { logout: authLogout } = useAuth();
 
   // Dynamic card variants based on animation preference
   const cardVariants = {
@@ -298,11 +300,9 @@ export default function DashboardClient() {
   };
 
   const handleLogout = useCallback(() => {
-    Cookies.remove("token");
-    Cookies.remove("user_id");
-    Cookies.remove("plan_type");
+    authLogout(); // Clear auth context state
     router.replace("/signin");
-  }, [router]);
+  }, [router, authLogout]);
 
   const handleCardAction = async (job: JobApplication, status: 'saved' | 'applied') => {
     const loadingKey = `${status}-${job.id}`;
@@ -571,20 +571,22 @@ export default function DashboardClient() {
       >
         <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-            <motion.h1
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
-              className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:to-purple-400 text-center md:text-left pb-2"
-            >
-              Your AI-Curated Job Feed
-            </motion.h1>
-            <p className="text-center md:text-left text-sm text-gray-600 dark:text-gray-400 -mt-2">
-              AI-generated match insights are for guidance only. Always review the official job posting.
-            </p>
+            <div className="flex-shrink-0 md:min-w-[280px]">
+              <motion.h1
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, ease: "easeInOut" }}
+                className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:to-purple-400 text-center md:text-left pb-2 whitespace-nowrap"
+              >
+                Your AI-Curated Job Feed
+              </motion.h1>
+              <p className="text-center md:text-left text-sm text-gray-600 dark:text-gray-400 -mt-2">
+                AI-generated match insights are for guidance only. Always review the official job posting.
+              </p>
+            </div>
 
             <motion.div
-              className="flex items-center justify-center md:justify-end gap-3 w-full md:w-auto relative z-10"
+              className="flex flex-nowrap items-center justify-center md:justify-end gap-3 w-full md:w-auto relative z-10 pb-2"
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
@@ -706,44 +708,54 @@ export default function DashboardClient() {
                 </motion.div>
               )}
 
-              <motion.div
-                key={`profile-wrapper-${wiggleProfileKey}`}
-                animate={{
-                  x: [0, 8, -4, 2, 0],
-                  transition: {
-                    duration: 0.5,
-                    times: [0, 0.2, 0.5, 0.75, 1],
-                    ease: "easeInOut"
-                  }
-                }}
-                style={{
-                  contain: 'layout style',
-                  isolation: 'isolate'
-                }}
-                layout={false}>
-                <HeaderButton
-                  id="profile"
-                  icon={<User size={22} />}
-                  expandedContent={
-                    <UserProfile
-                      userPlan={userPlan}
-                      authType={authType}
-                      onLogout={handleLogout}
-                      onEditPreferences={() => router.push('/preferences')}
-                      onBilling={() => router.push('/billing')}
-                      onNavigateToSaved={() => router.push('/saved')}
-                      onNavigateToApplied={() => router.push('/applied')}
-                      userName={userName}
-                      userEmail={userEmail}
-                      isExpanded={expandedButton === 'profile'}
-                    />
-                  }
-                  isExpanded={expandedButton === 'profile'}
-                  onExpand={handleExpandButton}
-                  ariaLabel="User Profile"
-                  shouldTriggerWiggle={false}
-                />
-              </motion.div>
+              {isDemoMode ? (
+                <button
+                  onClick={() => router.push("/signup?from=demo")}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full font-semibold transition duration-300 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white shadow-md"
+                >
+                  <User size={16} />
+                  <span className="whitespace-nowrap">Sign Up</span>
+                </button>
+              ) : (
+                <motion.div
+                  key={`profile-wrapper-${wiggleProfileKey}`}
+                  animate={{
+                    x: [0, 8, -4, 2, 0],
+                    transition: {
+                      duration: 0.5,
+                      times: [0, 0.2, 0.5, 0.75, 1],
+                      ease: "easeInOut"
+                    }
+                  }}
+                  style={{
+                    contain: 'layout style',
+                    isolation: 'isolate'
+                  }}
+                  layout={false}>
+                  <HeaderButton
+                    id="profile"
+                    icon={<User size={22} />}
+                    expandedContent={
+                      <UserProfile
+                        userPlan={userPlan}
+                        authType={authType}
+                        onLogout={handleLogout}
+                        onEditPreferences={() => router.push('/preferences')}
+                        onBilling={() => router.push('/billing')}
+                        onNavigateToSaved={() => router.push('/saved')}
+                        onNavigateToApplied={() => router.push('/applied')}
+                        userName={userName}
+                        userEmail={userEmail}
+                        isExpanded={expandedButton === 'profile'}
+                      />
+                    }
+                    isExpanded={expandedButton === 'profile'}
+                    onExpand={handleExpandButton}
+                    ariaLabel="User Profile"
+                    shouldTriggerWiggle={false}
+                  />
+                </motion.div>
+              )}
 
               {userPlan === "free" && (
                 <button

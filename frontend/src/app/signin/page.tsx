@@ -194,7 +194,7 @@ function SigninForm() {
   };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen px-4 py-8 animated-gradient-bg overflow-hidden">
+    <main className="flex flex-col items-center justify-center min-h-screen px-4 py-8 pt-24 animated-gradient-bg overflow-hidden">
       <SimpleNavbar />
       <Curtain isLoading={isSuccess} onFinish={handleAnimationFinish} />
       <AnimatePresence mode="wait" onExitComplete={() => router.push('/?signup=true')}>

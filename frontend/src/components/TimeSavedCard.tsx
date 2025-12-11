@@ -43,7 +43,9 @@ const TimeSavedCard = () => {
   const { data, isLoading, error } = useQuery<TimeSavedStats, Error>({
     queryKey: ["timeSavedStats"],
     queryFn: fetchTimeSavedStats,
-    staleTime: 60_000,
+    staleTime: 30_000, // Consider data stale after 30 seconds
+    refetchInterval: 30_000, // Auto-refetch every 30 seconds
+    refetchOnWindowFocus: true, // Refetch when window regains focus
   });
 
   const totalMinutesSaved = data?.total_minutes_saved ?? 0;

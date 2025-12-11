@@ -108,8 +108,7 @@ const HeaderButton: React.FC<HeaderButtonProps> = ({
         willChange: 'auto',
         minWidth: isExpanded ? 'auto' : '48px',
         contain: 'layout style',
-        isolation: 'isolate',
-        overflow: 'hidden'
+        isolation: 'isolate'
       }}
     >
       <AnimatePresence mode="sync" initial={false}>

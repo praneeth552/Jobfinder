@@ -101,9 +101,13 @@ async def submit_job_feedback(
         "created_at": datetime.utcnow()
     }
     
-    # Store in a separate job_feedback collection
+    # Store in a separate job_feedback collection - use upsert to prevent duplicates
     job_feedback_collection = db["job_feedback"]
-    await job_feedback_collection.insert_one(job_feedback_doc)
+    await job_feedback_collection.update_one(
+        {"user_id": ObjectId(user_id), "job_url": job_feedback.job_url},
+        {"$set": job_feedback_doc},
+        upsert=True
+    )
     
     return {
         "message": "Thanks for the quick feedback!",

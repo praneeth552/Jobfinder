@@ -15,6 +15,7 @@ interface AuthContextProps {
   isInitialized: boolean;
   setPlanType: (plan: "free" | "pro") => void;
   fetchUser: () => Promise<void>;
+  logout: () => void;
 }
 
 export const AuthContext = createContext<AuthContextProps | null>(null);
@@ -62,6 +63,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsInitialized(true);
   }, []);
 
+  const logout = useCallback(() => {
+    Cookies.remove("token");
+    Cookies.remove("user_id");
+    Cookies.remove("plan_type");
+    setToken(null);
+    setUserId(null);
+    setUserName(null);
+    setUserEmail(null);
+    setPlanType("free");
+  }, []);
+
   useEffect(() => {
     const initialize = async () => {
       await fetchUser();
@@ -76,7 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ token, userId, userName, userEmail, planType, isAuthenticated: !!token, isInitialized, setPlanType, fetchUser }}
+      value={{ token, userId, userName, userEmail, planType, isAuthenticated: !!token, isInitialized, setPlanType, fetchUser, logout }}
     >
       {children}
     </AuthContext.Provider>
