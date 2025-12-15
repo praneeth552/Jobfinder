@@ -307,6 +307,7 @@ function SigninForm() {
         onConfirm={handleRestoreAccount}
         title="Restore Your Account?"
         message="Your account is scheduled for deletion. Would you like to restore it and continue?"
+        confirmText="Restore Account"
       />
     </main>
   );

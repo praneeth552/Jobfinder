@@ -6,8 +6,11 @@ import { X, Check, Sparkles } from "lucide-react";
 import axios from "axios";
 import Cookies from "js-cookie";
 
-const CURRENT_VERSION = "2.1.1";
-const RELEASE_DATE = "December 3, 2025";
+const CURRENT_VERSION = "2.1.2";
+const RELEASE_DATE = "December 15, 2025";
+
+// Set to true to always show the modal for testing, then set back to false
+const FORCE_SHOW_FOR_TESTING = false;
 
 interface ChangelogItem {
     title: string;
@@ -17,36 +20,74 @@ interface ChangelogItem {
 
 const CHANGELOG_V2_1: ChangelogItem[] = [
     {
-        title: "Auto-Generation for New Users",
+        title: "Save & Apply for Everyone",
         description:
-            "New users automatically get their first job recommendations after completing onboarding—zero clicks needed! Just set preferences and go.",
+            "All users can now save and apply to jobs—no Pro required. Track your applications easily!",
         type: "feature",
     },
     {
-        title: "Global Animation Toggle",
+        title: "Smarter Location Matching",
         description:
-            "Choose your experience: instant page loads or delightful Framer Motion animations. Find the toggle in the navbar for a customized UX.",
-        type: "feature",
-    },
-    {
-        title: "Secure Dashboard Access",
-        description:
-            "Dashboard now requires authentication. Access via sign-in or try our demo mode—no more unauthorized access.",
+            "We now recognize city aliases (Bangalore↔Bengaluru, Mumbai↔Bombay) for better job matches.",
         type: "improvement",
     },
     {
-        title: "Updated Workflow Architecture",
+        title: "Hand-Drawn Welcome",
         description:
-            "Our workflow page now accurately shows all 12 steps of the user journey, from signup to deployment, with proper visual flow.",
+            "New animated welcome screen with elegant SVG path reveal instead of typing animation.",
+        type: "improvement",
+    },
+    {
+        title: "Better Feedback Timing",
+        description:
+            "Feedback prompts now appear after 5 applied jobs or 15 minutes—less intrusive, more helpful.",
+        type: "fix",
+    },
+    {
+        title: "Refined Design Language",
+        description:
+            "All modals and buttons now use consistent monochrome styling with subtle hand-drawn touches.",
         type: "improvement",
     },
 ];
 
+// Type icons using hand-drawn style characters
+const getTypeIcon = (type: string) => {
+    switch (type) {
+        case "feature":
+            return "✦";
+        case "improvement":
+            return "↗";
+        case "fix":
+            return "✓";
+        default:
+            return "•";
+    }
+};
+
 export default function ChangelogModal() {
     const [isVisible, setIsVisible] = useState(false);
 
+    // Lock body scroll when modal is visible
+    useEffect(() => {
+        if (isVisible) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isVisible]);
+
     useEffect(() => {
         const checkVersion = async () => {
+            // For testing: force show the modal
+            if (FORCE_SHOW_FOR_TESTING) {
+                setTimeout(() => setIsVisible(true), 500);
+                return;
+            }
+
             const token = Cookies.get("token");
             if (!token) return;
 
@@ -118,7 +159,7 @@ export default function ChangelogModal() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998]"
+                        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9998]"
                         onClick={handleClose}
                     />
 
@@ -127,58 +168,112 @@ export default function ChangelogModal() {
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                        transition={{ type: "spring", damping: 25, stiffness: 300 }}
                         className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
                     >
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden w-full max-w-2xl max-h-[90vh] flex flex-col">
+                        <div
+                            className="bg-[--background] border-2 border-[--foreground]/20 rounded-2xl shadow-2xl overflow-hidden w-full max-w-2xl max-h-[90vh] flex flex-col relative"
+                            style={{
+                                // Subtle hand-drawn border effect
+                                borderRadius: "18px 20px 16px 22px",
+                            }}
+                        >
+                            {/* Hand-drawn decorative corner scribbles */}
+                            <svg
+                                className="absolute top-2 left-2 w-8 h-8 text-[--foreground]/10"
+                                viewBox="0 0 32 32"
+                                fill="none"
+                            >
+                                <path
+                                    d="M2 12 Q 6 2, 16 2"
+                                    stroke="currentColor"
+                                    strokeWidth="1.5"
+                                    strokeLinecap="round"
+                                />
+                                <path
+                                    d="M2 18 Q 4 8, 12 4"
+                                    stroke="currentColor"
+                                    strokeWidth="1"
+                                    strokeLinecap="round"
+                                />
+                            </svg>
+                            <svg
+                                className="absolute top-2 right-2 w-8 h-8 text-[--foreground]/10"
+                                viewBox="0 0 32 32"
+                                fill="none"
+                            >
+                                <path
+                                    d="M30 12 Q 26 2, 16 2"
+                                    stroke="currentColor"
+                                    strokeWidth="1.5"
+                                    strokeLinecap="round"
+                                />
+                            </svg>
+
                             {/* Header */}
-                            <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-6 sm:px-8 py-4 sm:py-6 relative flex-shrink-0">
+                            <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-[--foreground]/10 relative flex-shrink-0">
                                 <button
                                     onClick={handleClose}
-                                    className="absolute top-3 right-3 sm:top-4 sm:right-4 text-white/80 hover:text-white transition-colors"
+                                    className="absolute top-3 right-3 sm:top-4 sm:right-4 p-1.5 rounded-full text-[--foreground]/50 hover:text-[--foreground] hover:bg-[--foreground]/5 transition-colors"
                                 >
-                                    <X size={20} className="sm:w-6 sm:h-6" />
+                                    <X size={18} className="sm:w-5 sm:h-5" />
                                 </button>
 
-                                <div className="flex items-center gap-2 sm:gap-3 text-white pr-8">
-                                    <Sparkles size={24} className="sm:w-8 sm:h-8 animate-pulse flex-shrink-0" />
+                                <div className="flex items-center gap-3 pr-8">
+                                    <div className="p-2 rounded-xl bg-[--foreground]/5">
+                                        <Sparkles size={24} className="sm:w-7 sm:h-7 text-[--foreground]/70" />
+                                    </div>
                                     <div>
-                                        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">What's New in v{CURRENT_VERSION}</h2>
-                                        <p className="text-sm sm:text-base text-white/90 mt-0.5 sm:mt-1">{RELEASE_DATE}</p>
+                                        <h2 className="text-xl sm:text-2xl font-bold text-[--foreground] relative">
+                                            What's New in v{CURRENT_VERSION}
+                                            {/* Scribble underline */}
+                                            <svg
+                                                className="absolute -bottom-1 left-0 w-32 h-2 text-[--foreground]/20"
+                                                viewBox="0 0 128 8"
+                                                fill="none"
+                                            >
+                                                <path
+                                                    d="M2 4 Q 32 2, 64 5 T 126 3"
+                                                    stroke="currentColor"
+                                                    strokeWidth="1.5"
+                                                    strokeLinecap="round"
+                                                />
+                                            </svg>
+                                        </h2>
+                                        <p className="text-sm text-[--foreground]/50 mt-1">{RELEASE_DATE}</p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Content */}
                             <div className="p-6 sm:p-8 overflow-y-auto flex-1">
-                                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-4 sm:mb-6">
+                                <p className="text-sm sm:text-base text-[--foreground]/60 mb-5">
                                     We've been working hard to make TackleIt even better! Here's what's new:
                                 </p>
 
-                                <div className="space-y-3 sm:space-y-4">
+                                <div className="space-y-3">
                                     {CHANGELOG_V2_1.map((item, index) => (
                                         <motion.div
                                             key={index}
                                             initial={{ opacity: 0, x: -20 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             transition={{ delay: index * 0.1 }}
-                                            className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-700"
+                                            className="flex gap-3 sm:gap-4 p-4 rounded-xl border border-[--foreground]/10 hover:border-[--foreground]/20 hover:bg-[--foreground]/[0.02] transition-all duration-200"
                                         >
-                                            <div
-                                                className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center text-lg sm:text-xl ${item.type === "feature"
-                                                    ? "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
-                                                    : item.type === "improvement"
-                                                        ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-                                                        : "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-                                                    }`}
-                                            >
-                                                {item.type === "feature" ? "✨" : item.type === "improvement" ? "🚀" : "🔧"}
+                                            <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[--foreground]/5 flex items-center justify-center text-lg text-[--foreground]/70 font-medium">
+                                                {getTypeIcon(item.type)}
                                             </div>
 
                                             <div className="flex-1 min-w-0">
-                                                <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white mb-1">
-                                                    {item.title}
-                                                </h3>
-                                                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <h3 className="font-semibold text-sm sm:text-base text-[--foreground]">
+                                                        {item.title}
+                                                    </h3>
+                                                    <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-[--foreground]/5 text-[--foreground]/50 uppercase tracking-wide">
+                                                        {item.type}
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs sm:text-sm text-[--foreground]/60 mt-1 leading-relaxed">
                                                     {item.description}
                                                 </p>
                                             </div>
@@ -188,10 +283,10 @@ export default function ChangelogModal() {
                             </div>
 
                             {/* Footer */}
-                            <div className="px-6 sm:px-8 py-4 sm:py-6 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+                            <div className="px-6 sm:px-8 py-4 sm:py-5 border-t border-[--foreground]/10 flex-shrink-0">
                                 <button
                                     onClick={handleClose}
-                                    className="w-full px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                                    className="w-full px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-[--foreground] hover:opacity-90 text-[--background] rounded-full font-medium transition-opacity flex items-center justify-center gap-2"
                                 >
                                     <Check size={18} className="sm:w-5 sm:h-5" />
                                     Got It, Thanks!
@@ -204,3 +299,4 @@ export default function ChangelogModal() {
         </AnimatePresence>
     );
 }
+

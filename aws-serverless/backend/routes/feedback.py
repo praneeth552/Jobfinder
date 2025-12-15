@@ -13,7 +13,13 @@ users_collection = db["users"]
 class FeedbackSubmission(BaseModel):
     rating: int = Field(..., ge=1, le=5, description="Rating from 1-5")
     comment: str | None = Field(None, max_length=200, description="Optional comment")
-    trigger: str = Field(..., pattern="^(job_generation|manual|periodic|applied_milestone|time_based|return_visit|exit_intent|success_story)$")
+    trigger: str = Field(..., pattern="^(job_generation|manual|periodic|applied_milestone|time_based|return_visit|success_story|inline_widget)$")
+
+class WidgetFeedback(BaseModel):
+    """For inline feedback widget (bug reports, feature requests, experience ratings)"""
+    type: str = Field(..., pattern="^(bug|feature|rating)$", description="Type of feedback")
+    message: str = Field(..., min_length=1, max_length=500, description="Feedback message")
+    trigger: str = Field(default="inline_widget")
 
 class JobFeedback(BaseModel):
     job_url: str = Field(..., description="URL of the job being rated")
@@ -30,7 +36,7 @@ async def submit_feedback(
     feedback: FeedbackSubmission,
     current_user: dict = Depends(get_current_user)
 ):
-    """Submit user feedback"""
+    """Submit user feedback (rating-based)"""
     user_id = current_user.get("_id")
     
     feedback_doc = {
@@ -54,6 +60,31 @@ async def submit_feedback(
     
     return {
         "message": "Thank you for your feedback!",
+        "feedback_id": str(result.inserted_id)
+    }
+
+@router.post("/feedback/widget", status_code=status.HTTP_201_CREATED)
+async def submit_widget_feedback(
+    feedback: WidgetFeedback,
+    current_user: dict = Depends(get_current_user)
+):
+    """Submit inline widget feedback (bug reports, feature requests, ratings)"""
+    user_id = current_user.get("_id")
+    
+    widget_feedback_doc = {
+        "user_id": ObjectId(user_id),
+        "type": feedback.type,
+        "message": feedback.message,
+        "trigger": "inline_widget",
+        "created_at": datetime.utcnow(),
+        "plan_type": current_user.get("plan_type", "free"),
+    }
+    
+    widget_feedback_collection = db["widget_feedback"]
+    result = await widget_feedback_collection.insert_one(widget_feedback_doc)
+    
+    return {
+        "message": "Thanks for your feedback! 🙏",
         "feedback_id": str(result.inserted_id)
     }
 

@@ -260,7 +260,7 @@ const JobCard = ({
               </LoadingButton>
             )}
             {/* Mobile-only Save and Apply buttons */}
-            {(userPlan === "pro" && onSave && onApply && !showMoveButton) && (
+            {(onSave && onApply && !showMoveButton) && (
               <div className="flex lg:hidden flex-row gap-3">
                 <LoadingButton
                   onClick={handleSaveClick}

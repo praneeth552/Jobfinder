@@ -29,21 +29,21 @@ export default function VersionHistoryTeaser() {
 
                     <div className="max-w-2xl mx-auto mb-8 p-6 rounded-2xl bg-[--card-background] border border-[--border]">
                         <div className="flex items-baseline gap-2 mb-3">
-                            <h3 className="text-xl font-bold text-[--foreground]">v2.1.1</h3>
+                            <h3 className="text-xl font-bold text-[--foreground]">v2.1.2</h3>
                             <span className="px-2 py-0.5 bg-[--foreground] text-[--background] text-xs font-semibold rounded-full">LATEST</span>
                         </div>
                         <ul className="text-left space-y-2 text-sm text-[--foreground]/70">
                             <li className="flex items-start gap-2">
                                 <span className="text-[--foreground]/50 mt-0.5">•</span>
-                                <span>Auto-Generation for New Users</span>
+                                <span>Save & Apply for Everyone</span>
                             </li>
                             <li className="flex items-start gap-2">
                                 <span className="text-[--foreground]/50 mt-0.5">•</span>
-                                <span>Global Animation Toggle</span>
+                                <span>Smarter Location Matching</span>
                             </li>
                             <li className="flex items-start gap-2">
                                 <span className="text-[--foreground]/50 mt-0.5">•</span>
-                                <span>Enhanced Security & Workflow Documentation</span>
+                                <span>Hand-Drawn Welcome & Refined Design</span>
                             </li>
                         </ul>
                     </div>

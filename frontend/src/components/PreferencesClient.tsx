@@ -404,20 +404,20 @@ export default function PreferencesClient() {
             <p className="text-[--foreground]/70">Or, upload your resume to get started quickly. This will autofill your roles and skills.</p>
           </div>
 
-          <div className="relative border-2 border-dashed border-gray-300 hover:border-blue-400 rounded-xl p-8 mb-8 text-center transition-all duration-300 cursor-pointer group hover:bg-blue-50/50">
+          <div className="relative border-2 border-dashed border-[--border] hover:border-[--foreground]/40 rounded-2xl p-8 mb-8 text-center transition-all duration-300 cursor-pointer group hover:bg-[--secondary]/30">
             <label
               htmlFor="resume-upload"
               className={`flex flex-col items-center space-y-4 cursor-pointer ${!isResumeUploadAllowed || isParsing ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               {/* Upload Icon */}
-              <div className={`p-3 rounded-full transition-all duration-300 ${isParsing ? 'bg-gray-100' : 'bg-blue-100 group-hover:bg-blue-200'}`}>
+              <div className={`p-3 rounded-full transition-all duration-300 ${isParsing ? 'bg-[--secondary]' : 'bg-[--foreground]/10 group-hover:bg-[--foreground]/20'}`}>
                 {isParsing ? (
-                  <svg className="w-6 h-6 text-gray-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-[--foreground]/60 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                 ) : (
-                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-[--foreground]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
                 )}
@@ -425,16 +425,16 @@ export default function PreferencesClient() {
 
               {/* Main Text */}
               <div>
-                <h3 className="text-lg font-semibold text-[--foreground]/60 mb-2">
+                <h3 className="text-lg font-semibold text-[--foreground] mb-2">
                   {isParsing ? "Processing Resume..." : "Upload Resume"}
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-sm text-[--foreground]/60 mb-4">
                   {isParsing ? "Please wait while we analyze your document" : "Drag and drop your file here, or click to browse"}
                 </p>
               </div>
 
               {/* File Types */}
-              <div className="flex items-center space-x-2 text-xs text-gray-500 mb-4">
+              <div className="flex items-center space-x-2 text-xs text-[--foreground]/50 mb-4">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
@@ -443,10 +443,10 @@ export default function PreferencesClient() {
 
               {/* Upload Button */}
               <div className={`
-      inline-flex items-center px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 shadow-md
+      inline-flex items-center px-6 py-3 rounded-full font-medium text-sm transition-all duration-200 shadow-md
       ${!isResumeUploadAllowed || isParsing
-                  ? 'bg-gray-400 text-white cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 hover:shadow-lg transform hover:-translate-y-0.5'
+                  ? 'bg-[--foreground]/30 text-[--background] cursor-not-allowed'
+                  : 'bg-[--foreground] text-[--background] hover:opacity-90 active:opacity-80 hover:shadow-lg transform hover:-translate-y-0.5'
                 }
     `}>
                 {isParsing ? "Processing..." : "Choose File"}
@@ -454,7 +454,7 @@ export default function PreferencesClient() {
             </label>
 
             {/* Usage Limit Text */}
-            <p className="text-xs text-gray-500 mt-6 px-4 py-2 bg-gray-50 rounded-lg">
+            <p className="text-xs text-[--foreground]/50 mt-6 px-4 py-2 bg-[--secondary]/50 rounded-lg">
               {!isResumeUploadAllowed && timeRemainingForResumeUpload ? timeRemainingForResumeUpload : "Free users can upload monthly, Pro users can upload weekly."}
             </p>
 

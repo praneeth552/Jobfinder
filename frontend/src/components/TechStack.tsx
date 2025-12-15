@@ -15,7 +15,7 @@ const TechStack = () => {
     { name: 'Tailwind CSS', logo: '/tailwind.svg' },
     { name: 'Gemini', logo: '/gemini.svg' },
     { name: 'AWS', logo: '/aws.svg' },
-    { name: 'Playwright', logo: '/playwright.svg' },
+    // { name: 'Playwright', logo: '/playwright.svg' },
     { name: 'GitHub Actions', logo: '/github-actions.svg' },
     { name: 'Framer Motion', logo: '/framer.svg' },
     { name: 'Razorpay', logo: '/razorpay.svg' },

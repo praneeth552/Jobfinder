@@ -44,7 +44,7 @@ const HeaderButton: React.FC<HeaderButtonProps> = ({
     if (isExpanded && autoCollapse) {
       timerRef.current = setTimeout(() => {
         onExpand?.('');
-      }, 3000);
+      }, 6000);
     } else if (timerRef.current) {
       clearTimeout(timerRef.current);
     }

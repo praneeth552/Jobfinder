@@ -19,8 +19,40 @@ interface VersionRelease {
 
 const VERSIONS: VersionRelease[] = [
     {
+        version: "2.1.2",
+        date: "December 15, 2025",
+        highlight: "Dashboard UX improvements and design refinements",
+        entries: [
+            {
+                category: "feature",
+                title:
+                    "Save & Apply for Everyone - All users can now save and apply to jobs, no Pro required",
+            },
+            {
+                category: "improvement",
+                title:
+                    "Smarter Location Matching - City aliases (Bangalore↔Bengaluru, Mumbai↔Bombay) now supported",
+            },
+            {
+                category: "improvement",
+                title:
+                    "Hand-Drawn Welcome - New animated SVG welcome screen with path reveal animation",
+            },
+            {
+                category: "fix",
+                title:
+                    "Better Feedback Timing - Prompts after 5 applied jobs or 15 minutes instead of intrusive triggers",
+            },
+            {
+                category: "improvement",
+                title:
+                    "Refined Design Language - All modals and buttons use consistent monochrome styling",
+            },
+        ],
+    },
+    {
         version: "2.1.1",
-        date: "December 3, 2024",
+        date: "December 3, 2025",
         highlight: "Enhanced user experience with automated features",
         entries: [
             {
@@ -47,7 +79,7 @@ const VERSIONS: VersionRelease[] = [
     },
     {
         version: "2.0",
-        date: "November 20, 2024",
+        date: "November 20, 2025",
         highlight: "Major milestone: Freemium model & payment integration",
         entries: [
             {
@@ -71,7 +103,7 @@ const VERSIONS: VersionRelease[] = [
     },
     {
         version: "1.5",
-        date: "November 10, 2024",
+        date: "November 10, 2025",
         highlight: "Foundation release with AI-powered matching",
         entries: [
             {
@@ -96,7 +128,7 @@ const VERSIONS: VersionRelease[] = [
 
 export default function VersionHistory() {
     const { animationsEnabled } = useAnimations();
-    const [activeVersion, setActiveVersion] = useState("2.1.1");
+    const [activeVersion, setActiveVersion] = useState("2.1.2");
 
     const scrollToVersion = (version: string) => {
         const element = document.getElementById(`version-${version}`);

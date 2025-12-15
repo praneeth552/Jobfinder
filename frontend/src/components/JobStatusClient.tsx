@@ -131,10 +131,10 @@ const JobStatusClient = ({ status }: { status: 'saved' | 'applied' }) => {
             </motion.h1>
             {jobApplications.length > 0 && (
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setIsConfirmationModalOpen(true)}
-                className='px-4 py-2 rounded-md text-white bg-red-600 hover:bg-red-700 font-semibold'
+                className='px-4 py-2 rounded-full border-2 border-[--foreground]/30 text-[--foreground] hover:bg-[--foreground]/5 hover:border-[--foreground]/50 font-medium transition-colors duration-200'
               >
                 Delete All
               </motion.button>
@@ -192,6 +192,7 @@ const JobStatusClient = ({ status }: { status: 'saved' | 'applied' }) => {
         onConfirm={handleDeleteAll}
         title={`Delete All ${status} Jobs`}
         message={`Are you sure you want to delete all ${status} jobs? This action cannot be undone.`}
+        confirmText="Delete All"
       />
     </>
   );

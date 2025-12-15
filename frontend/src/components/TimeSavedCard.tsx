@@ -2,14 +2,16 @@
 
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Clock } from "lucide-react";
+import { Clock, Zap, Search, CheckCircle } from "lucide-react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import Tooltip from "./Tooltip";
 import { motion } from "framer-motion";
 
 interface TimeSavedStats {
   total_minutes_saved: number;
+  companies_scanned?: number;
+  jobs_vetted?: number;
+  jobs_tracked?: number;
 }
 
 const fetchTimeSavedStats = async (): Promise<TimeSavedStats> => {
@@ -24,19 +26,16 @@ const fetchTimeSavedStats = async (): Promise<TimeSavedStats> => {
   return response.data;
 };
 
-const formatMinutesToHumanReadable = (totalMinutes: number): string => {
-  if (totalMinutes < 1) return "0 minutes";
-  if (totalMinutes < 60) return `${totalMinutes} minute${totalMinutes === 1 ? "" : "s"}`;
-
-  const days = Math.floor(totalMinutes / (60 * 24));
-  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
-  const minutes = totalMinutes % 60;
-
-  const parts: string[] = [];
-  if (days > 0) parts.push(`${days} day${days > 1 ? "s" : ""}`);
-  if (hours > 0) parts.push(`${hours} hour${hours > 1 ? "s" : ""}`);
-  if (minutes > 0) parts.push(`${minutes} minute${minutes > 1 ? "s" : ""}`);
-  return parts.join(", ");
+const formatTimeCompact = (totalMinutes: number): { value: string; unit: string } => {
+  if (totalMinutes < 60) {
+    return { value: `${totalMinutes}`, unit: "min" };
+  }
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
+  if (mins === 0) {
+    return { value: `${hours}`, unit: hours === 1 ? "hour" : "hours" };
+  }
+  return { value: `${hours}h ${mins}m`, unit: "" };
 };
 
 const TimeSavedCard = () => {
@@ -50,40 +49,16 @@ const TimeSavedCard = () => {
 
   const totalMinutesSaved = data?.total_minutes_saved ?? 0;
 
-  const tooltipContent = (
-    <div className="text-sm text-[--foreground]">
-      <p className="mb-3 text-center text-base font-semibold">How we estimate your time saved</p>
-      <ul className="space-y-2">
-        <li>
-          <p className="font-medium text-[--foreground]">Automated Searching</p>
-          <p className="text-xs opacity-70">5 mins for every unique company in each job batch.</p>
-        </li>
-        <li>
-          <p className="font-medium text-[--foreground]">AI-Powered Vetting</p>
-          <p className="text-xs opacity-70">6 mins for every relevant job we recommend.</p>
-        </li>
-        <li>
-          <p className="font-medium text-[--foreground]">Effortless Tracking</p>
-          <p className="text-xs opacity-70">1 min for saving a job, 3 mins for marking as applied.</p>
-        </li>
-        <li>
-          <p className="font-medium text-[--foreground]">Google Sheets Sync</p>
-          <p className="text-xs opacity-70">15 mins (one-time) for enabling integration.</p>
-        </li>
-      </ul>
-      <p className="mt-3 border-t border-[--border] pt-2 text-xs italic opacity-60">
-        This metric updates every time you get new recommendations or track an application.
-      </p>
-    </div>
-  );
-
   if (isLoading) {
     return (
       <div className="relative overflow-hidden rounded-2xl">
-        <div className="relative rounded-2xl border border-[--border] bg-[--card-background] p-6 shadow-sm">
-          <div className="flex h-32 flex-col items-center justify-center gap-4">
-            <div className="h-6 w-3/4 animate-pulse rounded bg-[--border]" />
-            <div className="h-4 w-1/2 animate-pulse rounded bg-[--border]" />
+        <div className="relative rounded-2xl border border-[--border] bg-[--card-background] p-4 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 animate-pulse rounded-full bg-[--border]" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 w-24 animate-pulse rounded bg-[--border]" />
+              <div className="h-6 w-16 animate-pulse rounded bg-[--border]" />
+            </div>
           </div>
         </div>
       </div>
@@ -94,36 +69,55 @@ const TimeSavedCard = () => {
     return null;
   }
 
-  const formattedTime = formatMinutesToHumanReadable(totalMinutesSaved);
+  const { value, unit } = formatTimeCompact(totalMinutesSaved);
 
   return (
-    <section className="relative overflow-hidden rounded-2xl">
-      {/* Clean card - no decorative blobs */}
-      <div className="relative rounded-2xl border border-[--border] bg-[--card-background] p-6 shadow-sm">
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25, ease: "easeOut" }}
-          className="relative z-10 flex flex-col items-center text-center"
-        >
-          <Clock size={40} className="mb-3 text-[--foreground]/60" />
-          <h3 className="mb-1 text-xl font-semibold tracking-tight text-[--foreground]">You've Saved</h3>
-          <p className="text-3xl font-bold tracking-tight text-[--foreground]">
-            {formattedTime}
-          </p>
-          <div className="mt-3">
-            <Tooltip content={tooltipContent}>
-              <button
-                className="text-sm text-[--foreground]/50 transition hover:text-[--foreground]/80 hover:underline"
-                aria-label="How is this calculated?"
-              >
-                How is this calculated?
-              </button>
-            </Tooltip>
+    <motion.section
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="relative overflow-hidden rounded-2xl"
+    >
+      <div className="relative rounded-2xl border border-[--border] bg-[--card-background] p-4 shadow-sm">
+        {/* Main content - Horizontal layout */}
+        <div className="flex items-center gap-4">
+          {/* Icon */}
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[--foreground]/5">
+            <Clock size={28} className="text-[--foreground]/70" />
           </div>
-        </motion.div>
+
+          {/* Time saved */}
+          <div className="flex-1">
+            <p className="text-sm font-medium text-[--foreground]/60">Time Saved</p>
+            <div className="flex items-baseline gap-1">
+              <span className="text-3xl font-bold text-[--foreground]">{value}</span>
+              {unit && <span className="text-lg text-[--foreground]/70">{unit}</span>}
+            </div>
+          </div>
+        </div>
+
+        {/* Inline breakdown - always visible */}
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-4 border-t border-[--border] pt-4">
+          <div className="flex items-center gap-1.5 text-sm text-[--foreground]/60">
+            <Search size={14} className="flex-shrink-0" />
+            <span>5min/company</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-sm text-[--foreground]/60">
+            <Zap size={14} className="flex-shrink-0" />
+            <span>6min/job</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-sm text-[--foreground]/60">
+            <CheckCircle size={14} className="flex-shrink-0" />
+            <span>1-3min/track</span>
+          </div>
+        </div>
+
+        {/* Subtle context line */}
+        <p className="mt-3 text-xs text-[--foreground]/40 text-center">
+          via automated job searching & AI vetting
+        </p>
       </div>
-    </section>
+    </motion.section>
   );
 };
 

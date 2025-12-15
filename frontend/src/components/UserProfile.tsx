@@ -160,33 +160,30 @@ const UserProfile = ({
                 <p className="text-sm text-gray-500 dark:text-gray-400">{userPlan === 'pro' ? 'Pro Plan' : 'Free Plan'}</p>
               </div>
               <ul className="py-2">
-                {userPlan === 'pro' && (
-                  <>
-                    <li className="px-2 md:hidden">
-                      <motion.button
-                        onClick={() => handleAction(onNavigateToSaved, 'saved')}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors"
-                        whileHover={{ x: 5 }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                      >
-                        <Bookmark size={16} />
-                        <span>Saved Jobs</span>
-                      </motion.button>
-                    </li>
-                    <li className="px-2 md:hidden">
-                      <motion.button
-                        onClick={() => handleAction(onNavigateToApplied, 'applied')}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors"
-                        whileHover={{ x: 5 }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                      >
-                        <Check size={16} />
-                        <span>Applied Jobs</span>
-                      </motion.button>
-                    </li>
-                    <div className="my-2 h-px bg-gray-200 dark:bg-slate-700 md:hidden" />
-                  </>
-                )}
+                {/* Saved/Applied navigation - visible on mobile for all users */}
+                <li className="px-2 md:hidden">
+                  <motion.button
+                    onClick={() => handleAction(onNavigateToSaved, 'saved')}
+                    className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors"
+                    whileHover={{ x: 5 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                  >
+                    <Bookmark size={16} />
+                    <span>Saved Jobs</span>
+                  </motion.button>
+                </li>
+                <li className="px-2 md:hidden">
+                  <motion.button
+                    onClick={() => handleAction(onNavigateToApplied, 'applied')}
+                    className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors"
+                    whileHover={{ x: 5 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                  >
+                    <Check size={16} />
+                    <span>Applied Jobs</span>
+                  </motion.button>
+                </li>
+                <div className="my-2 h-px bg-gray-200 dark:bg-slate-700 md:hidden" />
                 <li className="px-2">
                   <motion.button
                     onClick={() => router.push('/data')}

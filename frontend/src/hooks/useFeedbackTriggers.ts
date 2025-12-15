@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 
 interface FeedbackTriggerState {
     shouldShowFeedback: boolean;
-    triggerType: "applied_milestone" | "time_based" | "return_visit" | "exit_intent" | "success_story" | null;
+    triggerType: "applied_milestone" | "time_based" | "return_visit" | "success_story" | null;
     resetTrigger: () => void;
 }
 
@@ -25,7 +25,6 @@ export function useFeedbackTriggers({
     const hasTriggeredAppliedMilestone = useRef(false);
     const hasTriggeredTimeBased = useRef(false);
     const hasTriggeredReturnVisit = useRef(false);
-    const hasShownExitIntent = useRef(false);
 
     // Reset trigger
     const resetTrigger = useCallback(() => {
@@ -57,9 +56,9 @@ export function useFeedbackTriggers({
         }
     }, [hasJobs]);
 
-    // Trigger 1: After 3+ jobs marked as applied
+    // Trigger 1: After 5+ jobs marked as applied (increased from 3)
     useEffect(() => {
-        if (appliedJobsCount >= 3 && !hasTriggeredAppliedMilestone.current && !isGenerating) {
+        if (appliedJobsCount >= 5 && !hasTriggeredAppliedMilestone.current && !isGenerating) {
             hasTriggeredAppliedMilestone.current = true;
 
             setTriggerType("applied_milestone");
@@ -67,15 +66,15 @@ export function useFeedbackTriggers({
         }
     }, [appliedJobsCount, isGenerating]);
 
-    // Trigger 2: After 5 minutes of browsing
+    // Trigger 2: After 15 minutes of browsing (increased from 5)
     useEffect(() => {
         if (!hasJobs || isGenerating) return;
 
         intervalRef.current = setInterval(() => {
             timeOnPageRef.current += 1;
 
-            // After 5 minutes (300 seconds)
-            if (timeOnPageRef.current >= 300 && !hasTriggeredTimeBased.current) {
+            // After 15 minutes (900 seconds)
+            if (timeOnPageRef.current >= 900 && !hasTriggeredTimeBased.current) {
                 hasTriggeredTimeBased.current = true;
 
                 setTriggerType("time_based");
@@ -94,26 +93,7 @@ export function useFeedbackTriggers({
         };
     }, [hasJobs, isGenerating]);
 
-    // Trigger 3: Exit intent detection
-    useEffect(() => {
-        if (!hasJobs || hasShownExitIntent.current) return;
-
-        const handleMouseLeave = (e: MouseEvent) => {
-            // Detect if mouse is leaving from the top (towards browser chrome/tabs)
-            if (e.clientY <= 0 && !hasShownExitIntent.current) {
-                hasShownExitIntent.current = true;
-
-                setTriggerType("exit_intent");
-                setShouldShowFeedback(true);
-            }
-        };
-
-        document.addEventListener("mouseleave", handleMouseLeave);
-
-        return () => {
-            document.removeEventListener("mouseleave", handleMouseLeave);
-        };
-    }, [hasJobs]);
+    // Exit-intent trigger REMOVED - too intrusive
 
     return {
         shouldShowFeedback,

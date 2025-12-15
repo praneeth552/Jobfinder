@@ -27,6 +27,7 @@ import { useAnimations } from "@/context/AnimationContext";
 import { useAuth } from "@/context/AuthContext";
 import { useFeedbackTriggers } from "@/hooks/useFeedbackTriggers";
 import OverallRating from "./OverallRating";
+import InlineFeedbackWidget from "./InlineFeedbackWidget";
 
 interface JobApplication {
   id: string;
@@ -525,12 +526,19 @@ export default function DashboardClient() {
   };
 
   const handleGenerateRecommendations = () => {
-    if (!!timeRemaining) {
-      toast.error("You've reached your recommendation limit for now.");
-      return;
-    }
     if (isGenerating) {
       toast.loading("Generation is already in progress...");
+      return;
+    }
+
+    // For demo mode, skip confirmation and generate directly
+    if (isDemoMode) {
+      generateDemoRecommendations();
+      return;
+    }
+
+    if (!!timeRemaining) {
+      toast.error("You've reached your recommendation limit for now.");
       return;
     }
     setIsConfirmationModalOpen(true);
@@ -710,7 +718,7 @@ export default function DashboardClient() {
               {isDemoMode ? (
                 <button
                   onClick={() => router.push("/signup?from=demo")}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full font-semibold transition duration-300 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white shadow-md"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full font-medium transition duration-200 border-2 border-[--foreground] bg-[--foreground] text-[--background] hover:opacity-90"
                 >
                   <User size={16} />
                   <span className="whitespace-nowrap">Sign Up</span>
@@ -756,10 +764,10 @@ export default function DashboardClient() {
                 </motion.div>
               )}
 
-              {userPlan === "free" && (
+              {userPlan === "free" && !isDemoMode && (
                 <button
                   onClick={() => router.push("/upgrade")}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full font-semibold transition duration-300 bg-yellow-500 hover:bg-yellow-600 text-white shadow-md"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full font-medium transition duration-200 border-2 border-[--foreground]/30 text-[--foreground] hover:bg-[--foreground]/5 hover:border-[--foreground]/50"
                 >
                   <Star size={16} />
                   <span className="whitespace-nowrap">Upgrade to Pro</span>
@@ -854,11 +862,10 @@ export default function DashboardClient() {
                   <OverallRating />
                 )}
 
-                {userPlan === "pro" && (
-                  <div className="hidden lg:flex">
-                    <DropZone savedCount={savedJobsCount} appliedCount={appliedJobsCount} />
-                  </div>
-                )}
+                {/* Desktop DropZone - available to all users */}
+                <div className="hidden lg:flex">
+                  <DropZone savedCount={savedJobsCount} appliedCount={appliedJobsCount} />
+                </div>
               </>
             )}
           </DndContext>
@@ -882,7 +889,11 @@ export default function DashboardClient() {
         onConfirm={confirmGenerateRecommendations}
         title="Confirm Recommendation Generation"
         message="This will delete your existing recommendations and generate a new list. Are you sure you want to continue?"
+        confirmText="Generate Jobs"
       />
+
+      {/* Inline Feedback Widget - always accessible */}
+      {!isDemoMode && <InlineFeedbackWidget />}
     </>
   );
 }

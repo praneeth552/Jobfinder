@@ -8,7 +8,7 @@ interface FeedbackModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (rating: number, comment?: string) => Promise<void>;
-    trigger?: "job_generation" | "manual" | "periodic" | "applied_milestone" | "time_based" | "return_visit" | "exit_intent" | "success_story";
+    trigger?: "job_generation" | "manual" | "periodic" | "applied_milestone" | "time_based" | "return_visit" | "success_story";
 }
 
 export default function FeedbackModal({
@@ -62,8 +62,6 @@ export default function FeedbackModal({
                 return { icon: "🎉", title: "Nice progress!", subtitle: "How are the recommendations?" };
             case "return_visit":
                 return { icon: "👋", title: "Welcome back!", subtitle: "How did things work out?" };
-            case "exit_intent":
-                return { icon: "⏸", title: "Before you go...", subtitle: "Quick rating before you leave?" };
             case "success_story":
                 return { icon: "🚀", title: "Congratulations!", subtitle: "Would you recommend us?" };
             default:
@@ -126,8 +124,8 @@ export default function FeedbackModal({
                                         key={value}
                                         onClick={() => setRating(value)}
                                         className={`w-10 h-10 rounded-full border-2 transition-all ${value <= rating
-                                                ? 'bg-[--foreground] border-[--foreground]'
-                                                : 'bg-transparent border-[--border] hover:border-[--foreground]/40'
+                                            ? 'bg-[--foreground] border-[--foreground]'
+                                            : 'bg-transparent border-[--border] hover:border-[--foreground]/40'
                                             }`}
                                         aria-label={`Rate ${value}`}
                                     >

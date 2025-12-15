@@ -9,11 +9,17 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import Script from "next/script";
 import AppContent from "@/components/AppContent";
 import QueryProvider from "@/components/QueryProvider";
-import { Space_Grotesk } from 'next/font/google';
+import { Space_Grotesk, Caveat } from 'next/font/google';
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-space-grotesk',
+  display: 'swap'
+});
+
+const caveat = Caveat({
+  subsets: ['latin'],
+  variable: '--font-caveat',
   display: 'swap'
 });
 
@@ -126,7 +132,7 @@ import BodyWrapper from "@/components/BodyWrapper";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={spaceGrotesk.variable}>
+    <html lang="en" className={`${spaceGrotesk.variable} ${caveat.variable}`}>
       <head>
         {/* Structured Data */}
         <script

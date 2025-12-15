@@ -219,6 +219,25 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
                 # === SCORING (Higher score = better match) ===
                 score = 0
                 
+                # City aliases for better matching
+                city_aliases = {
+                    "bangalore": ["bengaluru", "blr", "bangalore"],
+                    "bengaluru": ["bangalore", "blr", "bengaluru"],
+                    "mumbai": ["bombay", "mumbai"],
+                    "bombay": ["mumbai", "bombay"],
+                    "chennai": ["madras", "chennai"],
+                    "madras": ["chennai", "madras"],
+                    "kolkata": ["calcutta", "kolkata"],
+                    "calcutta": ["kolkata", "calcutta"],
+                    "new delhi": ["delhi", "ncr", "new delhi"],
+                    "delhi": ["new delhi", "ncr", "delhi"],
+                    "hyderabad": ["hyd", "hyderabad"],
+                    "pune": ["pune"],
+                    "gurgaon": ["gurugram", "gurgaon"],
+                    "gurugram": ["gurgaon", "gurugram"],
+                    "noida": ["noida", "ncr"],
+                }
+                
                 # Location match (+4 points) - Improved remote handling
                 remote_keywords = ["remote", "work from home", "wfh", "anywhere", "distributed"]
                 is_remote_job = any(kw in location for kw in remote_keywords)
@@ -226,11 +245,16 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
                 if user_wants_remote and is_remote_job:
                     score += 4
                 elif preferred_locations:
-                    # Check if any preferred city is in job location
+                    # Check if any preferred city is in job location (with aliases)
                     for loc in preferred_locations:
                         # Extract city name (e.g., "bangalore" from "remote (india)")
                         city = loc.replace("remote", "").replace("(", "").replace(")", "").strip()
-                        if city and city in location:
+                        
+                        # Get all aliases for this city
+                        aliases = city_aliases.get(city, [city])
+                        
+                        # Check if any alias matches the job location
+                        if any(alias in location for alias in aliases):
                             score += 4
                             break
                         elif loc in location:
