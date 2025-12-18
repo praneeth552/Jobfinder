@@ -83,11 +83,11 @@ const TimeRemainingButton: React.FC<TimeRemainingButtonProps> = ({
         whileHover={!prefersReducedMotion ? { scale: 1.01 } : {}}
         className={`
           relative flex items-center h-12
-          rounded-full border border-slate-300/70 dark:border-white/20 
-          bg-gradient-to-r from-slate-200/60 to-slate-300/60 
-          dark:from-white/10 dark:to-white/15
-          shadow-md backdrop-blur-sm cursor-pointer overflow-hidden
-          focus:outline-none focus:ring-2 focus:ring-sky-300/60 dark:focus:ring-sky-400/40
+          rounded-full border border-[--border]
+          bg-[--secondary]
+          shadow-sm backdrop-blur-sm cursor-pointer overflow-hidden
+          hover:border-[--foreground]/30 hover:shadow-md
+          focus:outline-none focus:ring-2 focus:ring-[--primary]/30
         `}
         aria-label="Time remaining for next recommendations"
         style={{ minWidth: COLLAPSED_W, transform: 'translateZ(0)', willChange: 'transform, width, opacity' }}
@@ -99,7 +99,7 @@ const TimeRemainingButton: React.FC<TimeRemainingButtonProps> = ({
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 10 }}
-              className="flex items-center gap-3 px-5 py-2 text-sm text-slate-700 dark:text-slate-200 whitespace-nowrap"
+              className="flex items-center gap-3 px-5 py-2 text-sm text-[--foreground] whitespace-nowrap"
               style={{ transform: 'translateZ(0)', willChange: 'transform, opacity' }}
             >
               <motion.div
@@ -132,7 +132,7 @@ const TimeRemainingButton: React.FC<TimeRemainingButtonProps> = ({
                 animate={!prefersReducedMotion ? { rotate: [0, -6, 6, -6, 6, 0] } : {}}
                 transition={{ duration: 1.6, repeat: Infinity, repeatDelay: 2.5 }}
               >
-                <Timer size={20} className="text-slate-600 dark:text-slate-300" />
+                <Timer size={20} className="text-[--accent]" />
               </motion.div>
             </motion.div>
           )}

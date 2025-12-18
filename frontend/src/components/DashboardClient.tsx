@@ -38,6 +38,7 @@ interface JobApplication {
   match_score?: number;
   reason?: string;
   job_url?: string;
+  notes?: string;
 }
 
 export default function DashboardClient() {
@@ -105,7 +106,7 @@ export default function DashboardClient() {
         const jobApps = res.data.job_applications.map((app: any, index: number) => {
           const jobDetails = app.job_details || {};
           const id = `${jobDetails.job_url || `${jobDetails.title}-${jobDetails.company}`}-${index}`;
-          return { ...jobDetails, id, status: app.status };
+          return { ...jobDetails, id, status: app.status, notes: app.notes };
         });
         setJobApplications(jobApps);
         setSavedJobsCount(jobApps.filter((j: JobApplication) => j.status === "saved").length);

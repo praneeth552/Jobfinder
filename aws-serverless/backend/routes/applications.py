@@ -64,13 +64,13 @@ async def save_job_application(
         # Update existing application
         user_model.job_applications[existing_app_index].status = job_to_save.status
         
-        # Calculate time saved for status change
+        # Calculate time saved for status change (including REVERSE transitions)
         if old_status == JobApplicationStatus.recommended and job_to_save.status == JobApplicationStatus.saved:
-            time_to_add += 1
+            time_to_add += 1  # Forward: recommended → saved
         elif old_status == JobApplicationStatus.recommended and job_to_save.status == JobApplicationStatus.applied:
-            time_to_add += 3
+            time_to_add += 3  # Forward: recommended → applied
         elif old_status == JobApplicationStatus.saved and job_to_save.status == JobApplicationStatus.applied:
-            time_to_add += 2 # 3 (applied) - 1 (saved)
+            time_to_add += 2  # Forward: saved → applied (3 - 1)
         
         # REVERSE transitions (subtract time)
         elif old_status == JobApplicationStatus.saved and job_to_save.status == JobApplicationStatus.recommended:
@@ -180,3 +180,35 @@ async def delete_job_applications_by_status(
         pass
 
     return {"message": f"All {status.value} job applications deleted successfully"}
+
+
+class UpdateJobNotes(BaseModel):
+    job_url: str
+    notes: str
+
+
+@router.post("/application/update_notes")
+async def update_job_notes(
+    data: UpdateJobNotes,
+    current_user: User = Depends(get_current_user)
+):
+    """Update personal notes for a specific job application."""
+    user_id = str(current_user["_id"])
+    
+    # Find and update the specific job's notes
+    result = await db.users.update_one(
+        {
+            "_id": ObjectId(user_id),
+            "job_applications.job_details.job_url": data.job_url
+        },
+        {
+            "$set": {
+                "job_applications.$.notes": data.notes if data.notes.strip() else None
+            }
+        }
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Job application not found")
+    
+    return {"message": "Notes updated successfully"}

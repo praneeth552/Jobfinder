@@ -180,3 +180,35 @@ async def delete_job_applications_by_status(
         pass
 
     return {"message": f"All {status.value} job applications deleted successfully"}
+
+
+class UpdateJobNotes(BaseModel):
+    job_url: str
+    notes: str
+
+
+@router.post("/application/update_notes")
+async def update_job_notes(
+    data: UpdateJobNotes,
+    current_user: User = Depends(get_current_user)
+):
+    """Update personal notes for a specific job application."""
+    user_id = str(current_user["_id"])
+    
+    # Find and update the specific job's notes
+    result = await db.users.update_one(
+        {
+            "_id": ObjectId(user_id),
+            "job_applications.job_details.job_url": data.job_url
+        },
+        {
+            "$set": {
+                "job_applications.$.notes": data.notes if data.notes.strip() else None
+            }
+        }
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Job application not found")
+    
+    return {"message": "Notes updated successfully"}

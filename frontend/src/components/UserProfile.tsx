@@ -124,8 +124,8 @@ const UserProfile = ({
       <div className="relative w-full" ref={containerRef}>
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
-            <User className="text-slate-800 dark:text-white" size={22} />
-            <span className="text-sm font-semibold text-slate-800 dark:text-white">{userName}</span>
+            <User className="text-[--foreground]" size={22} />
+            <span className="text-sm font-semibold text-[--foreground]">{userName}</span>
             {userPlan === 'pro' && (
               <span className="flex items-center gap-1 bg-[--foreground] text-[--background] px-1.5 py-0.5 rounded-full text-xs font-semibold">
                 <Star size={10} />
@@ -153,85 +153,73 @@ const UserProfile = ({
                 width: `${dropdownWidth}px`,
                 maxWidth: 'calc(100vw - 32px)'
               }}
-              className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-700 overflow-hidden"
+              className="bg-[--card-background] rounded-2xl shadow-xl border border-[--border] overflow-hidden"
             >
-              <div className="p-4 border-b border-gray-200 dark:border-slate-700">
-                <p className="font-semibold text-gray-800 dark:text-white">{userName || 'User'}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{userPlan === 'pro' ? 'Pro Plan' : 'Free Plan'}</p>
+              <div className="p-4 border-b border-[--border]">
+                <p className="font-semibold text-[--foreground]">{userName || 'User'}</p>
+                <p className="text-sm text-[--accent]">{userPlan === 'pro' ? 'Pro Plan' : 'Free Plan'}</p>
               </div>
               <ul className="py-2">
                 {/* Saved/Applied navigation - visible on mobile for all users */}
                 <li className="px-2 md:hidden">
-                  <motion.button
+                  <button
                     onClick={() => handleAction(onNavigateToSaved, 'saved')}
-                    className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors"
-                    whileHover={{ x: 5 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                    className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-[--foreground] hover:bg-[--secondary] rounded-lg transition-all duration-150"
                   >
                     <Bookmark size={16} />
                     <span>Saved Jobs</span>
-                  </motion.button>
+                  </button>
                 </li>
                 <li className="px-2 md:hidden">
-                  <motion.button
+                  <button
                     onClick={() => handleAction(onNavigateToApplied, 'applied')}
-                    className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors"
-                    whileHover={{ x: 5 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                    className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-[--foreground] hover:bg-[--secondary] rounded-lg transition-all duration-150"
                   >
                     <Check size={16} />
                     <span>Applied Jobs</span>
-                  </motion.button>
+                  </button>
                 </li>
-                <div className="my-2 h-px bg-gray-200 dark:bg-slate-700 md:hidden" />
+                <div className="my-2 h-px bg-[--border] md:hidden" />
                 <li className="px-2">
-                  <motion.button
+                  <button
                     onClick={() => router.push('/data')}
-                    className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors"
-                    whileHover={{ x: 5 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                    className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-[--foreground] hover:bg-[--secondary] rounded-lg transition-all duration-150"
                   >
                     <UserRoundCog size={16} />
                     <span>Account Settings</span>
-                  </motion.button>
+                  </button>
                 </li>
                 {authType === 'standard' && (
                   <li className="px-2">
-                    <motion.button
+                    <button
                       onClick={() => router.push(`/forgot-password?email=${userEmail}`)}
-                      className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors"
-                      whileHover={{ x: 5 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                      className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-[--foreground] hover:bg-[--secondary] rounded-lg transition-all duration-150"
                     >
                       <Settings size={16} />
                       <span>Change Password</span>
-                    </motion.button>
+                    </button>
                   </li>
                 )}
                 <li className="px-2">
-                  <motion.button
+                  <button
                     onClick={() => handleAction(onEditPreferences, 'preferences')}
-                    className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors"
-                    whileHover={{ x: 5 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                    className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-[--foreground] hover:bg-[--secondary] rounded-lg transition-all duration-150"
                   >
                     <SlidersHorizontal size={16} />
                     <span>Edit Preferences</span>
-                  </motion.button>
+                  </button>
                 </li>
                 <li className="px-2">
-                  <motion.button
+                  <button
                     onClick={() => handleAction(onBilling, 'billing')}
-                    className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors"
-                    whileHover={{ x: 5 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                    className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-[--foreground] hover:bg-[--secondary] rounded-lg transition-all duration-150"
                   >
                     <CreditCard size={16} />
                     <span>Manage Subscription</span>
-                  </motion.button>
+                  </button>
                 </li>
                 <li className="px-2">
-                  <motion.button
+                  <button
                     onClick={async () => {
                       setIsLoading('replay-tour');
                       try {
@@ -240,7 +228,6 @@ const UserProfile = ({
                           method: 'POST',
                           headers: { 'Authorization': `Bearer ${token}` }
                         });
-                        // Clear session storage for onboarding
                         sessionStorage.removeItem(`onboarding_completed_${userEmail || ''}`);
                         window.location.reload();
                       } catch (error) {
@@ -248,25 +235,21 @@ const UserProfile = ({
                         setIsLoading(null);
                       }
                     }}
-                    className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors"
-                    whileHover={{ x: 5 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                    className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-[--foreground] hover:bg-[--secondary] rounded-lg transition-all duration-150"
                   >
                     {isLoading === 'replay-tour' ? <Loader size={16} className="animate-spin" /> : <RotateCcw size={16} />}
                     <span>{isLoading === 'replay-tour' ? 'Restarting...' : 'Replay Tour'}</span>
-                  </motion.button>
+                  </button>
                 </li>
-                <div className="my-2 h-px bg-gray-200 dark:bg-slate-700" />
+                <div className="my-2 h-px bg-[--border]" />
                 <li className="px-2">
-                  <motion.button
+                  <button
                     onClick={() => handleAction(onLogout, 'logout')}
-                    className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/50 rounded-md transition-colors"
-                    whileHover={{ x: 5 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                    className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-sm text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-all duration-150"
                   >
                     {isLoading === 'logout' ? <Loader size={16} className="animate-spin" /> : <LogOut size={16} />}
                     <span>{isLoading === 'logout' ? 'Logging out...' : 'Logout'}</span>
-                  </motion.button>
+                  </button>
                 </li>
               </ul>
             </motion.div>

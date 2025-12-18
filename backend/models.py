@@ -79,6 +79,7 @@ class RecommendedJob(BaseModel):
 class JobApplication(BaseModel):
     job_details: RecommendedJob
     status: JobApplicationStatus
+    notes: Optional[str] = None  # Personal notes for this job application
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 class User(BaseModel):

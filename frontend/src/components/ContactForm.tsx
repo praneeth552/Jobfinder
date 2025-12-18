@@ -143,7 +143,7 @@ const ContactForm = () => {
                   value={formData.name}
                   onChange={handleChange}
                   className="w-full px-5 py-3 bg-[--background] text-[--foreground] border border-[--border] rounded-xl focus:outline-none focus:border-[--foreground]/40 focus:ring-2 focus:ring-[--foreground]/10 transition-all placeholder-[--foreground]/40"
-                  placeholder="John Doe"
+                  placeholder="heisenberg"
                   required
                 />
               </div>
@@ -157,7 +157,7 @@ const ContactForm = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className="w-full px-5 py-3 bg-[--background] text-[--foreground] border border-[--border] rounded-xl focus:outline-none focus:border-[--foreground]/40 focus:ring-2 focus:ring-[--foreground]/10 transition-all placeholder-[--foreground]/40"
-                  placeholder="john@example.com"
+                  placeholder="heisenberg@breakingbad.com"
                   required
                 />
               </div>
@@ -193,7 +193,7 @@ const ContactForm = () => {
                 onChange={handleChange}
                 rows={5}
                 className="w-full px-5 py-3 pr-12 bg-[--background] text-[--foreground] border border-[--border] rounded-xl focus:outline-none focus:border-[--foreground]/40 focus:ring-2 focus:ring-[--foreground]/10 transition-all placeholder-[--foreground]/40 resize-none"
-                placeholder="Tell me about your project..."
+                placeholder="say my name..."
                 required
               ></textarea>
               <button

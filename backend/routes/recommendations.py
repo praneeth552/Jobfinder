@@ -453,25 +453,58 @@ async def get_recommendation_status(task_id: str, current_user: dict = Depends(g
 async def generate_demo_recommendations(request: Request):
     """
     Generate demo recommendations without authentication.
-    Returns random jobs from database for guest users to preview the platform.
-    No user preferences needed - purely for demonstration purposes.
+    Returns varied jobs from different companies for guest users to preview the platform.
     """
     try:
-        # Get 10 random active jobs from database
+        # Get jobs grouped by company to ensure variety
+        # First, get distinct companies and sample from each
         pipeline = [
-            {"$match": {"is_active": True}},
-            {"$sample": {"size": 10}}
+            {"$group": {
+                "_id": "$company",
+                "jobs": {"$push": "$$ROOT"},
+                "count": {"$sum": 1}
+            }},
+            {"$sample": {"size": 10}},  # Get 10 random companies
+            {"$project": {
+                "company": "$_id",
+                "job": {"$arrayElemAt": ["$jobs", 0]}  # Take first job from each company
+            }}
         ]
         
-        demo_jobs_cursor = jobs_collection.aggregate(pipeline)
-        demo_jobs = await demo_jobs_cursor.to_list(10)
+        company_jobs_cursor = jobs_collection.aggregate(pipeline)
+        company_jobs = await company_jobs_cursor.to_list(10)
         
-        if not demo_jobs:
-            # Fallback: if no jobs with is_active, just get any 10 jobs
-            demo_jobs = await jobs_collection.find().limit(10).to_list(10)
+        demo_jobs = [item["job"] for item in company_jobs if item.get("job")]
         
-        # Format jobs to match expected structure
+        if not demo_jobs or len(demo_jobs) < 5:
+            # Fallback: get varied jobs with limit per company
+            pipeline_fallback = [
+                {"$group": {
+                    "_id": "$company",
+                    "job": {"$first": "$$ROOT"}
+                }},
+                {"$limit": 10}
+            ]
+            fallback_cursor = jobs_collection.aggregate(pipeline_fallback)
+            fallback_jobs = await fallback_cursor.to_list(10)
+            demo_jobs = [item["job"] for item in fallback_jobs if item.get("job")]
+        
+        # Format jobs to match expected structure with varied match scores
         recommendations = []
+        match_scores = [92, 88, 85, 83, 80, 78, 76, 74, 72, 70]
+        demo_reasons = [
+            "Strong match based on your technical skills and experience level.",
+            "Great fit for your preferred location and role type.",
+            "Excellent opportunity matching your career goals.",
+            "Company culture aligns with your preferences.",
+            "Role perfectly matches your skill set.",
+            "Competitive package for your experience level.",
+            "Growing team looking for talent like you.",
+            "Remote-friendly role matching your work style.",
+            "Industry leader with exciting projects.",
+            "Great learning opportunities in this role."
+        ]
+        
         for idx, job in enumerate(demo_jobs):
             # Remove MongoDB _id for clean response
             if "_id" in job:
@@ -483,8 +516,8 @@ async def generate_demo_recommendations(request: Request):
                     "company": job.get("company", "Tech Company"),
                     "location": job.get("location", "Remote"),
                     "job_url": job.get("job_url", "#"),
-                    "match_score": 85,  # Fixed demo score
-                    "reason": "Sample job recommendation for demo purposes. Sign up to get personalized matches!"
+                    "match_score": match_scores[idx] if idx < len(match_scores) else 75,
+                    "reason": demo_reasons[idx] if idx < len(demo_reasons) else "Sample job recommendation for demo purposes. Sign up to get personalized matches!"
                 },
                 "status": "recommended"
             })

@@ -80,7 +80,7 @@ const HeaderButton: React.FC<HeaderButtonProps> = ({
       tabIndex={0}
       onClick={handleClick}
       onKeyPress={(e) => e.key === 'Enter' && handleClick()}
-      className={`relative flex items-center justify-center h-12 rounded-full border border-slate-300/70 dark:border-white/20 bg-slate-200/50 dark:bg-white/10 shadow-lg backdrop-blur-sm transition-colors duration-300 hover:bg-slate-300/70 dark:hover:bg-white/20 cursor-pointer flex-shrink-0 ${className}`}
+      className={`relative flex items-center justify-center h-12 rounded-full border border-[--border] bg-[--secondary] shadow-sm backdrop-blur-sm hover:bg-[--foreground]/5 hover:border-[--foreground]/40 hover:shadow-md cursor-pointer flex-shrink-0 ${className}`}
       aria-label={ariaLabel}
       animate={{
         width: isExpanded ? contentWidth : 48,
@@ -92,16 +92,7 @@ const HeaderButton: React.FC<HeaderButtonProps> = ({
       }}
       whileTap={{ scale: animationsEnabled ? 0.96 : 1 }}
       whileHover={animationsEnabled ? {
-        scale: 1.05,
-        boxShadow: "0 0 12px rgba(100, 180, 255, 0.4)",
-        transition: {
-          boxShadow: {
-            duration: 0.8,
-            repeat: Infinity,
-            repeatType: "reverse",
-            ease: "easeInOut",
-          },
-        },
+        scale: 1.03,
       } : {}}
       layout={false}
       style={{

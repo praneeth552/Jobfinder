@@ -75,9 +75,11 @@ class RecommendedJob(BaseModel):
             return str(v.get('name', v.get('value', str(v))))
         return str(v) if v is not None else ""
 
+
 class JobApplication(BaseModel):
     job_details: RecommendedJob
     status: JobApplicationStatus
+    notes: Optional[str] = None  # Personal notes for this job application
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 class User(BaseModel):
