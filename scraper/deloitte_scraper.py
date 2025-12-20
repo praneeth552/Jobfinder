@@ -29,6 +29,9 @@ def scrape_deloitte():
             return
         
         logging.info(f"Found {len(jobs)} Deloitte jobs. Posting to backend...")
+        
+        # Import experience extraction utility
+        from experience_utils import extract_experience_from_text
 
         for i, job in enumerate(jobs, start=1):
             translated_data = job.get("translated", {})
@@ -40,16 +43,24 @@ def scrape_deloitte():
             location_str = "N/A"
             if locations and len(locations) > 0:
                 location_str = locations[0].get("translated", {}).get("title", "N/A")
+            
+            # Extract experience from title and description
+            experience_required, experience_min_years = extract_experience_from_text(title)
+            
+            if experience_min_years is None:
+                experience_required, experience_min_years = extract_experience_from_text(description)
 
             payload = {
                 "title": title,
                 "company": "Deloitte",
                 "location": location_str,
                 "job_url": job_url,
-                "description": description
+                "description": description,
+                "experience_required": experience_required,
+                "experience_min_years": experience_min_years
             }
 
-            logging.info(f"[{i}] {title} at {location_str} — {job_url}")
+            logging.info(f"[{i}] {title} at {location_str} — Exp: {experience_required} ({experience_min_years} yrs)")
             try:
                 url = f"{BACKEND_ENDPOINT}/jobs"
                 post_resp = requests.post(url, json=payload, timeout=30)

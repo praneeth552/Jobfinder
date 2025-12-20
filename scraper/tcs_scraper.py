@@ -72,6 +72,9 @@ def scrape_tcs():
         return
         
     logging.info(f"Found {len(jobs)} TCS jobs. Posting to backend...")
+    
+    # Import experience extraction utility
+    from experience_utils import extract_experience_from_text
 
     for i, job in enumerate(jobs, start=1):
         title = job.get("jobTitle", "N/A")
@@ -83,16 +86,38 @@ def scrape_tcs():
         experience = job.get("experience", "N/A")
         skills = job.get("skills", "N/A")
         description = f"Experience: {experience} years. Skills: {skills}"
+        
+        # Parse experience from API field
+        experience_required = None
+        experience_min_years = None
+        
+        if experience and experience != "N/A":
+            try:
+                # TCS API returns experience as a string like "3-5" or "3"
+                experience_required = f"{experience} years"
+                # Extract minimum years
+                if "-" in str(experience):
+                    experience_min_years = int(str(experience).split("-")[0])
+                else:
+                    experience_min_years = int(experience)
+            except (ValueError, TypeError):
+                experience_required, experience_min_years = extract_experience_from_text(str(experience))
+        
+        # Fallback to parsing from title
+        if experience_min_years is None:
+            experience_required, experience_min_years = extract_experience_from_text(title)
 
         payload = {
             "title": title,
             "company": "TCS",
             "location": location,
             "job_url": job_url,
-            "description": description
+            "description": description,
+            "experience_required": experience_required,
+            "experience_min_years": experience_min_years
         }
 
-        logging.info(f"[{i}] {title} at {location} — {job_url}")
+        logging.info(f"[{i}] {title} at {location} — Exp: {experience_required} ({experience_min_years} yrs)")
         try:
             url = f"{BACKEND_ENDPOINT}/jobs"
             post_resp = requests.post(url, json=payload, timeout=30)

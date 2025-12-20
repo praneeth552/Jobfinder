@@ -93,7 +93,7 @@ export default function OnboardingTour() {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            await axios.post(
+            const response = await axios.post(
                 `${process.env.NEXT_PUBLIC_API_URL}/user/onboarding/skip`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -104,8 +104,19 @@ export default function OnboardingTour() {
             sessionStorage.setItem(sessionKey, "true");
             setIsVisible(false);
 
-            // Dispatch event to trigger auto-generation for new users
-            window.dispatchEvent(new CustomEvent('tour-completed'));
+            // Dispatch event with auto-generation info from backend
+            // If backend started auto-generation, pass the task_id so dashboard can poll for status
+            const autoGenStarted = response.data?.auto_generation_started;
+            const taskId = response.data?.task_id;
+
+            if (autoGenStarted && taskId) {
+                toast.success("Finding your perfect jobs...", { duration: 3000 });
+                window.dispatchEvent(new CustomEvent('tour-completed', {
+                    detail: { autoGenStarted: true, taskId }
+                }));
+            } else {
+                window.dispatchEvent(new CustomEvent('tour-completed'));
+            }
         } catch (error) {
             console.error("Error skipping onboarding:", error);
             setIsVisible(false);
@@ -124,7 +135,7 @@ export default function OnboardingTour() {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            await axios.post(
+            const response = await axios.post(
                 `${process.env.NEXT_PUBLIC_API_URL}/user/onboarding/complete`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -136,8 +147,19 @@ export default function OnboardingTour() {
             toast.success("Welcome aboard! 🎉", { duration: 3000 });
             setIsVisible(false);
 
-            // Dispatch event to trigger auto-generation for new users
-            window.dispatchEvent(new CustomEvent('tour-completed'));
+            // Dispatch event with auto-generation info from backend
+            // If backend started auto-generation, pass the task_id so dashboard can poll for status
+            const autoGenStarted = response.data?.auto_generation_started;
+            const taskId = response.data?.task_id;
+
+            if (autoGenStarted && taskId) {
+                toast.success("Finding your perfect jobs...", { duration: 3000 });
+                window.dispatchEvent(new CustomEvent('tour-completed', {
+                    detail: { autoGenStarted: true, taskId }
+                }));
+            } else {
+                window.dispatchEvent(new CustomEvent('tour-completed'));
+            }
         } catch (error) {
             console.error("Error completing onboarding:", error);
             toast.success("Welcome aboard! 🎉", { duration: 3000 });

@@ -69,6 +69,9 @@ def scrape_qualcomm():
         return
         
     logging.info(f"Found {len(jobs)} Qualcomm jobs. Posting to backend...")
+    
+    # Import experience extraction utility
+    from experience_utils import extract_experience_from_text
 
     for i, job in enumerate(jobs, start=1):
         title = job.get("name", "N/A")
@@ -77,16 +80,33 @@ def scrape_qualcomm():
         
         # Fetch the full job description from the job URL
         description = get_job_description(job_url)
+        
+        # Try to get experience from API field first, then parse from description
+        experience_required = job.get("experienceLevel", "") or job.get("experience", "")
+        experience_min_years = None
+        
+        if not experience_required:
+            # Parse from description
+            experience_required, experience_min_years = extract_experience_from_text(description)
+        else:
+            # If we have structured experience, parse the years from it
+            _, experience_min_years = extract_experience_from_text(experience_required)
+        
+        # Also try to extract from title
+        if experience_min_years is None:
+            _, experience_min_years = extract_experience_from_text(title)
 
         payload = {
             "title": title,
             "company": "Qualcomm",
             "location": location,
             "job_url": job_url,
-            "description": description
+            "description": description,
+            "experience_required": experience_required,
+            "experience_min_years": experience_min_years
         }
 
-        logging.info(f"[{i}] {title} at {location} — {job_url}")
+        logging.info(f"[{i}] {title} at {location} — Exp: {experience_required} ({experience_min_years} yrs)")
         try:
             url = f"{BACKEND_ENDPOINT}/jobs"
             post_resp = requests.post(url, json=payload, timeout=30)

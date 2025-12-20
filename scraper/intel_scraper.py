@@ -69,16 +69,22 @@ def scrape_intel():
 
         # Placeholder for description as it's not in the list view
         description = "Full description available on the job page."
+        
+        # Extract experience from title (Intel typically has seniority in title)
+        from experience_utils import extract_experience_from_text
+        experience_required, experience_min_years = extract_experience_from_text(title)
 
         payload = {
             "title": title,
             "company": "Intel",
             "location": location,
             "job_url": job_url,
-            "description": description
+            "description": description,
+            "experience_required": experience_required,
+            "experience_min_years": experience_min_years
         }
 
-        logging.info(f"[{index}] {title} | {location} | {job_url}")
+        logging.info(f"[{index}] {title} | {location} — Exp: {experience_required} ({experience_min_years} yrs)")
 
         # Push to backend
         try:

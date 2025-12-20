@@ -9,10 +9,18 @@ from datetime import datetime, timedelta
 from encryption import decrypt_field
 import razorpay
 import os
+import asyncio
+import uuid
 
 router = APIRouter()
 users_collection = db["users"]
 recommendations_collection = db["recommendations"]
+tasks_collection = db["generation_tasks"]
+
+# Import recommendation generation function (lazy import to avoid circular dependency)
+def get_recommendation_generator():
+    from routes.recommendations import _run_recommendation_generation
+    return _run_recommendation_generation
 
 razorpay_client = razorpay.Client(
     auth=(os.getenv("RAZORPAY_KEY_ID"), os.getenv("RAZORPAY_KEY_SECRET"))
@@ -344,7 +352,7 @@ async def redeem_reward(current_user: dict = Depends(get_current_user)):
 
 @router.post("/onboarding/complete", status_code=status.HTTP_200_OK)
 async def complete_onboarding(current_user: dict = Depends(get_current_user)):
-    """Mark onboarding as completed for the user"""
+    """Mark onboarding as completed for the user and auto-generate recommendations if applicable"""
     user_id = current_user.get("_id")
     
     await users_collection.update_one(
@@ -357,12 +365,57 @@ async def complete_onboarding(current_user: dict = Depends(get_current_user)):
         }
     )
     
-    return {"message": "Onboarding completed successfully"}
+    # Auto-trigger recommendation generation for new users with preferences
+    auto_generation_started = False
+    task_id = None
+    
+    try:
+        user = await users_collection.find_one({"_id": ObjectId(user_id)})
+        if user:
+            preferences = user.get("preferences", {})
+            # Check if user has meaningful preferences set
+            has_preferences = bool(
+                preferences.get("role") or 
+                preferences.get("tech_stack") or 
+                preferences.get("location")
+            )
+            
+            if has_preferences:
+                # Check if user already has recommendations
+                existing_recs = await recommendations_collection.find_one({"user_id": str(user_id)})
+                existing_jobs = user.get("job_applications", [])
+                
+                if not existing_recs and not existing_jobs:
+                    # Create a generation task and start background recommendation generation
+                    task_id = str(uuid.uuid4())
+                    await tasks_collection.insert_one({
+                        "_id": task_id,
+                        "user_id": str(user_id),
+                        "status": "pending",
+                        "source": "onboarding_auto",
+                        "created_at": datetime.utcnow(),
+                        "updated_at": datetime.utcnow()
+                    })
+                    
+                    # Get the recommendation generator and run it
+                    _run_recommendation_generation = get_recommendation_generator()
+                    asyncio.create_task(_run_recommendation_generation(str(user_id), task_id))
+                    auto_generation_started = True
+                    print(f"DEBUG: Auto-started recommendation generation for new user {user_id}")
+    except Exception as e:
+        print(f"DEBUG: Failed to auto-start recommendations for user {user_id}: {e}")
+        # Don't fail the onboarding request if auto-generation fails
+    
+    return {
+        "message": "Onboarding completed successfully",
+        "auto_generation_started": auto_generation_started,
+        "task_id": task_id
+    }
 
 
 @router.post("/onboarding/skip", status_code=status.HTTP_200_OK)
 async def skip_onboarding(current_user: dict = Depends(get_current_user)):
-    """Mark onboarding as skipped (same as completed, just different intent)"""
+    """Mark onboarding as skipped and auto-generate recommendations if applicable"""
     user_id = current_user.get("_id")
     
     await users_collection.update_one(
@@ -375,7 +428,52 @@ async def skip_onboarding(current_user: dict = Depends(get_current_user)):
         }
     )
     
-    return {"message": "Onboarding skipped"}
+    # Auto-trigger recommendation generation for new users with preferences
+    auto_generation_started = False
+    task_id = None
+    
+    try:
+        user = await users_collection.find_one({"_id": ObjectId(user_id)})
+        if user:
+            preferences = user.get("preferences", {})
+            # Check if user has meaningful preferences set
+            has_preferences = bool(
+                preferences.get("role") or 
+                preferences.get("tech_stack") or 
+                preferences.get("location")
+            )
+            
+            if has_preferences:
+                # Check if user already has recommendations
+                existing_recs = await recommendations_collection.find_one({"user_id": str(user_id)})
+                existing_jobs = user.get("job_applications", [])
+                
+                if not existing_recs and not existing_jobs:
+                    # Create a generation task and start background recommendation generation
+                    task_id = str(uuid.uuid4())
+                    await tasks_collection.insert_one({
+                        "_id": task_id,
+                        "user_id": str(user_id),
+                        "status": "pending",
+                        "source": "onboarding_skip_auto",
+                        "created_at": datetime.utcnow(),
+                        "updated_at": datetime.utcnow()
+                    })
+                    
+                    # Get the recommendation generator and run it
+                    _run_recommendation_generation = get_recommendation_generator()
+                    asyncio.create_task(_run_recommendation_generation(str(user_id), task_id))
+                    auto_generation_started = True
+                    print(f"DEBUG: Auto-started recommendation generation for skipped-onboarding user {user_id}")
+    except Exception as e:
+        print(f"DEBUG: Failed to auto-start recommendations for user {user_id}: {e}")
+        # Don't fail the skip request if auto-generation fails
+    
+    return {
+        "message": "Onboarding skipped",
+        "auto_generation_started": auto_generation_started,
+        "task_id": task_id
+    }
 
 
 @router.post("/onboarding/reset", status_code=status.HTTP_200_OK)

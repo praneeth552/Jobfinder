@@ -26,22 +26,39 @@ async def scrape_amazon_jobs():
         data = response.json()
         jobs = data.get("jobs", [])
         logging.info(f"Found {len(jobs)} jobs. Processing each now...")
+        
+        # Import experience extraction utility
+        from experience_utils import extract_experience_from_text
 
         for index, job in enumerate(jobs, start=1):
             title = job.get("title", "N/A")
             location = job.get("location", "N/A")
             job_url = f"{BASE_URL}{job.get('job_path', '')}"
             description = job.get("description", "N/A")
+            
+            # Check for basic_qualifications which often has experience info
+            basic_qualifications = job.get("basic_qualifications", "")
+            
+            # Extract experience from description or qualifications
+            experience_required, experience_min_years = extract_experience_from_text(basic_qualifications)
+            
+            if experience_min_years is None:
+                experience_required, experience_min_years = extract_experience_from_text(description)
+            
+            if experience_min_years is None:
+                experience_required, experience_min_years = extract_experience_from_text(title)
 
             payload = {
                 "title": title,
                 "company": "Amazon",
                 "location": location,
                 "job_url": job_url,
-                "description": description
+                "description": description,
+                "experience_required": experience_required,
+                "experience_min_years": experience_min_years
             }
 
-            logging.info(f"[{index}] {title} | {location} | {job_url}")
+            logging.info(f"[{index}] {title} | {location} — Exp: {experience_required} ({experience_min_years} yrs)")
 
             try:
                 url = f"{BACKEND_ENDPOINT}/jobs"

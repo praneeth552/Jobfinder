@@ -133,6 +133,8 @@ class Job(BaseModel):
     location: str
     description: Optional[str] = None
     job_url: Optional[str] = None
+    experience_required: Optional[str] = None  # e.g., "3-5 years", "Fresher", "5+ years"
+    experience_min_years: Optional[int] = None  # Numeric value for filtering (0, 3, 5, etc.)
     date_scraped: datetime = Field(default_factory=datetime.utcnow)
 
 

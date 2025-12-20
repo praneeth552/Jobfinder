@@ -76,6 +76,9 @@ def scrape_capgemini():
         return
         
     logging.info(f"Found {len(jobs)} Capgemini jobs. Posting to backend...")
+    
+    # Import experience extraction utility
+    from experience_utils import extract_experience_from_text, parse_experience_level
 
     for i, job in enumerate(jobs, start=1):
         title = job.get("title", "N/A")
@@ -86,6 +89,22 @@ def scrape_capgemini():
         experience_level = job.get("experience_level", "")
         brand = job.get("brand", "Capgemini")
         professional_community = job.get("professional_communities", "")
+        
+        # Parse experience from structured field or description
+        experience_required = None
+        experience_min_years = None
+        
+        if experience_level:
+            experience_required, experience_min_years = parse_experience_level(experience_level)
+        
+        # If not found in structured field, try description
+        if experience_min_years is None:
+            raw_description = job.get("description", "")
+            experience_required, experience_min_years = extract_experience_from_text(raw_description)
+        
+        # Also try to extract from title
+        if experience_min_years is None:
+            experience_required, experience_min_years = extract_experience_from_text(title)
         
         # Clean and format description
         raw_description = job.get("description", "")
@@ -107,10 +126,12 @@ def scrape_capgemini():
             "company": brand if brand else "Capgemini",
             "location": location,
             "job_url": job_url,
-            "description": description
+            "description": description,
+            "experience_required": experience_required,
+            "experience_min_years": experience_min_years
         }
 
-        logging.info(f"[{i}] {title} at {location} ({experience_level})")
+        logging.info(f"[{i}] {title} at {location} — Exp: {experience_required} ({experience_min_years} yrs)")
         try:
             url = f"{BACKEND_ENDPOINT}/jobs"
             post_resp = requests.post(url, json=payload, timeout=30)

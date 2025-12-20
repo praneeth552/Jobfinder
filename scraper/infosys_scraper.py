@@ -58,16 +58,32 @@ def scrape_infosys():
 
         # Create description combining experience and skills
         description = f"Experience: {min_exp}-{max_exp} years. Skills: {skills}."
+        
+        # Format experience for new fields
+        experience_required = None
+        experience_min_years = None
+        
+        if min_exp is not None:
+            try:
+                experience_min_years = int(min_exp)
+                if max_exp is not None:
+                    experience_required = f"{min_exp}-{max_exp} years"
+                else:
+                    experience_required = f"{min_exp}+ years"
+            except (ValueError, TypeError):
+                experience_required = str(min_exp) if min_exp else None
 
         payload = {
             "title": title,
             "company": "Infosys",
             "location": location,
             "job_url": job_url,
-            "description": description
+            "description": description,
+            "experience_required": experience_required,
+            "experience_min_years": experience_min_years
         }
 
-        logging.info(f"[{index}] {title} | {location} | {job_url}")
+        logging.info(f"[{index}] {title} | {location} | Exp: {experience_required}")
 
         # Push to backend
         try:

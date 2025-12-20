@@ -70,6 +70,9 @@ def scrape_adobe():
         return
 
     logging.info(f"Processing {len(job_listings)} job listings...")
+    
+    # Import experience extraction utility
+    from experience_utils import extract_experience_from_text
 
     for index, job in enumerate(job_listings, start=1):
         title = job.get("title", "N/A")
@@ -90,16 +93,21 @@ def scrape_adobe():
         # For now, we'll use a placeholder as the full description is not available in a clean format.
         # A better approach would be to visit job_url and scrape the description, but that's more complex.
         description = "Full description available on the job page." # Placeholder
+        
+        # Extract experience from title (Adobe often has seniority in title like "Senior", "Staff")
+        experience_required, experience_min_years = extract_experience_from_text(title)
 
         payload = {
             "title": title,
             "company": "Adobe",
             "location": location,
             "job_url": job_url,
-            "description": description
+            "description": description,
+            "experience_required": experience_required,
+            "experience_min_years": experience_min_years
         }
 
-        logging.info(f"[{index}] Processing job: {title} | {location}")
+        logging.info(f"[{index}] {title} | {location} — Exp: {experience_required} ({experience_min_years} yrs)")
 
         # Push to backend
         try:

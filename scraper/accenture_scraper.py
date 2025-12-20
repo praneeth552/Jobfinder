@@ -72,6 +72,9 @@ def scrape_accenture():
         return
         
     logging.info(f"Found {len(jobs)} Accenture jobs. Posting to backend...")
+    
+    # Import experience extraction utility
+    from experience_utils import extract_experience_from_text
 
     for i, job in enumerate(jobs, start=1):
         title = job.get("title", "N/A")
@@ -83,16 +86,27 @@ def scrape_accenture():
         job_url = f"https://www.accenture.com/{country_site}/careers/jobdetails?id={job.get('requisitionId', '')}_en&title={job.get('title', '')}" if job_url_template else "Not available"
         
         description = job.get("jobDescriptionClean", "N/A")
+        
+        # Extract experience from description and title
+        experience_required, experience_min_years = extract_experience_from_text(description)
+        
+        # Also try from title if not found
+        if experience_min_years is None:
+            _, experience_min_years = extract_experience_from_text(title)
+            if experience_min_years is not None:
+                experience_required = f"{experience_min_years}+ years"
 
         payload = {
             "title": title,
             "company": "Accenture",
             "location": location_str,
             "job_url": job_url,
-            "description": description
+            "description": description,
+            "experience_required": experience_required,
+            "experience_min_years": experience_min_years
         }
 
-        logging.info(f"[{i}] {title} at {location_str} — {job_url}")
+        logging.info(f"[{i}] {title} at {location_str} — Exp: {experience_required} ({experience_min_years} yrs)")
         try:
             url = f"{BACKEND_ENDPOINT}/jobs"
             post_resp = requests.post(url, json=payload, timeout=30)
