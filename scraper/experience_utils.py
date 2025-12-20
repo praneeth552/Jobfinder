@@ -53,7 +53,8 @@ def extract_experience_from_text(text: str) -> Tuple[Optional[str], Optional[int
     
     # Pattern 5: Fresher/Entry-level keywords
     fresher_keywords = ['fresher', 'freshers', 'entry level', 'entry-level', 'graduate', 
-                        'new grad', 'college hire', '0 years', 'no experience', 'trainee']
+                        'new grad', 'college hire', '0 years', 'no experience', 'trainee', 
+                        'jr.', 'jr ', 'junior']
     if any(kw in text_lower for kw in fresher_keywords):
         return "Fresher", 0
     
@@ -63,9 +64,11 @@ def extract_experience_from_text(text: str) -> Tuple[Optional[str], Optional[int
         return "Internship", 0
     
     # Pattern 7: Senior keywords often indicate 5+ years
-    senior_keywords = ['senior', 'lead', 'principal', 'staff', 'architect']
+    # Note: Check for "sr." "sr " abbreviations and full words
+    senior_keywords = ['senior', 'sr.', 'sr ', 'lead', 'principal', 'staff', 
+                       'architect', 'director', 'head', 'member technical staff',
+                       'mts', 'mts-ii', 'mts-iii']
     if any(kw in text_lower for kw in senior_keywords):
-        # Check if title, not description
         return "Senior", 5
     
     return None, None

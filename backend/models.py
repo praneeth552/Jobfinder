@@ -74,6 +74,18 @@ class RecommendedJob(BaseModel):
             # If it's a dict, try to extract a reasonable string value
             return str(v.get('name', v.get('value', str(v))))
         return str(v) if v is not None else ""
+    
+    @field_validator('match_score', mode='before')
+    @classmethod
+    def cap_match_score(cls, v):
+        """Cap match score at 100% (AI sometimes returns scores > 100)"""
+        if v is None:
+            return None
+        try:
+            score = int(v)
+            return min(score, 100)  # Cap at 100
+        except (ValueError, TypeError):
+            return None
 
 
 class JobApplication(BaseModel):
