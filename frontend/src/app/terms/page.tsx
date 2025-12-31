@@ -50,7 +50,16 @@ const TermsAndConditions = () => {
       content: "We reserve the right, at our sole discretion, to modify or replace these Terms at any time. We will provide at least 30 days' notice prior to any new terms taking effect. By continuing to access or use our Service after those revisions become effective, you agree to be bound by the revised terms."
     },
     {
-      title: "10. Contact Us",
+      title: "10. Advertising",
+      content: "Our Service may display third-party advertisements, including ads served by Google AdSense. By using our Service, you acknowledge and agree that:",
+      bullets: [
+        { label: "Ad Display:", text: "Advertisements may appear on various pages of the Service, and you consent to the display of such advertisements." },
+        { label: "Third-Party Advertisers:", text: "Third-party advertisers may use cookies and similar technologies to collect information about your browsing activities. Please refer to our Privacy Policy for more details." },
+        { label: "No Endorsement:", text: "The display of advertisements does not imply endorsement by Tackleit of any advertised product or service." }
+      ]
+    },
+    {
+      title: "11. Contact Us",
       content: "If you have any questions about these Terms, please contact us at:",
       link: { text: "saipraneeth2525@gmail.com", href: "mailto:saipraneeth2525@gmail.com" }
     }
@@ -78,7 +87,7 @@ const TermsAndConditions = () => {
                 <h1 className="text-3xl md:text-4xl font-bold text-[--foreground] mb-4">
                   Terms and Conditions
                 </h1>
-                <p className="text-sm text-[--foreground]/50">Last Updated: August 12, 2025</p>
+                <p className="text-sm text-[--foreground]/50">Last Updated: December 31, 2025</p>
               </div>
 
               {/* Content */}

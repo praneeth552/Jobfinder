@@ -56,15 +56,45 @@ const PrivacyPolicy = () => {
       ]
     },
     {
-      title: "6. Your Rights and Choices",
-      content: "You have certain rights regarding your personal information:",
+      title: "6. Advertising",
+      content: "We may display advertisements on our Site using third-party advertising services, including Google AdSense. These services may use cookies and similar technologies to serve ads based on your prior visits to our Site or other websites.",
       bullets: [
-        { label: "Account Information:", text: "You may at any time review or change the information in your account by logging into your account settings and updating your preferences." },
-        { label: "Emails and Communications:", text: "If you no longer wish to receive correspondence, emails, or other communications from us, you may opt-out by contacting us using the contact information provided below." }
+        { label: "Personalized Ads:", text: "Google and other third-party vendors use cookies to serve ads based on your browsing history. You can opt out of personalized advertising by visiting Google's Ads Settings (https://www.google.com/settings/ads)." },
+        { label: "Third-Party Cookies:", text: "Third-party vendors, including Google, use cookies to serve ads based on your visits to this and other websites. You may opt out of third-party cookies by visiting the Network Advertising Initiative opt-out page (https://optout.networkadvertising.org/)." },
+        { label: "DoubleClick Cookie:", text: "Google's use of the DoubleClick cookie enables it and its partners to serve ads based on your visit to our Site and/or other sites on the Internet." }
       ]
     },
     {
-      title: "7. Contact Us",
+      title: "7. Cookies and Tracking Technologies",
+      content: "We use cookies and similar tracking technologies to track activity on our Site and hold certain information. Cookies are files with a small amount of data which may include an anonymous unique identifier.",
+      bullets: [
+        { label: "Essential Cookies:", text: "Required for the operation of the Site, such as session management and authentication." },
+        { label: "Analytics Cookies:", text: "Help us understand how visitors interact with our Site by collecting and reporting information anonymously." },
+        { label: "Advertising Cookies:", text: "Used to deliver relevant advertisements and track ad campaign performance." },
+        { label: "Your Choices:", text: "You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of our Site." }
+      ]
+    },
+    {
+      title: "8. Data Retention and Deletion",
+      content: "We retain your personal information only for as long as necessary to fulfill the purposes for which it was collected, or as required by law.",
+      bullets: [
+        { label: "Active Accounts:", text: "Your data is retained for as long as your account remains active." },
+        { label: "Account Deletion:", text: "If you request account deletion, your data will be permanently removed within 30 days, unless we are required to retain it for legal or regulatory purposes." },
+        { label: "Inactive Accounts:", text: "Accounts that have been inactive for an extended period may be subject to deletion after prior notice." }
+      ]
+    },
+    {
+      title: "9. Your Rights and Choices",
+      content: "You have certain rights regarding your personal information:",
+      bullets: [
+        { label: "Account Information:", text: "You may at any time review or change the information in your account by logging into your account settings and updating your preferences." },
+        { label: "Emails and Communications:", text: "If you no longer wish to receive correspondence, emails, or other communications from us, you may opt-out by contacting us using the contact information provided below." },
+        { label: "Data Access and Portability:", text: "You have the right to request a copy of your personal data that we hold." },
+        { label: "Right to Erasure:", text: "You have the right to request deletion of your personal data, subject to certain exceptions." }
+      ]
+    },
+    {
+      title: "10. Contact Us",
       content: "If you have questions or comments about this Privacy Policy, please contact us at:",
       link: { text: "saipraneeth2525@gmail.com", href: "mailto:saipraneeth2525@gmail.com" }
     }
@@ -92,7 +122,7 @@ const PrivacyPolicy = () => {
                 <h1 className="text-3xl md:text-4xl font-bold text-[--foreground] mb-4">
                   Privacy Policy
                 </h1>
-                <p className="text-sm text-[--foreground]/50">Last Updated: August 12, 2025</p>
+                <p className="text-sm text-[--foreground]/50">Last Updated: December 31, 2025</p>
               </div>
 
               {/* Content */}
