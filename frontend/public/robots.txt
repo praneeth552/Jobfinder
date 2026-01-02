@@ -14,5 +14,12 @@ Disallow: /upgrade/
 Disallow: /billing/
 Disallow: /otp/
 Disallow: /delete/
+Disallow: /signin/
+Disallow: /signup/
+Disallow: /forgot-password/
+Disallow: /reset-password/
+Disallow: /settings/
+Disallow: /results/
+Disallow: /jobs/
 
 Sitemap: https://tackleit.xyz/sitemap.xml
