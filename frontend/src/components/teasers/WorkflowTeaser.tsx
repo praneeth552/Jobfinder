@@ -26,9 +26,29 @@ export default function WorkflowTeaser() {
                         Find Jobs in <span className="text-[--foreground]/60">4 Simple Steps</span>
                     </h2>
 
-                    <p className="text-lg text-[--foreground]/70 max-w-2xl mx-auto mb-8">
-                        Upload resume → Set preferences → AI matches jobs → Export to Google Sheets (Pro)
+                    <p className="text-lg text-[--foreground]/70 max-w-2xl mx-auto mb-6">
+                        Our streamlined process makes job searching effortless and efficient.
                     </p>
+
+                    {/* Detailed workflow steps */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto mb-8 text-left">
+                        <div className="p-4 rounded-xl bg-[--card-background] border border-[--border]">
+                            <div className="font-semibold text-[--foreground] mb-1">1. Upload Your Resume</div>
+                            <p className="text-sm text-[--foreground]/60">Our AI parses your resume to understand your skills, experience, and qualifications automatically.</p>
+                        </div>
+                        <div className="p-4 rounded-xl bg-[--card-background] border border-[--border]">
+                            <div className="font-semibold text-[--foreground] mb-1">2. Set Your Preferences</div>
+                            <p className="text-sm text-[--foreground]/60">Tell us your desired roles, locations, salary expectations, and company preferences.</p>
+                        </div>
+                        <div className="p-4 rounded-xl bg-[--card-background] border border-[--border]">
+                            <div className="font-semibold text-[--foreground] mb-1">3. AI Matches Jobs</div>
+                            <p className="text-sm text-[--foreground]/60">Our algorithms scan company career pages and match you with relevant opportunities.</p>
+                        </div>
+                        <div className="p-4 rounded-xl bg-[--card-background] border border-[--border]">
+                            <div className="font-semibold text-[--foreground] mb-1">4. Export to Sheets (Pro)</div>
+                            <p className="text-sm text-[--foreground]/60">Seamlessly export your curated job list to Google Sheets for easy tracking.</p>
+                        </div>
+                    </div>
 
                     <div className="flex items-center justify-center gap-4 mb-8">
                         <div className="px-4 py-2 rounded-lg bg-[--card-background] border border-[--border] text-[--foreground]/70 text-sm font-medium">
