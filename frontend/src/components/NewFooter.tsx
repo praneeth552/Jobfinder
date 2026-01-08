@@ -98,6 +98,7 @@ const NewFooter = () => {
               <ul className="space-y-4">
                 <FooterLink href="/pricing">Pricing</FooterLink>
                 <FooterLink href="/about">About</FooterLink>
+                <FooterLink href="/blog">Blog</FooterLink>
                 <FooterLink href="/contact">Contact</FooterLink>
               </ul>
             </div>
