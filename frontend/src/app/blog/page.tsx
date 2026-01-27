@@ -39,6 +39,33 @@ const blogPosts = [
         readTime: "12 min read",
         category: "Interviews",
     },
+    {
+        slug: "networking-for-introverts",
+        title: "Networking for Introverts: A Guide for Developers",
+        excerpt: "Networking doesn't have to be scary. Learn practical, low-energy strategies to build professional connections without draining your social battery.",
+        author: "Tackleit Team",
+        date: "December 5, 2025",
+        readTime: "7 min read",
+        category: "Career Growth",
+    },
+    {
+        slug: "remote-work-trends-2026",
+        title: "Remote Work Trends in 2026: What to Expect",
+        excerpt: "Is remote work here to stay? We analyze the latest data on remote, hybrid, and in-office trends for the tech industry in 2026.",
+        author: "Tackleit Team",
+        date: "November 28, 2025",
+        readTime: "5 min read",
+        category: "Industry Trends",
+    },
+    {
+        slug: "salary-negotiation-guide",
+        title: "Salary Negotiation for Software Engineers",
+        excerpt: "Don't leave money on the table. Expert tips on how to research your market value and negotiate a better compensation package.",
+        author: "Tackleit Team",
+        date: "November 15, 2025",
+        readTime: "9 min read",
+        category: "Salary & Benefits",
+    },
 ];
 
 export default function BlogPage() {
