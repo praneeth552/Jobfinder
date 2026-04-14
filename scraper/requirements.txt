@@ -1,4 +1,4 @@
 pymongo[srv]
 python-dotenv
-playwright
+
 beautifulsoup4
