@@ -18,7 +18,7 @@ Jinja2
 python-multipart
 gunicorn
 setuptools
-playwright
+
 beautifulsoup4
 spacy
 nltk
