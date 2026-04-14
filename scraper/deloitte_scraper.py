@@ -14,7 +14,11 @@ if not BACKEND_ENDPOINT:
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-DELOITTE_API_URL = "https://careersatdeloitte.com/api/v1/elasticsearch/vacancies?workAreasFilterType=whereHasAll&order=newest_first&page=1&per_page=40&withFilterUris=1&query=intern%20OR%20fresher%20OR%20trainee%20OR%20graduate"
+DELOITTE_API_URL = os.getenv("DELOITTE_API_URL")
+
+if not DELOITTE_API_URL:
+    logging.error("DELOITTE_API_URL environment variable not set.")
+    exit(1)
 
 def scrape_deloitte():
     logging.info("Fetching Deloitte job listings from API...")

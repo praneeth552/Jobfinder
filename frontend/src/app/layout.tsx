@@ -155,10 +155,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="canonical" href="https://www.tackleit.xyz" />
 
         {/* Google AdSense */}
-        <script
-          async
+        <Script
+          id="google-adsense"
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4215764171598471"
           crossOrigin="anonymous"
+          strategy="afterInteractive"
         />
       </head>
       <body>

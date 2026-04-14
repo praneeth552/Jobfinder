@@ -16,8 +16,12 @@ if not BACKEND_ENDPOINT:
 
 logging.basicConfig(level=logging.INFO)
 
-API_HOST = "nvidia.wd5.myworkdayjobs.com"
-API_PATH = "/wday/cxs/nvidia/NVIDIAExternalCareerSite/jobs"
+API_HOST = os.getenv("NVIDIA_API_HOST")
+API_PATH = os.getenv("NVIDIA_API_PATH")
+
+if not API_HOST or not API_PATH:
+    logging.error("NVIDIA_API_HOST or NVIDIA_API_PATH environment variable not set.")
+    exit(1)
 
 def fetch_nvidia_jobs() -> List[Dict]:
     logging.info("Fetching NVIDIA job listings from Workday API...")

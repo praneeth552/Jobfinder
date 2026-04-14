@@ -18,8 +18,12 @@ if not BACKEND_ENDPOINT:
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-API_HOST = "adobe.wd5.myworkdayjobs.com"
-API_PATH = "/wday/cxs/adobe/external_experienced/jobs"
+API_HOST = os.getenv("ADOBE_API_HOST")
+API_PATH = os.getenv("ADOBE_API_PATH")
+
+if not API_HOST or not API_PATH:
+    logging.error("ADOBE_API_HOST or ADOBE_API_PATH environment variable not set.")
+    exit(1)
 
 def clean_html(raw_html: str) -> str:
     """A simple function to remove HTML tags from a string."""

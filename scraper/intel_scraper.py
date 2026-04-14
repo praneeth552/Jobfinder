@@ -19,8 +19,12 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 def scrape_intel():
     logging.info("Fetching INTEL job listings from API.")
 
-    API_HOST = "intel.wd1.myworkdayjobs.com"
-    API_PATH = "/wday/cxs/intel/External/jobs"
+    API_HOST = os.getenv("INTEL_API_HOST")
+    API_PATH = os.getenv("INTEL_API_PATH")
+
+    if not API_HOST or not API_PATH:
+        logging.error("INTEL_API_HOST or INTEL_API_PATH environment variable not set.")
+        exit(1)
     
     all_jobs = []
     

@@ -57,6 +57,8 @@ export default function DashboardClient() {
   const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
   const [isLoading, setIsLoading] = useState(true); // For initial page load
   const [isGenerating, setIsGenerating] = useState(false); // For background task
+  const [generationProgress, setGenerationProgress] = useState(0); // Progress percentage
+  const [generationMessage, setGenerationMessage] = useState(""); // Progress message
   const [error, setError] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isSheetsEnabled, setIsSheetsEnabled] = useState(false);
@@ -368,6 +370,9 @@ export default function DashboardClient() {
         if (task.status === 'complete') {
           if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
           setIsGenerating(false);
+          setGenerationProgress(100);
+          setGenerationMessage("Done!");
+          
           toast.success(`Successfully generated ${task.result?.count || 'new'} recommendations!`);
           if (task.result?.sheets_error) {
             toast.error(`Google Sheets Sync Failed: ${task.result.sheets_error}`, { duration: 6000 });
@@ -383,10 +388,19 @@ export default function DashboardClient() {
         } else if (task.status === 'failed') {
           if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
           setIsGenerating(false);
+          setGenerationProgress(0);
+          setGenerationMessage("");
           setError(task.error || 'Recommendation generation failed.');
           toast.error(task.error || 'An unknown error occurred during generation.');
+        } else {
+          // If status is 'pending' or 'running', update progress and message
+          if (task.progress !== undefined) {
+             setGenerationProgress(task.progress);
+          }
+          if (task.message) {
+             setGenerationMessage(task.message);
+          }
         }
-        // If status is 'pending' or 'running', do nothing and let it poll again
       } catch (error) {
         if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
         setIsGenerating(false);
@@ -443,6 +457,8 @@ export default function DashboardClient() {
     }
 
     setIsGenerating(true);
+    setGenerationProgress(0);
+    setGenerationMessage("Starting...");
     setError(null);
 
     try {
@@ -828,10 +844,45 @@ export default function DashboardClient() {
             onDragEnd={onDragEnd}
           >
             {(isLoading || isGenerating) && (
-              <div className="text-center">
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  {isGenerating ? "Generating new recommendations, this may take up to a minute..." : "Loading your dashboard..."}
-                </p>
+              <div className="text-center w-full">
+                {isGenerating ? (
+                  <div className="flex flex-col items-center bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 max-w-md mx-auto mb-8">
+                    <Sparkles className="text-indigo-500 mb-3 animate-pulse" size={28} />
+                    <p className="text-slate-800 dark:text-slate-200 font-medium text-lg mb-4 text-center">
+                       AI is hunting your next big opportunity
+                    </p>
+                    <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 mb-3 overflow-hidden shadow-inner relative">
+                       <motion.div 
+                         className="bg-indigo-500 h-2 rounded-full absolute top-0 left-0"
+                         initial={{ width: `${generationProgress}%` }}
+                         animate={{ width: `${generationProgress}%` }}
+                         transition={{ duration: 0.5, ease: "easeInOut" }}
+                       />
+                       {/* Subtle shimmer effect on the progress bar */}
+                       <motion.div 
+                         className="absolute top-0 bottom-0 left-0 bg-white/30 backdrop-blur-sm"
+                         initial={{ x: "-100%", width: "20%" }}
+                         animate={{ x: "500%" }}
+                         transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                       />
+                    </div>
+                    <div className="flex justify-between w-full text-xs text-slate-500 font-medium px-1">
+                      <motion.span
+                        key={generationMessage}
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                      >
+                        {generationMessage || "Initializing..."}
+                      </motion.span>
+                      <span>{generationProgress}%</span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-gray-600 dark:text-gray-300 mb-8 flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 rounded-full border-2 border-[--foreground]/20 md:border-b-indigo-500 animate-spin" />
+                    Loading your dashboard...
+                  </p>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {Array.from({ length: 6 }).map((_, index) => <JobCardSkeleton key={index} />)}
                 </div>

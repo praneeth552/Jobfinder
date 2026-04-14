@@ -14,7 +14,12 @@ if not BACKEND_ENDPOINT:
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-TCS_API_URL = "https://ibegin.tcsapps.com/candidate/api/v1/jobs/searchJ?at=1753900034586"
+TCS_API_URL = os.getenv("TCS_API_URL")
+
+if not TCS_API_URL:
+    logging.error("TCS_API_URL environment variable not set.")
+    exit(1)
+
 HEADERS = {
     "Content-Type": "application/json", 
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",

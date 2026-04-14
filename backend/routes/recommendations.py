@@ -126,7 +126,7 @@ Return ONLY a valid JSON array. No markdown, no backticks, no explanation text.
 # --- Background Task ---
 async def _run_recommendation_generation(user_id: str, task_id: str):
     print(f"DEBUG: Starting recommendation generation v3 for task {task_id}")
-    await tasks_collection.update_one({"_id": task_id}, {"$set": {"status": "running", "updated_at": datetime.utcnow()}})
+    await tasks_collection.update_one({"_id": task_id}, {"$set": {"status": "running", "progress": 10, "message": "Preparing your data...", "updated_at": datetime.utcnow()}})
     try:
         user_object_id = ObjectId(user_id)
         user = await users_collection.find_one({"_id": user_object_id})
@@ -172,6 +172,7 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
         user_profile_string = "\n".join(user_profile_parts)
         
         # Fetch ALL jobs from database
+        await tasks_collection.update_one({"_id": task_id}, {"$set": {"progress": 30, "message": "Pre-filtering jobs...", "updated_at": datetime.utcnow()}})
         all_jobs = await jobs_collection.find({}).to_list(length=None)
         if not all_jobs:
             raise Exception("No jobs found in the database")
@@ -468,6 +469,7 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
             print(f"DEBUG: Expanded job pool to {len(jobs)} jobs")
 
         prompt = build_prompt(user_profile_string, jobs, len(jobs))
+        await tasks_collection.update_one({"_id": task_id}, {"$set": {"progress": 60, "message": "Generating AI recommendations...", "updated_at": datetime.utcnow()}})
         model = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, generation_config=GENERATION_CONFIG, safety_settings=SAFETY_SETTINGS)
         
         # Retry logic for Gemini API
@@ -559,6 +561,8 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
         evaluation_time_saved = len(recommended_jobs) * 6
         total_batch_time_saved = search_time_saved + evaluation_time_saved
 
+        await tasks_collection.update_one({"_id": task_id}, {"$set": {"progress": 90, "message": "Syncing database...", "updated_at": datetime.utcnow()}})
+
         recommendation_data = {"user_id": user_id, "recommended_jobs": [job.dict() for job in recommended_jobs], "generated_at": datetime.utcnow()}
         await recommendations_collection.update_one({"user_id": user_id}, {"$set": recommendation_data}, upsert=True)
 
@@ -577,7 +581,7 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
         
         await tasks_collection.update_one(
             {"_id": task_id},
-            {"$set": {"status": "complete", "result": {"count": len(recommended_jobs), "sheets_error": sheets_error}, "updated_at": datetime.utcnow()}}
+            {"$set": {"status": "complete", "progress": 100, "message": "Done!", "result": {"count": len(recommended_jobs), "sheets_error": sheets_error}, "updated_at": datetime.utcnow()}}
         )
 
     except Exception as e:
@@ -639,6 +643,8 @@ async def get_recommendation_status(task_id: str, current_user: dict = Depends(g
     return {
         "task_id": task["_id"],
         "status": task["status"],
+        "progress": task.get("progress", 0),
+        "message": task.get("message", ""),
         "created_at": task["created_at"],
         "updated_at": task["updated_at"],
         "result": task.get("result"),

@@ -83,6 +83,9 @@ export default function SimpleNavbar() {
         </Link>
 
         <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+          <Link href="/docs" className="text-sm font-semibold text-[--foreground]/80 hover:text-[--foreground] transition-colors hidden sm:block md:mr-2">
+            Docs
+          </Link>
           <ThemeToggle />
           <AnimationToggle />
 

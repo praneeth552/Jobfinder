@@ -15,7 +15,12 @@ if not BACKEND_ENDPOINT:
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-QUALCOMM_API_URL = "https://careers.qualcomm.com/api/apply/v2/jobs"
+QUALCOMM_API_URL = os.getenv("QUALCOMM_API_URL")
+
+if not QUALCOMM_API_URL:
+    logging.error("QUALCOMM_API_URL environment variable not set.")
+    exit(1)
+
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "application/json, text/plain, */*"

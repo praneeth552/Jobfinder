@@ -18,7 +18,11 @@ def scrape_infosys():
     logging.info("Fetching Infosys job listings from API.")
 
     # Infosys jobs API URL
-    INFOSYS_API_URL = "https://intapgateway.infosysapps.com/careersci/search/intapjbsrch/getCareerSearchJobs?sourceId=1,21&searchText=fresher OR intern OR trainee OR developer"
+    INFOSYS_API_URL = os.getenv("INFOSYS_API_URL")
+
+    if not INFOSYS_API_URL:
+        logging.error("INFOSYS_API_URL environment variable not set.")
+        exit(1)
 
     # Headers to mimic browser request
     HEADERS = {

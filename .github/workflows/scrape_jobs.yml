@@ -39,6 +39,20 @@ jobs:
       env:
         MONGO_URI: ${{ secrets.MONGO_URI }}
         NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+        ACCENTURE_API_URL: ${{ secrets.ACCENTURE_API_URL }}
+        ADOBE_API_HOST: ${{ secrets.ADOBE_API_HOST }}
+        ADOBE_API_PATH: ${{ secrets.ADOBE_API_PATH }}
+        AMAZON_BASE_URL: ${{ secrets.AMAZON_BASE_URL }}
+        AMAZON_SEARCH_URL: ${{ secrets.AMAZON_SEARCH_URL }}
+        CAPGEMINI_API_URL: ${{ secrets.CAPGEMINI_API_URL }}
+        DELOITTE_API_URL: ${{ secrets.DELOITTE_API_URL }}
+        INTEL_API_HOST: ${{ secrets.INTEL_API_HOST }}
+        INTEL_API_PATH: ${{ secrets.INTEL_API_PATH }}
+        INFOSYS_API_URL: ${{ secrets.INFOSYS_API_URL }}
+        NVIDIA_API_HOST: ${{ secrets.NVIDIA_API_HOST }}
+        NVIDIA_API_PATH: ${{ secrets.NVIDIA_API_PATH }}
+        QUALCOMM_API_URL: ${{ secrets.QUALCOMM_API_URL }}
+        TCS_API_URL: ${{ secrets.TCS_API_URL }}
       run: |
         python scraper/accenture_scraper.py
         python scraper/adobe_scraper.py

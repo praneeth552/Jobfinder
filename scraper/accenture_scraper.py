@@ -16,7 +16,11 @@ logging.info(f"Using backend endpoint: {BACKEND_ENDPOINT}")
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-ACCENTURE_API_URL = "https://www.accenture.com/api/accenture/elastic/findjobs"
+ACCENTURE_API_URL = os.getenv("ACCENTURE_API_URL")
+
+if not ACCENTURE_API_URL:
+    logging.error("ACCENTURE_API_URL environment variable not set.")
+    exit(1)
 
 HEADERS = {
     'authority': 'www.accenture.com',

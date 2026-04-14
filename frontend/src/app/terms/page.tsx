@@ -87,7 +87,7 @@ const TermsAndConditions = () => {
                 <h1 className="text-3xl md:text-4xl font-bold text-[--foreground] mb-4">
                   Terms and Conditions
                 </h1>
-                <p className="text-sm text-[--foreground]/50">Last Updated: December 31, 2025</p>
+                <p className="text-sm text-[--foreground]/50">Last Updated: December 31, 2026</p>
               </div>
 
               {/* Content */}
