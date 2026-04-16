@@ -61,3 +61,10 @@ jobs:
         python scraper/nvidia_scraper.py
         python scraper/qualcomm_scraper.py
         python scraper/tcs_scraper.py
+
+    - name: Build FAISS embedding index
+      env:
+        MONGO_URI: ${{ secrets.MONGO_URI }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      run: |
+        python scraper/build_embeddings.py

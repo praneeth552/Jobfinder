@@ -10,9 +10,12 @@ import json
 import uuid
 import asyncio
 from services.google_sheets import write_to_sheet
+from services.vector_search import search_similar_jobs, build_search_query
+from services.taste_profile import build_taste_profile
 from utils import is_pro_user
 from dependencies import get_current_user, limiter
 from encryption import decrypt_field
+from bson import ObjectId as BsonObjectId
 
 # --- Load Environment ---
 load_dotenv()
@@ -171,13 +174,50 @@ async def _run_recommendation_generation(user_id: str, task_id: str):
 
         user_profile_string = "\n".join(user_profile_parts)
         
-        # Fetch ALL jobs from database
-        await tasks_collection.update_one({"_id": task_id}, {"$set": {"progress": 30, "message": "Pre-filtering jobs...", "updated_at": datetime.utcnow()}})
-        all_jobs = await jobs_collection.find({}).to_list(length=None)
+        # --- TASTE PROFILE (Pro users only) ---
+        taste_profile_text = ""
+        if is_pro_user(user):
+            await tasks_collection.update_one({"_id": task_id}, {"$set": {"progress": 25, "message": "Analyzing your preferences...", "updated_at": datetime.utcnow()}})
+            try:
+                taste_profile_text = await build_taste_profile(user_id)
+                if taste_profile_text:
+                    print(f"DEBUG: Built taste profile ({len(taste_profile_text)} chars)")
+                    user_profile_string += "\n\n" + taste_profile_text
+                else:
+                    print("DEBUG: No taste profile data yet (insufficient feedback)")
+            except Exception as tp_error:
+                print(f"DEBUG: Taste profile build failed (non-fatal): {tp_error}")
+        
+        # --- VECTOR SEARCH: Fetch candidates using FAISS ---
+        await tasks_collection.update_one({"_id": task_id}, {"$set": {"progress": 30, "message": "Searching for matching jobs...", "updated_at": datetime.utcnow()}})
+        
+        # Build a search query from user preferences + resume
+        search_query = build_search_query(preferences, resume_data)
+        print(f"DEBUG: Vector search query: '{search_query[:100]}...'")
+        
+        # Try vector search first, fall back to full scan if no index
+        candidate_job_ids = await search_similar_jobs(search_query, top_k=300)
+        
+        if candidate_job_ids:
+            # Fetch only the candidate jobs from MongoDB
+            from bson import ObjectId as BsonObjId
+            object_ids = []
+            for jid in candidate_job_ids:
+                try:
+                    object_ids.append(BsonObjId(jid))
+                except Exception:
+                    pass
+            all_jobs = await jobs_collection.find({"_id": {"$in": object_ids}}).to_list(length=300)
+            print(f"DEBUG: Vector search returned {len(all_jobs)} candidate jobs")
+        else:
+            # Fallback: No FAISS index yet, load all jobs (original behavior)
+            print("DEBUG: No FAISS index available, falling back to full collection scan")
+            all_jobs = await jobs_collection.find({}).to_list(length=None)
+        
         if not all_jobs:
             raise Exception("No jobs found in the database")
         
-        print(f"DEBUG: Fetched {len(all_jobs)} total jobs from database")
+        print(f"DEBUG: Working with {len(all_jobs)} jobs for pre-filtering")
         
         # Pre-filter jobs based on user preferences - QUALITY-FOCUSED VERSION
         def pre_filter_jobs(jobs, prefs, resume):

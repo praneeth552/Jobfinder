@@ -25,3 +25,7 @@ nltk
 pdfminer.six
 docx2txt
 cryptography
+
+# Vector Search (FAISS)
+faiss-cpu
+numpy

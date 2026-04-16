@@ -6,8 +6,8 @@ import { X, Check, Sparkles } from "lucide-react";
 import axios from "axios";
 import Cookies from "js-cookie";
 
-const CURRENT_VERSION = "2.1.2";
-const RELEASE_DATE = "December 15, 2025";
+const CURRENT_VERSION = "2.5";
+const RELEASE_DATE = "April 16, 2026";
 
 // Set to true to always show the modal for testing, then set back to false
 const FORCE_SHOW_FOR_TESTING = false;
@@ -18,35 +18,35 @@ interface ChangelogItem {
     type: "feature" | "improvement" | "fix";
 }
 
-const CHANGELOG_V2_1: ChangelogItem[] = [
+const CHANGELOG_V2_5: ChangelogItem[] = [
     {
-        title: "Save & Apply for Everyone",
+        title: "Semantic Job Search (FAISS)",
         description:
-            "All users can now save and apply to jobs—no Pro required. Track your applications easily!",
+            "Jobs are now matched using AI-powered semantic understanding, not just keywords. Your search understands context and meaning.",
         type: "feature",
     },
     {
-        title: "Smarter Location Matching",
+        title: "AI Taste Learning (Pro)",
         description:
-            "We now recognize city aliases (Bangalore↔Bengaluru, Mumbai↔Bombay) for better job matches.",
+            "Pro users' AI now learns from your thumbs-up/down, saves, and applications. Each recommendation cycle gets smarter.",
+        type: "feature",
+    },
+    {
+        title: "Smart Rate Limits",
+        description:
+            "AI features are now rate-limited per user to ensure fair usage. Pro users get significantly higher limits across all features.",
         type: "improvement",
     },
     {
-        title: "Hand-Drawn Welcome",
+        title: "Updated Pricing & Features",
         description:
-            "New animated welcome screen with elegant SVG path reveal instead of typing animation.",
+            "Pricing page now reflects all new AI capabilities with a clear Free vs Pro comparison including AI daily limits.",
         type: "improvement",
     },
     {
-        title: "Better Feedback Timing",
+        title: "Performance Boost",
         description:
-            "Feedback prompts now appear after 5 applied jobs or 15 minutes—less intrusive, more helpful.",
-        type: "fix",
-    },
-    {
-        title: "Refined Design Language",
-        description:
-            "All modals and buttons now use consistent monochrome styling with subtle hand-drawn touches.",
+            "Recommendations now use vector search (top candidates) instead of scanning all jobs—faster and more accurate results.",
         type: "improvement",
     },
 ];
@@ -252,7 +252,7 @@ export default function ChangelogModal() {
                                 </p>
 
                                 <div className="space-y-3">
-                                    {CHANGELOG_V2_1.map((item, index) => (
+                                    {CHANGELOG_V2_5.map((item, index) => (
                                         <motion.div
                                             key={index}
                                             initial={{ opacity: 0, x: -20 }}

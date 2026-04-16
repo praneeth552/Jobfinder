@@ -176,9 +176,11 @@ const UpgradePage = () => {
               <ul className="space-y-4 text-gray-700">
                 <Feature text="Generate recommendations once a month" included={true} />
                 <Feature text="Monthly resume uploads" included={true} />
+                <Feature text="Semantic job search (5/day)" included={true} />
+                <Feature text="AI taste learning" included={false} />
+                <Feature text="Resume gap analysis" included={false} />
+                <Feature text="Interview prep agent" included={false} />
                 <Feature text="Google Sheets Integration" included={false} />
-                <Feature text="Email updates for new jobs" included={false} />
-                <Feature text="Early access to beta features" included={false} />
               </ul>
             </motion.div>
 
@@ -202,12 +204,14 @@ const UpgradePage = () => {
               </p>
               <p className="text-center text-gray-500 mb-6">For serious professionals</p>
               <ul className="space-y-4 text-gray-700">
-                <Feature text="Generate recommendations once a week" included={true} />
+                <Feature text="Generate recommendations weekly" included={true} />
                 <Feature text="Weekly resume uploads" included={true} />
-                <Feature text="Advanced Job Tracking" included={true} />
+                <Feature text="Semantic job search (50/day)" included={true} />
+                <Feature text="AI taste learning (learns your preferences)" included={true} />
+                <Feature text="Resume gap analysis (10/day)" included={true} />
+                <Feature text="Interview prep agent (5/day)" included={true} />
                 <Feature text="Google Sheets Integration" included={true} />
-                <Feature text="Email updates for new jobs" included={true} />
-                <Feature text="Early access to beta features" included={true} />
+                <Feature text="Advanced Job Tracking" included={true} />
               </ul>
               <div className="text-center mt-8">
                 <LoadingButton

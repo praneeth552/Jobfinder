@@ -846,27 +846,33 @@ export default function DashboardClient() {
             {(isLoading || isGenerating) && (
               <div className="text-center w-full">
                 {isGenerating ? (
-                  <div className="flex flex-col items-center bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 max-w-md mx-auto mb-8">
-                    <Sparkles className="text-indigo-500 mb-3 animate-pulse" size={28} />
-                    <p className="text-slate-800 dark:text-slate-200 font-medium text-lg mb-4 text-center">
-                       AI is hunting your next big opportunity
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col items-center bg-[--background] p-8 rounded-2xl border-2 border-[--foreground] shadow-[4px_4px_0px_rgba(0,0,0,0.1)] dark:shadow-[4px_4px_0px_rgba(255,255,255,0.1)] max-w-md mx-auto mb-8 relative overflow-hidden"
+                  >
+                    <Sparkles className="text-[#8B4513] dark:text-[#D2B48C] mb-4 animate-[spin_3s_linear_infinite]" size={32} />
+                    <h3 className="text-[--foreground] font-bold text-xl mb-2 text-center" style={{ fontFamily: 'var(--font-kalam), cursive', fontSize: '1.5rem' }}>
+                       AI is hunting new jobs...
+                    </h3>
+                    <p className="text-[--foreground]/70 text-sm mb-6 text-center font-medium">
+                       Hang tight while our vector search finds the perfect matches.
                     </p>
-                    <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 mb-3 overflow-hidden shadow-inner relative">
+                    <div className="w-full h-3 border-2 border-[--foreground] rounded-full overflow-hidden relative bg-[--foreground]/5">
                        <motion.div 
-                         className="bg-indigo-500 h-2 rounded-full absolute top-0 left-0"
+                         className="bg-[#D2B48C] dark:bg-[#8B4513] h-full absolute top-0 left-0"
                          initial={{ width: `${generationProgress}%` }}
                          animate={{ width: `${generationProgress}%` }}
                          transition={{ duration: 0.5, ease: "easeInOut" }}
                        />
-                       {/* Subtle shimmer effect on the progress bar */}
                        <motion.div 
                          className="absolute top-0 bottom-0 left-0 bg-white/30 backdrop-blur-sm"
-                         initial={{ x: "-100%", width: "20%" }}
-                         animate={{ x: "500%" }}
+                         initial={{ x: "-100%", width: "50%" }}
+                         animate={{ x: "200%" }}
                          transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
                        />
                     </div>
-                    <div className="flex justify-between w-full text-xs text-slate-500 font-medium px-1">
+                    <div className="flex justify-between w-full text-xs text-[--foreground]/80 font-bold mt-4 px-1 tracking-wide">
                       <motion.span
                         key={generationMessage}
                         initial={{ opacity: 0, y: 5 }}
@@ -874,9 +880,9 @@ export default function DashboardClient() {
                       >
                         {generationMessage || "Initializing..."}
                       </motion.span>
-                      <span>{generationProgress}%</span>
+                      <span>{Math.round(generationProgress)}%</span>
                     </div>
-                  </div>
+                  </motion.div>
                 ) : (
                   <p className="text-gray-600 dark:text-gray-300 mb-8 flex items-center justify-center gap-2">
                     <span className="w-4 h-4 rounded-full border-2 border-[--foreground]/20 md:border-b-indigo-500 animate-spin" />

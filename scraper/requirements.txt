@@ -2,3 +2,8 @@ pymongo[srv]
 python-dotenv
 
 beautifulsoup4
+
+# Embedding Index Builder
+faiss-cpu
+google-generativeai
+numpy

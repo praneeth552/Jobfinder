@@ -19,6 +19,33 @@ interface VersionRelease {
 
 const VERSIONS: VersionRelease[] = [
     {
+        version: "2.5",
+        date: "April 16, 2026",
+        highlight: "Tackleit becomes an intelligent career assistant",
+        entries: [
+            {
+                category: "feature",
+                title: "Semantic Job Search (FAISS) - Matches based on meaning using AI models",
+            },
+            {
+                category: "feature",
+                title: "AI Taste Learning (Pro) - Learns from your feedback and saves to refine matches",
+            },
+            {
+                category: "improvement",
+                title: "Smart Rate Limits - Optimized API calls to handle scaling effectively",
+            },
+            {
+                category: "improvement",
+                title: "Updated Pricing - New tiered AI limits properly represented across site",
+            },
+            {
+                category: "improvement",
+                title: "Performance Boost - Orders magnitude faster job finding using vector db",
+            },
+        ],
+    },
+    {
         version: "2.1.2",
         date: "December 15, 2025",
         highlight: "Dashboard UX improvements and design refinements",
@@ -128,7 +155,7 @@ const VERSIONS: VersionRelease[] = [
 
 export default function VersionHistory() {
     const { animationsEnabled } = useAnimations();
-    const [activeVersion, setActiveVersion] = useState("2.1.2");
+    const [activeVersion, setActiveVersion] = useState("2.5");
 
     const scrollToVersion = (version: string) => {
         const element = document.getElementById(`version-${version}`);

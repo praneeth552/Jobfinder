@@ -55,10 +55,13 @@ provider:
     MAIL_FROM_NAME: ${env:MAIL_FROM_NAME}
     MAIL_TLS: ${env:MAIL_TLS}
     MAIL_SSL: ${env:MAIL_SSL}
+    FRONTEND_URL: ${env:FRONTEND_URL}
+    ENCRYPTION_KEY: ${env:ENCRYPTION_KEY}
 
 functions:
   api:
     image: appimage
+    memorySize: 512
     timeout: 90 # Increase timeout to 30 seconds
     events:
       - httpApi: '*'
