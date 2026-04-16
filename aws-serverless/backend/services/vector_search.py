@@ -10,14 +10,27 @@ Uses Gemini text-embedding-004 for embeddings (768-dimensional vectors).
 import os
 import json
 import tempfile
-import numpy as np
+# Heavy imports moved inside for Lambda init speed
+_faiss = None
+_numpy = None
 
-try:
-    import faiss
-    FAISS_AVAILABLE = True
-except ImportError:
-    FAISS_AVAILABLE = False
-    print("WARNING: faiss not installed. Semantic vector search will fall back to full collection scan.")
+def _get_faiss():
+    global _faiss
+    if _faiss is None:
+        try:
+            import faiss
+            _faiss = faiss
+        except ImportError:
+            print("WARNING: faiss not installed. Falling back to full scan.")
+            return None
+    return _faiss
+
+def _get_numpy():
+    global _numpy
+    if _numpy is None:
+        import numpy as np
+        _numpy = np
+    return _numpy
 
 import google.generativeai as genai
 from database import db, client as mongo_client
@@ -55,16 +68,11 @@ def _get_sync_gridfs():
     return _sync_fs
 
 
-def embed_text(text: str) -> np.ndarray:
+def embed_text(text: str):
     """
     Embed a single text string using Gemini text-embedding-004.
-    
-    Args:
-        text: The text to embed
-        
-    Returns:
-        numpy array of shape (768,)
     """
+    np = _get_numpy()
     result = genai.embed_content(
         model=EMBEDDING_MODEL,
         content=text,
@@ -73,17 +81,11 @@ def embed_text(text: str) -> np.ndarray:
     return np.array(result['embedding'], dtype=np.float32)
 
 
-def embed_texts_batch(texts: list, task_type: str = "retrieval_document") -> np.ndarray:
+def embed_texts_batch(texts: list, task_type: str = "retrieval_document"):
     """
     Embed multiple texts in a batch using Gemini.
-    
-    Args:
-        texts: List of strings to embed
-        task_type: "retrieval_document" for indexing, "retrieval_query" for searching
-        
-    Returns:
-        numpy array of shape (len(texts), 768)
     """
+    np = _get_numpy()
     result = genai.embed_content(
         model=EMBEDDING_MODEL,
         content=texts,
@@ -107,7 +109,8 @@ def load_index():
     """
     global _cached_index, _cached_id_map, _cached_version
     
-    if not FAISS_AVAILABLE:
+    faiss = _get_faiss()
+    if faiss is None:
         print("DEBUG: FAISS is not available, cannot load index.")
         return None, None
         
@@ -199,6 +202,7 @@ async def search_similar_jobs(query_text: str, top_k: int = 200) -> list:
     query_vector = query_vector.reshape(1, -1)
     
     # Normalize for cosine similarity (IndexFlatIP uses inner product)
+    faiss = _get_faiss()
     faiss.normalize_L2(query_vector)
     
     # Search

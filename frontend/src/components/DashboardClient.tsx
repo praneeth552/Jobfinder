@@ -885,7 +885,7 @@ export default function DashboardClient() {
                   </motion.div>
                 ) : (
                   <p className="text-gray-600 dark:text-gray-300 mb-8 flex items-center justify-center gap-2">
-                    <span className="w-4 h-4 rounded-full border-2 border-[--foreground]/20 md:border-b-indigo-500 animate-spin" />
+                    <span className="w-4 h-4 rounded-full border-2 border-[--foreground]/20 md:border-b-[#8B4513] dark:md:border-b-[#D2B48C] animate-spin" />
                     Loading your dashboard...
                   </p>
                 )}

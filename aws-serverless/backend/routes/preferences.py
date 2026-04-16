@@ -8,12 +8,9 @@ import json
 import tempfile
 import os
 import re
-import spacy
 import docx2txt
 from pdfminer.high_level import extract_text
 
-# Load the spaCy model
-nlp = spacy.load("en_core_web_sm")
 
 # --- Constants for Parsing ---
 SKILLS_DB = [

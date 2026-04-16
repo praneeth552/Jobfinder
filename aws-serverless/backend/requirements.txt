@@ -1,33 +1,47 @@
+# FastAPI and Server
 fastapi
 slowapi
-pydantic[email]
-python-dotenv
+mangum
+pydantic==2.5.0
+pydantic-settings==2.1.0
+email-validator
+werkzeug
+
+# Database
 motor
-fastapi-mail
 pymongo[srv]
+dnspython
+
+# Auth & Security
 passlib[bcrypt]
+bcrypt==4.0.1
 python-jose[cryptography]
 google-auth-oauthlib
+
+# APIs and HTTP
 google-api-python-client
 google-generativeai
 razorpay
 httpx
-uvicorn
-dnspython
-Jinja2
-python-multipart
-gunicorn
-setuptools
+requests
 
-# NLP and Parsing
-beautifulsoup4
-spacy
-nltk
-pdfminer.six
-docx2txt
+# Email & Templates
+fastapi-mail==1.4.1
+Jinja2
+
+# NLP and Parsing Dependencies
+spacy==3.7.2
+nltk==3.8.1
+numpy>=1.25.0,<2.0.0
+pdfminer.six==20221105
+docx2txt==0.9
+beautifulsoup4==4.12.2
+
+# Utilities
+python-dotenv
+python-multipart
+setuptools
 cryptography
 
-# Vector Search & AI (v2.5)
+# Vector Search & AI (Tackleit v2.5)
 faiss-cpu
-numpy
-google-generativeai
