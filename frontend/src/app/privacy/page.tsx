@@ -45,7 +45,19 @@ const PrivacyPolicy = () => {
       ]
     },
     {
-      title: "5. Security of Your Information",
+      title: "5. Google API Data & Limited Use Disclosure",
+      content: "Tackleit offers an optional Google Sheets export feature for Pro plan users. This section describes exactly how we handle data obtained through Google APIs, in compliance with the Google API Services User Data Policy.",
+      bullets: [
+        { label: "What We Access:", text: "When you enable the Google Sheets integration, our application requests access to the Google Sheets API (spreadsheets scope) and the Google Drive API (drive.file scope). The drive.file scope is limited exclusively to files that Tackleit has created — we cannot access, read, modify, or delete any other files in your Google Drive." },
+        { label: "How We Use It:", text: "We use these permissions solely to create and update a single Google Spreadsheet titled 'Tackleit Job Recommendations' in your Google Drive. When your AI-generated job recommendations are produced, job titles, companies, locations, match scores, reasons, and job URLs are written to this spreadsheet. We do not use Google data for any other purpose, including advertising, analytics, or profiling." },
+        { label: "How We Store Tokens:", text: "Your Google OAuth tokens are encrypted using AES-256 encryption before being stored in our database. We never store your Google account password. Only the encrypted OAuth tokens necessary to maintain the integration are retained." },
+        { label: "Revoking Access:", text: "You can disable the Google Sheets integration at any time from your Tackleit dashboard. When you disable it, our application programmatically revokes the OAuth token via Google's revocation endpoint (https://oauth2.googleapis.com/revoke) and immediately deletes the stored credentials from your user profile. You can also revoke access manually from your Google Account permissions page at https://myaccount.google.com/permissions." },
+        { label: "No Transfer to Third Parties:", text: "We do not transfer, sell, share, or disclose any data obtained from Google APIs to any third party, except as necessary to provide or improve the Google Sheets export feature, as required by law, or with your explicit consent." },
+        { label: "Limited Use Compliance:", text: "Tackleit's use and transfer of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements. We only use Google data to provide and improve the Google Sheets export feature that the user has explicitly requested." }
+      ]
+    },
+    {
+      title: "6. Security of Your Information",
       content: "We take the security of your data seriously and implement industry-standard encryption and security measures:",
       bullets: [
         { label: "Encryption at Rest:", text: "Sensitive personal data from your resume (name, email, phone) and Google OAuth tokens are encrypted using AES-256 encryption before being stored in our database." },
@@ -56,7 +68,7 @@ const PrivacyPolicy = () => {
       ]
     },
     {
-      title: "6. Advertising",
+      title: "7. Advertising",
       content: "We may display advertisements on our Site using third-party advertising services, including Google AdSense. These services may use cookies and similar technologies to serve ads based on your prior visits to our Site or other websites.",
       bullets: [
         { label: "Personalized Ads:", text: "Google and other third-party vendors use cookies to serve ads based on your browsing history. You can opt out of personalized advertising by visiting Google's Ads Settings (https://www.google.com/settings/ads)." },
@@ -65,7 +77,7 @@ const PrivacyPolicy = () => {
       ]
     },
     {
-      title: "7. Cookies and Tracking Technologies",
+      title: "8. Cookies and Tracking Technologies",
       content: "We use cookies and similar tracking technologies to track activity on our Site and hold certain information. Cookies are files with a small amount of data which may include an anonymous unique identifier.",
       bullets: [
         { label: "Essential Cookies:", text: "Required for the operation of the Site, such as session management and authentication." },
@@ -75,7 +87,7 @@ const PrivacyPolicy = () => {
       ]
     },
     {
-      title: "8. Data Retention and Deletion",
+      title: "9. Data Retention and Deletion",
       content: "We retain your personal information only for as long as necessary to fulfill the purposes for which it was collected, or as required by law.",
       bullets: [
         { label: "Active Accounts:", text: "Your data is retained for as long as your account remains active." },
@@ -84,7 +96,7 @@ const PrivacyPolicy = () => {
       ]
     },
     {
-      title: "9. Your Rights and Choices",
+      title: "10. Your Rights and Choices",
       content: "You have certain rights regarding your personal information:",
       bullets: [
         { label: "Account Information:", text: "You may at any time review or change the information in your account by logging into your account settings and updating your preferences." },
@@ -94,7 +106,7 @@ const PrivacyPolicy = () => {
       ]
     },
     {
-      title: "10. Contact Us",
+      title: "11. Contact Us",
       content: "If you have questions or comments about this Privacy Policy, please contact us at:",
       link: { text: "saipraneeth2525@gmail.com", href: "mailto:saipraneeth2525@gmail.com" }
     }
