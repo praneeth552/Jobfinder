@@ -187,7 +187,12 @@ async def verify_otp(request: Request, data: VerifyOTP):
         "preferences": {"role": [], "location": [], "tech_stack": []},
         "plan_type": "free",
         "created_at": datetime.utcnow(),
-        "updated_at": datetime.utcnow()
+        "updated_at": datetime.utcnow(),
+        "last_login_at": datetime.utcnow(),
+        "last_seen_at": datetime.utcnow(),
+        "visit_count": 1,
+        "dashboard_visit_count": 0,
+        "feedback_count": 0
     }
     
     try:
@@ -269,6 +274,29 @@ async def login(request: Request, user: UserLoginWithTurnstile):
     db_user = await users_collection.find_one({"email": user.email})
     if not db_user or not verify_password(user.password, db_user["password"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    if db_user.get("plan_status") == "pending_deletion":
+        deletion_date = db_user.get("deletion_requested_at")
+        if deletion_date and datetime.utcnow() - deletion_date < timedelta(days=30):
+            token = create_access_token({"email": db_user["email"], "scope": "restore"})
+            return {
+                "account_status": "pending_deletion",
+                "message": "This account is scheduled for deletion. Would you like to restore it?",
+                "recovery_token": token,
+            }
+        raise HTTPException(status_code=401, detail="This account has been permanently deleted.")
+
+    await users_collection.update_one(
+        {"_id": db_user["_id"]},
+        {
+            "$set": {
+                "last_login_at": datetime.utcnow(),
+                "last_seen_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            },
+            "$inc": {"login_count": 1, "visit_count": 1}
+        }
+    )
     
     token = create_access_token({"email": db_user["email"]})
     return {
@@ -331,7 +359,12 @@ async def google_login(data: GoogleToken):
                 "preferences": {"role": [], "location": [], "tech_stack": []},
                 "plan_type": "free",
                 "created_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow()
+                "updated_at": datetime.utcnow(),
+                "last_login_at": datetime.utcnow(),
+                "last_seen_at": datetime.utcnow(),
+                "visit_count": 1,
+                "dashboard_visit_count": 0,
+                "feedback_count": 0
             }
             
             try:
@@ -351,7 +384,14 @@ async def google_login(data: GoogleToken):
         else:
             await users_collection.update_one(
                 {"email": email},
-                {"$set": {"updated_at": datetime.utcnow()}}
+                {
+                    "$set": {
+                        "last_login_at": datetime.utcnow(),
+                        "last_seen_at": datetime.utcnow(),
+                        "updated_at": datetime.utcnow()
+                    },
+                    "$inc": {"login_count": 1, "visit_count": 1}
+                }
             )
             user_id = str(db_user["_id"])
             is_first_time_user = db_user.get("is_first_time_user", True)

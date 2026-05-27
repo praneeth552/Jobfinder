@@ -12,7 +12,7 @@ users_collection = db["users"]
 
 class FeedbackSubmission(BaseModel):
     rating: int = Field(..., ge=1, le=5, description="Rating from 1-5")
-    comment: str | None = Field(None, max_length=200, description="Optional comment")
+    comment: str | None = Field(None, max_length=500, description="Optional comment")
     trigger: str = Field(..., pattern="^(job_generation|manual|periodic|applied_milestone|time_based|return_visit|success_story|inline_widget)$")
 
 class WidgetFeedback(BaseModel):
@@ -55,7 +55,10 @@ async def submit_feedback(
     # Update user's last feedback timestamp
     await users_collection.update_one(
         {"_id": ObjectId(user_id)},
-        {"$set": {"last_feedback_given": datetime.utcnow()}}
+        {
+            "$set": {"last_feedback_given": datetime.utcnow(), "last_seen_at": datetime.utcnow()},
+            "$inc": {"feedback_count": 1}
+        }
     )
     
     return {
@@ -82,6 +85,14 @@ async def submit_widget_feedback(
     
     widget_feedback_collection = db["widget_feedback"]
     result = await widget_feedback_collection.insert_one(widget_feedback_doc)
+
+    await users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {
+            "$set": {"last_feedback_given": datetime.utcnow(), "last_seen_at": datetime.utcnow()},
+            "$inc": {"feedback_count": 1}
+        }
+    )
     
     return {
         "message": "Thanks for your feedback! 🙏",
@@ -138,6 +149,14 @@ async def submit_job_feedback(
         {"user_id": ObjectId(user_id), "job_url": job_feedback.job_url},
         {"$set": job_feedback_doc},
         upsert=True
+    )
+
+    await users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {
+            "$set": {"last_seen_at": datetime.utcnow()},
+            "$inc": {"job_feedback_count": 1}
+        }
     )
     
     return {

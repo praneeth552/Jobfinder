@@ -9,6 +9,8 @@ import { CheckCircle2, XCircle, Star } from "lucide-react";
 import LoadingButton from "@/components/LoadingButton";
 import NotificationModal from "@/components/NotificationModal"; // Import the modal
 
+const AUTH_COOKIE_EXPIRES_DAYS = 30;
+
 const UpgradePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null); // Keep for inline errors before modal is shown
@@ -62,7 +64,7 @@ const UpgradePage = () => {
               {},
               { headers: { Authorization: `Bearer ${token}` } }
             );
-            Cookies.set("plan_type", "pro");
+            Cookies.set("plan_type", "pro", { expires: AUTH_COOKIE_EXPIRES_DAYS });
             // --- Use Notification Modal instead of alert ---
             setNotificationDetails({
               title: "Payment Successful!",

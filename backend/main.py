@@ -17,7 +17,9 @@ from routes import (
     webhooks,
     applications,
     search,
-    feedback
+    feedback,
+    metrics,
+    digest
 )
 from dotenv import load_dotenv
 
@@ -66,6 +68,8 @@ app.include_router(payment.router, prefix="/payment", tags=["Payment"])  # ✅ P
 app.include_router(webhooks.router, prefix="/webhooks", tags=["Webhooks"])
 app.include_router(search.router, prefix="/search", tags=["Search"])
 app.include_router(feedback.router, prefix="/api", tags=["Feedback"])  # ✅ Feedback router
+app.include_router(metrics.router, prefix="/metrics", tags=["Metrics"])
+app.include_router(digest.router, prefix="/digest", tags=["Digest"])
 
 
 @app.get("/warmup")

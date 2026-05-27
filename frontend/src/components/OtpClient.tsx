@@ -7,6 +7,8 @@ import LoadingButton from "@/components/LoadingButton";
 import SimpleNavbar from "./SimpleNavbar";
 import BrandSpinner from "./BrandSpinner";
 
+const AUTH_COOKIE_EXPIRES_DAYS = 30;
+
 const OtpClient = () => {
     const router = useRouter();
     const [email, setEmail] = useState<string | null>(null);
@@ -61,7 +63,7 @@ const OtpClient = () => {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-otp`, { email, otp });
 
             // Backend now returns access_token and user info
-            const { access_token, user_id, is_first_time_user } = response.data;
+            const { access_token, user_id, is_first_time_user, plan_type } = response.data;
 
             // Store auth credentials in both localStorage and cookies for consistency
             localStorage.setItem("token", access_token);
@@ -69,8 +71,9 @@ const OtpClient = () => {
 
             // Also set cookies (matches Google signup flow)
             const Cookies = (await import("js-cookie")).default;
-            Cookies.set("token", access_token, { expires: 1 });
-            Cookies.set("user_id", user_id, { expires: 1 });
+            Cookies.set("token", access_token, { expires: AUTH_COOKIE_EXPIRES_DAYS });
+            Cookies.set("user_id", user_id, { expires: AUTH_COOKIE_EXPIRES_DAYS });
+            Cookies.set("plan_type", plan_type || "free", { expires: AUTH_COOKIE_EXPIRES_DAYS });
 
             toast.success("Verification successful!");
             sessionStorage.removeItem('otp_verification_pending');

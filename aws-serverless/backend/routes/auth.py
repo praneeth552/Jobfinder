@@ -187,7 +187,12 @@ async def verify_otp(request: Request, data: VerifyOTP):
         "preferences": {"role": [], "location": [], "tech_stack": []},
         "plan_type": "free",
         "created_at": datetime.utcnow(),
-        "updated_at": datetime.utcnow()
+        "updated_at": datetime.utcnow(),
+        "last_login_at": datetime.utcnow(),
+        "last_seen_at": datetime.utcnow(),
+        "visit_count": 1,
+        "dashboard_visit_count": 0,
+        "feedback_count": 0
     }
     
     try:
@@ -284,6 +289,18 @@ async def login(request: Request, user: UserLoginWithTurnstile):
             # Deletion grace period has passed
             raise HTTPException(status_code=401, detail="This account has been permanently deleted.")
 
+    await users_collection.update_one(
+        {"_id": db_user["_id"]},
+        {
+            "$set": {
+                "last_login_at": datetime.utcnow(),
+                "last_seen_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            },
+            "$inc": {"login_count": 1, "visit_count": 1}
+        }
+    )
+
     token = create_access_token({"email": db_user["email"]})
     return {
         "access_token": token,
@@ -345,7 +362,12 @@ async def google_login(data: GoogleToken):
                 "preferences": {"role": [], "location": [], "tech_stack": []},
                 "plan_type": "free",
                 "created_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow()
+                "updated_at": datetime.utcnow(),
+                "last_login_at": datetime.utcnow(),
+                "last_seen_at": datetime.utcnow(),
+                "visit_count": 1,
+                "dashboard_visit_count": 0,
+                "feedback_count": 0
             }
             
             try:
@@ -365,7 +387,14 @@ async def google_login(data: GoogleToken):
         else:
             await users_collection.update_one(
                 {"email": email},
-                {"$set": {"updated_at": datetime.utcnow()}}
+                {
+                    "$set": {
+                        "last_login_at": datetime.utcnow(),
+                        "last_seen_at": datetime.utcnow(),
+                        "updated_at": datetime.utcnow()
+                    },
+                    "$inc": {"login_count": 1, "visit_count": 1}
+                }
             )
             user_id = str(db_user["_id"])
             is_first_time_user = db_user.get("is_first_time_user", True)

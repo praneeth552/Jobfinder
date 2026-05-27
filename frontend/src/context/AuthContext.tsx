@@ -47,6 +47,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
         setUserName(res.data.name);
         setUserEmail(res.data.email); // Set userEmail
+        setPlanType(res.data.plan_type || "free");
+        Cookies.set("plan_type", res.data.plan_type || "free", { expires: 30 });
       } catch (error) {
         console.error("Failed to fetch user data", error);
         // Clear cookies if the token is invalid

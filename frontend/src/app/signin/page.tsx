@@ -16,6 +16,8 @@ import SimpleNavbar from '@/components/SimpleNavbar';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import { useAnimations } from '@/context/AnimationContext';
 
+const AUTH_COOKIE_EXPIRES_DAYS = 30;
+
 export default function SigninPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -53,9 +55,9 @@ function SigninForm() {
   const handleSuccessfulLogin = async (data: any) => {
     localStorage.setItem("token", data.access_token);
     localStorage.setItem("user_id", data.user_id);
-    Cookies.set("token", data.access_token, { expires: 1 });
-    Cookies.set("user_id", data.user_id, { expires: 1 });
-    Cookies.set("plan_type", data.plan_type || "free", { expires: 1 });
+    Cookies.set("token", data.access_token, { expires: AUTH_COOKIE_EXPIRES_DAYS });
+    Cookies.set("user_id", data.user_id, { expires: AUTH_COOKIE_EXPIRES_DAYS });
+    Cookies.set("plan_type", data.plan_type || "free", { expires: AUTH_COOKIE_EXPIRES_DAYS });
     await fetchUser();
 
     // Check if there's a redirect parameter, otherwise use default logic

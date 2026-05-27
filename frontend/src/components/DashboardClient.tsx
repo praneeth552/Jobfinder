@@ -28,6 +28,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useFeedbackTriggers } from "@/hooks/useFeedbackTriggers";
 import OverallRating from "./OverallRating";
 import InlineFeedbackWidget from "./InlineFeedbackWidget";
+import DashboardMomentumCard from "./DashboardMomentumCard";
+import WhatsNewCard from "./WhatsNewCard";
 
 interface JobApplication {
   id: string;
@@ -95,6 +97,16 @@ export default function DashboardClient() {
   const token = typeof window !== "undefined" ? Cookies.get("token") : null;
   const userId = typeof window !== "undefined" ? Cookies.get("user_id") : null;
   const plan = typeof window !== "undefined" ? Cookies.get("plan_type") : "free";
+
+  // --- Event tracking helper ---
+  const trackEvent = useCallback((event: string, metadata?: Record<string, unknown>) => {
+    if (!token || isDemoMode) return;
+    axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/metrics/event`,
+      { event, metadata },
+      { headers: { Authorization: `Bearer ${token}` } }
+    ).catch((err) => console.error("Event tracking failed:", err));
+  }, [token, isDemoMode]);
 
   const fetchAllJobs = useCallback(async () => {
     if (!userId || !token) return;
@@ -192,6 +204,18 @@ export default function DashboardClient() {
     };
   }, [plan, searchParams, router, fetchAllJobs, token]);
 
+  useEffect(() => {
+    if (!token || isDemoMode) return;
+
+    axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/metrics/session`,
+      { page: "dashboard", source: document.referrer ? "referral" : "direct" },
+      { headers: { Authorization: `Bearer ${token}` } }
+    ).catch((error) => {
+      console.error("Failed to record dashboard session:", error);
+    });
+  }, [token, isDemoMode]);
+
 
   useEffect(() => {
     const fetchSheetStatus = async () => {
@@ -283,6 +307,9 @@ export default function DashboardClient() {
     try {
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/jobs/application/save_job`, { ...job, status }, { headers: { Authorization: `Bearer ${token}` } });
       toast.success(`Job moved to ${status}!`);
+      // Track save/apply events
+      if (status === 'saved') trackEvent('job_saved', { job_url: job.job_url, title: job.title });
+      if (status === 'applied') trackEvent('job_applied', { job_url: job.job_url, title: job.title });
       await fetchAllJobs();
     } catch (error) {
       setJobApplications(oldJobs);
@@ -383,6 +410,9 @@ export default function DashboardClient() {
           if (userData.next_generation_allowed_at) {
             setNextGenerationAllowedAt(new Date(userData.next_generation_allowed_at).getTime());
           }
+
+          // Track generation completion
+          trackEvent('jobs_generated', { count: task.result?.count });
 
           // Don't auto-show feedback modal - let smart triggers handle it
         } else if (task.status === 'failed') {
@@ -554,6 +584,7 @@ export default function DashboardClient() {
       );
 
       toast.success("Thank you for your feedback! 🎉");
+      trackEvent('feedback_given', { rating, trigger: feedbackTriggerType || 'manual' });
       setShowFeedbackModal(false);
       resetFeedbackTrigger();
     } catch (error) {
@@ -803,7 +834,7 @@ export default function DashboardClient() {
 
               {userPlan === "free" && !isDemoMode && (
                 <button
-                  onClick={() => router.push("/upgrade")}
+                  onClick={() => { trackEvent('upgrade_clicked', { source: 'dashboard_header' }); router.push("/upgrade"); }}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-full font-medium transition duration-200 border-2 border-[--foreground]/30 text-[--foreground] hover:bg-[--foreground]/5 hover:border-[--foreground]/50"
                 >
                   <Star size={16} />
@@ -833,9 +864,20 @@ export default function DashboardClient() {
 
           {/* Time Saved Card */}
           {!isDemoMode && (
-            <div className="mb-8 max-w-md mx-auto">
+            <div className="mb-8 mx-auto grid max-w-4xl grid-cols-1 gap-4 lg:grid-cols-2">
               <TimeSavedCard />
+              <DashboardMomentumCard
+                onGenerate={handleGenerateRecommendations}
+                onShowFeedback={() => setShowFeedbackModal(true)}
+                onUpgrade={() => { trackEvent('upgrade_clicked', { source: 'momentum_card' }); router.push("/upgrade"); }}
+                onViewSaved={() => router.push("/saved")}
+              />
             </div>
+          )}
+
+          {/* What's New card for returning users */}
+          {!isDemoMode && (
+            <WhatsNewCard onGenerate={handleGenerateRecommendations} />
           )}
 
           <DndContext

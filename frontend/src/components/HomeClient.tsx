@@ -17,6 +17,7 @@ import axios from "axios";
 import LoadingSpinner from "./LoadingSpinner";
 import dynamic from "next/dynamic";
 import { useAnimations } from "@/context/AnimationContext";
+import ProductMetricsStrip from "@/components/ProductMetricsStrip";
 
 // New landing page teaser components
 import PrivacyTrustTeaser from "@/components/teasers/PrivacyTrustTeaser";
@@ -96,6 +97,7 @@ export default function HomeClient() {
           >
             <Navbar onGetStarted={handleGetStarted} />
             <HeroSection onGetStarted={handleGetStarted} />
+            <ProductMetricsStrip />
             <IntroductionSection />
             <WorkflowTeaser />
             <FeaturesSection />

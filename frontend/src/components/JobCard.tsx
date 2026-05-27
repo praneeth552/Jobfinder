@@ -1,5 +1,5 @@
 "use client";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useEffect, useRef, useState } from "react";
@@ -83,6 +83,7 @@ const JobCard = ({
 
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [jobFeedback, setJobFeedback] = useState<"thumbs_up" | "thumbs_down" | null>(null);
+  const [showOutcomeFeedback, setShowOutcomeFeedback] = useState(false);
 
   // Notes state
   const [isEditingNotes, setIsEditingNotes] = useState(false);
@@ -173,6 +174,21 @@ const JobCard = ({
           job_url: job.job_url
         }));
       }
+
+      // Fire job_viewed event for analytics
+      const viewToken = Cookies.get("token");
+      if (viewToken && !isDemoMode) {
+        axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/metrics/event`,
+          { event: "job_viewed", metadata: { job_url: job.job_url, title: job.title, company: job.company } },
+          { headers: { Authorization: `Bearer ${viewToken}` } }
+        ).catch(() => {});
+
+        // Track view count in session for feedback trigger
+        const viewCount = Number(sessionStorage.getItem('tackleit_jobs_viewed_session') || '0');
+        sessionStorage.setItem('tackleit_jobs_viewed_session', String(viewCount + 1));
+      }
+
       window.open(job.job_url, "_blank");
     }
   };
@@ -418,16 +434,74 @@ const JobCard = ({
         </div>
       </div>
 
-      {/* Apply Confirmation Modal */}
       <ApplyConfirmationModal
         isOpen={showApplyModal}
         onClose={() => setShowApplyModal(false)}
         onYes={() => {
-          if (onApply) onApply(job);
+          if (onApply) {
+            onApply(job);
+            // Show outcome feedback after apply (max once per session)
+            const shownCount = Number(sessionStorage.getItem('tackleit_outcome_feedback_shown') || '0');
+            if (shownCount < 1) {
+              sessionStorage.setItem('tackleit_outcome_feedback_shown', String(shownCount + 1));
+              setTimeout(() => setShowOutcomeFeedback(true), 1500);
+            }
+          }
         }}
         jobTitle={job.title}
         company={job.company}
       />
+
+      {/* Inline outcome feedback after apply */}
+      <AnimatePresence>
+        {showOutcomeFeedback && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[90] w-[90%] max-w-sm"
+          >
+            <div className="rounded-2xl border border-[--border] bg-[--card-background] p-5 shadow-lg">
+              <div className="text-center">
+                <span className="text-2xl block mb-2">🎯</span>
+                <p className="text-sm font-semibold text-[--foreground] mb-1">
+                  Did Tackleit help you find this opportunity?
+                </p>
+                <p className="text-xs text-[--foreground]/50 mb-4">
+                  One tap helps us improve your next batch
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => {
+                      handleJobFeedback("thumbs_up");
+                      setShowOutcomeFeedback(false);
+                      toast.success("Glad we helped! 🙏");
+                    }}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[--foreground] text-[--background] font-semibold text-sm hover:opacity-90 transition-opacity"
+                  >
+                    👍 Yes!
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleJobFeedback("thumbs_down");
+                      setShowOutcomeFeedback(false);
+                    }}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-[--border] text-[--foreground]/70 font-medium text-sm hover:bg-[--secondary] transition-colors"
+                  >
+                    👎 Not really
+                  </button>
+                </div>
+                <button
+                  onClick={() => setShowOutcomeFeedback(false)}
+                  className="mt-3 text-xs text-[--foreground]/30 hover:text-[--foreground]/50 transition-colors"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

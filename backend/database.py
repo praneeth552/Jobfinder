@@ -23,3 +23,7 @@ async def create_text_index():
         ("company", "text"),
         ("location", "text")
     ])
+    await db.users.create_index("last_seen_at")
+    await db.users.create_index("visit_count")
+    await db.feedback.create_index("rating")
+    await db.usage_events.create_index([("user_id", 1), ("created_at", -1)])

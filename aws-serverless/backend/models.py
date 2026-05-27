@@ -115,6 +115,12 @@ class User(BaseModel):
     google_sheets_bonus_awarded: bool = False
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+    last_login_at: Optional[datetime] = None
+    last_seen_at: Optional[datetime] = None
+    last_dashboard_visit_at: Optional[datetime] = None
+    visit_count: int = 0
+    dashboard_visit_count: int = 0
+    feedback_count: int = 0
     deletion_requested_at: Optional[datetime] = None
     
     # Onboarding tracking
@@ -171,6 +177,9 @@ class UserProfileResponse(BaseModel):
     auth_type: Optional[str] = None
     preferences: Optional[UserPreferences] = None
     created_at: datetime
+    last_seen_at: Optional[datetime] = None
+    visit_count: int = 0
+    dashboard_visit_count: int = 0
     next_generation_allowed_at: Optional[datetime] = None
     next_resume_upload_allowed_at: Optional[datetime] = None
     onboarding_completed: bool = False

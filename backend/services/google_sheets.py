@@ -12,7 +12,6 @@ from encryption import encrypt_field, decrypt_field
 
 # Define the scopes required for the application
 SCOPES = [
-    "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive.file",
     "openid",
     "https://www.googleapis.com/auth/userinfo.email",

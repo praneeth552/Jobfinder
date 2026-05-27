@@ -4,7 +4,7 @@ Vector Search Service for Tackleit v2.5
 Provides FAISS-based semantic similarity search over job listings.
 The FAISS index is stored in MongoDB GridFS and cached locally on Lambda's /tmp.
 
-Uses Gemini text-embedding-004 for embeddings (768-dimensional vectors).
+Uses Gemini gemini-embedding-001 for embeddings (768-dimensional vectors via output_dimensionality).
 """
 
 import os
@@ -30,7 +30,7 @@ load_dotenv()
 # Configure Gemini for embeddings
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
 
-EMBEDDING_MODEL = "models/text-embedding-004"
+EMBEDDING_MODEL = "models/gemini-embedding-001"
 EMBEDDING_DIMENSION = 768
 
 # Module-level cache for the FAISS index
@@ -57,7 +57,7 @@ def _get_sync_gridfs():
 
 def embed_text(text: str) -> np.ndarray:
     """
-    Embed a single text string using Gemini text-embedding-004.
+    Embed a single text string using Gemini gemini-embedding-001.
     
     Args:
         text: The text to embed
@@ -68,7 +68,8 @@ def embed_text(text: str) -> np.ndarray:
     result = genai.embed_content(
         model=EMBEDDING_MODEL,
         content=text,
-        task_type="retrieval_query"
+        task_type="retrieval_query",
+        output_dimensionality=EMBEDDING_DIMENSION
     )
     return np.array(result['embedding'], dtype=np.float32)
 
@@ -87,7 +88,8 @@ def embed_texts_batch(texts: list, task_type: str = "retrieval_document") -> np.
     result = genai.embed_content(
         model=EMBEDDING_MODEL,
         content=texts,
-        task_type=task_type
+        task_type=task_type,
+        output_dimensionality=EMBEDDING_DIMENSION
     )
     return np.array(result['embedding'], dtype=np.float32)
 

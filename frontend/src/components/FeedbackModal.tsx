@@ -8,7 +8,7 @@ interface FeedbackModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (rating: number, comment?: string) => Promise<void>;
-    trigger?: "job_generation" | "manual" | "periodic" | "applied_milestone" | "time_based" | "return_visit" | "success_story";
+    trigger?: "job_generation" | "manual" | "periodic" | "applied_milestone" | "time_based" | "return_visit" | "success_story" | "post_apply";
 }
 
 export default function FeedbackModal({
@@ -64,6 +64,8 @@ export default function FeedbackModal({
                 return { icon: "👋", title: "Welcome back!", subtitle: "How did things work out?" };
             case "success_story":
                 return { icon: "🚀", title: "Congratulations!", subtitle: "Would you recommend us?" };
+            case "post_apply":
+                return { icon: "🎯", title: "One quick question", subtitle: "Did these recommendations help?" };
             default:
                 return { icon: "💬", title: "Quick feedback", subtitle: "How was your experience?" };
         }
@@ -144,12 +146,12 @@ export default function FeedbackModal({
                                 placeholder="Any thoughts? (optional)"
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
-                                maxLength={200}
+                                maxLength={500}
                                 rows={3}
                                 className="w-full p-3 rounded-xl bg-[--secondary] border border-[--border] text-[--foreground] placeholder-[--foreground]/40 focus:outline-none focus:ring-1 focus:ring-[--foreground]/20 resize-none text-sm"
                             />
                             <p className="text-right text-[--foreground]/30 text-xs mt-1">
-                                {comment.length}/200
+                                {comment.length}/500
                             </p>
                         </div>
 

@@ -14,6 +14,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import SimpleNavbar from "./SimpleNavbar";
 import { useAnimations } from "@/context/AnimationContext";
 
+const AUTH_COOKIE_EXPIRES_DAYS = 30;
+
 const PasswordCriteria = ({ criteria }: { criteria: { [key: string]: boolean } }) => {
   const criteriaText: { [key: string]: string } = {
     minLength: "At least 8 characters",
@@ -232,11 +234,12 @@ export default function SignupPage() {
         token: credentialResponse.credential,
       });
 
-      const { access_token, user_id, is_first_time_user } = res.data;
+      const { access_token, user_id, is_first_time_user, plan_type } = res.data;
       localStorage.setItem("token", access_token);
       localStorage.setItem("user_id", user_id);
-      Cookies.set("token", access_token, { expires: 1 });
-      Cookies.set("user_id", user_id, { expires: 1 });
+      Cookies.set("token", access_token, { expires: AUTH_COOKIE_EXPIRES_DAYS });
+      Cookies.set("user_id", user_id, { expires: AUTH_COOKIE_EXPIRES_DAYS });
+      Cookies.set("plan_type", plan_type || "free", { expires: AUTH_COOKIE_EXPIRES_DAYS });
 
       toast.success("Google signup successful!");
       setRedirectPath(is_first_time_user ? "/preferences?new_user=true" : "/dashboard");
