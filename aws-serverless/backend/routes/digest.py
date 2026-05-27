@@ -35,6 +35,16 @@ def _build_digest_html(user_name: str, new_count: int, top_titles: list[str], un
     for title in top_titles[:3]:
         title_list += f"<li style='margin-bottom:6px;color:#333;'>{title}</li>"
 
+    top_matches_html = ""
+    if title_list:
+        top_matches_html = (
+            "<div style='margin-bottom:24px;'>"
+            "<h3 style='font-size:16px; color:#525252; margin-bottom:12px;'>Top matches:</h3>"
+            "<ul style='padding-left:20px; margin:0;'>"
+            + title_list +
+            "</ul></div>"
+        )
+
     return f"""
     <html>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #1a1a1a;">
@@ -50,7 +60,7 @@ def _build_digest_html(user_name: str, new_count: int, top_titles: list[str], un
             </p>
         </div>
 
-        {"<div style='margin-bottom:24px;'><h3 style=\"font-size:16px; color:#525252; margin-bottom:12px;\">Top matches:</h3><ul style=\"padding-left:20px; margin:0;\">" + title_list + "</ul></div>" if title_list else ""}
+        {top_matches_html}
 
         <div style="text-align:center; margin: 32px 0;">
             <a href="{FRONTEND_URL}/dashboard"
