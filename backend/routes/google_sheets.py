@@ -54,7 +54,21 @@ async def authorize_sheet_access(current_user: dict = Depends(get_user_from_toke
         prompt='consent',
         state=str(user_id)  # Ensure state is a string
     )
-    return RedirectResponse(auth_url)
+    
+    response = RedirectResponse(auth_url)
+    
+    # Store PKCE code_verifier in a secure, HTTP-only cookie for the callback
+    if getattr(flow, "code_verifier", None):
+        response.set_cookie(
+            key="cv", 
+            value=flow.code_verifier, 
+            httponly=True, 
+            secure=True, 
+            samesite="lax",
+            max_age=3600 # 1 hour
+        )
+        
+    return response
 
 
 @router.get("/callback")
@@ -74,14 +88,26 @@ async def oauth_callback(request: Request):
 
     try:
         flow = get_google_flow()
-        flow.fetch_token(code=code)
+        
+        # Retrieve the PKCE code_verifier from the cookie
+        code_verifier = request.cookies.get("cv")
+        
+        # Pass the code_verifier if it exists, otherwise just the code
+        if code_verifier:
+            flow.fetch_token(code=code, code_verifier=code_verifier)
+        else:
+            flow.fetch_token(code=code)
+            
         credentials = flow.credentials
         
         # The user_id is passed in the 'state' parameter
         user_id = state
         await handle_oauth_callback(user_id, credentials.to_json())
         
-        return RedirectResponse(f"{FRONTEND_URL}/dashboard?sheets_success=true")
+        response = RedirectResponse(f"{FRONTEND_URL}/dashboard?sheets_success=true")
+        # Clear the cookie after use
+        response.delete_cookie("cv")
+        return response
 
     except Exception as e:
         print(f"Error during OAuth callback: {e}")
